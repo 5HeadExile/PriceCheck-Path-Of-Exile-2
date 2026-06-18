@@ -20,8 +20,10 @@ public sealed class MenuOverlay : IDisposable
     private Form? _menu;
 
     public event Action? SettingsRequested;
-    public event Action? CalibrateRequested;
+    public event Action? AddPylonRequested;
+    public event Action? ClearPylonsRequested;
     public event Action? TogglePriceOverlayRequested;
+    public event Action? RescanRequested;
     public event Action? ExitRequested;
 
     public bool IsOpen => _dim is not null;
@@ -87,7 +89,7 @@ public sealed class MenuOverlay : IDisposable
         {
             FormBorderStyle = FormBorderStyle.None,
             StartPosition = FormStartPosition.Manual,
-            Size = new Size(320, 300),
+            Size = new Size(320, 380),
             BackColor = Color.FromArgb(24, 24, 28),
             ShowInTaskbar = false,
             TopMost = true,
@@ -117,9 +119,11 @@ public sealed class MenuOverlay : IDisposable
             Padding = new Padding(24, 8, 24, 24),
         };
 
+        layout.Controls.Add(MakeButton("Добавить пилон (калибровка)", () => AddPylonRequested?.Invoke()));
+        layout.Controls.Add(MakeButton("Сбросить пилоны", () => ClearPylonsRequested?.Invoke()));
+        layout.Controls.Add(MakeButton("Оценить пилоны (оверлей)", () => TogglePriceOverlayRequested?.Invoke()));
+        layout.Controls.Add(MakeButton("Пересканировать", () => RescanRequested?.Invoke()));
         layout.Controls.Add(MakeButton("Настройки", () => SettingsRequested?.Invoke()));
-        layout.Controls.Add(MakeButton("Калибровка области", () => CalibrateRequested?.Invoke()));
-        layout.Controls.Add(MakeButton("Оверлей цен вкл/выкл", () => TogglePriceOverlayRequested?.Invoke()));
         layout.Controls.Add(MakeButton("Закрыть меню", Hide));
         layout.Controls.Add(MakeButton("Выход", () => ExitRequested?.Invoke()));
 
@@ -141,7 +145,9 @@ public sealed class MenuOverlay : IDisposable
             BackColor = Color.FromArgb(40, 40, 48),
         };
         button.FlatAppearance.BorderColor = Color.FromArgb(70, 70, 80);
-        button.Click += (_, _) => onClick();
+        // Откладываем действие, чтобы обработчик клика успел вернуться до того,
+        // как действие закроет/уничтожит форму меню (избегаем реентрантности).
+        button.Click += (_, _) => button.BeginInvoke(onClick);
         return button;
     }
 

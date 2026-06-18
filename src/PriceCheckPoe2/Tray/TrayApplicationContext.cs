@@ -40,13 +40,15 @@ public sealed class TrayApplicationContext : ApplicationContext
 
         _menu = new MenuOverlay(_config);
         _menu.SettingsRequested += OpenSettings;
-        _menu.CalibrateRequested += StartCalibration;
+        _menu.AddPylonRequested += AddPylonRegion;
+        _menu.ClearPylonsRequested += ClearPylons;
         _menu.TogglePriceOverlayRequested += TogglePriceOverlay;
+        _menu.RescanRequested += Rescan;
         _menu.ExitRequested += ExitApp;
 
         _hotkeys = new HotkeyManager(_config);
         _hotkeys.MenuToggleRequested += () => OnUi(() => _menu.Toggle());
-        _hotkeys.RecalibrateRequested += () => OnUi(StartCalibration);
+        _hotkeys.RecalibrateRequested += () => OnUi(AddPylonRegion);
         _hotkeys.DebugToggleRequested += () => OnUi(ToggleDebug);
         _hotkeys.Start();
 
@@ -89,21 +91,30 @@ public sealed class TrayApplicationContext : ApplicationContext
         using var form = new SettingsForm(_config);
         form.ShowDialog();
         // Хоткеи перечитываются HotkeyManager'ом из _config при каждом нажатии,
-        // поэтому отдельная перерегистрация не нужна.
+        // поэтому отдельная перерегистрация не нужна. Параметры OCR подхватятся
+        // при следующем создании сканера.
+        _scanner = null;
+        _ocr?.Dispose();
+        _ocr = null;
     }
 
-    private void StartCalibration()
+    private void AddPylonRegion()
     {
         _menu.Hide();
         using var overlay = new CalibrationOverlay();
-        if (overlay.ShowDialog() == DialogResult.OK && overlay.Result is { } profile)
+        if (overlay.ShowDialog() == DialogResult.OK && overlay.Result is { } region)
         {
-            profile.Name = "default";
-            _config.Profiles.RemoveAll(p => p.Name == profile.Name);
-            _config.Profiles.Add(profile);
-            _config.ActiveProfile = profile.Name;
+            region.Name = $"pylon-{_config.PylonRegions.Count + 1}";
+            _config.PylonRegions.Add(region);
             _config.Save();
         }
+    }
+
+    private void ClearPylons()
+    {
+        _config.PylonRegions.Clear();
+        _config.Save();
+        _priceOverlay?.Update(Array.Empty<PylonScanResult>());
     }
 
     private void TogglePriceOverlay()
@@ -114,30 +125,41 @@ public sealed class TrayApplicationContext : ApplicationContext
             return;
         }
 
-        var region = ActiveRegion();
-        if (region is null)
+        ShowOverlayAndScan();
+    }
+
+    private void Rescan()
+    {
+        _menu.Hide();
+        ShowOverlayAndScan();
+    }
+
+    private void ShowOverlayAndScan()
+    {
+        var regions = PylonRegions();
+        if (regions.Count == 0)
         {
-            MessageBox.Show("Сначала откалибруйте область пилона (меню → Калибровка).",
+            MessageBox.Show("Сначала добавьте область пилона (меню → Добавить пилон).",
                 "PriceCheck PoE2");
             return;
         }
 
         _priceOverlay ??= new PriceOverlayForm();
         _priceOverlay.Show();
-        _ = ScanAndRenderAsync(region.Value);
+        _ = ScanAndRenderAsync(regions);
     }
 
-    private async Task ScanAndRenderAsync(Rectangle region)
+    private async Task ScanAndRenderAsync(IReadOnlyList<(string, Rectangle)> regions)
     {
         try
         {
             EnsureScanner();
-            var valuations = await _scanner!.ScanAsync(region).ConfigureAwait(true);
-            _priceOverlay?.Update(valuations);
+            var results = await _scanner!.ScanAllAsync(regions).ConfigureAwait(true);
+            _priceOverlay?.Update(results);
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Не удалось оценить пилон: {ex.Message}", "PriceCheck PoE2");
+            MessageBox.Show($"Не удалось оценить пилоны: {ex.Message}", "PriceCheck PoE2");
         }
     }
 
@@ -148,7 +170,7 @@ public sealed class TrayApplicationContext : ApplicationContext
             return;
         }
 
-        _ocr = new OcrEngine();
+        _ocr = new OcrEngine(threshold: _config.OcrThreshold, saveDebug: _config.SaveOcrDebugImages);
         var aliasesPath = Path.Combine(AppContext.BaseDirectory, "Data", "reward-aliases.json");
         _parser = RewardParser.FromFile(aliasesPath);
         _priceCache = new PriceCache(
@@ -157,18 +179,17 @@ public sealed class TrayApplicationContext : ApplicationContext
         _scanner = new PylonScanner(_ocr, _parser, _priceCache, _config);
     }
 
-    private Rectangle? ActiveRegion()
-    {
-        var profile = _config.Profiles.FirstOrDefault(p => p.Name == _config.ActiveProfile)
-                      ?? _config.Profiles.FirstOrDefault();
-        return profile is null
-            ? null
-            : new Rectangle(profile.X, profile.Y, profile.Width, profile.Height);
-    }
+    private IReadOnlyList<(string Id, Rectangle Region)> PylonRegions() =>
+        _config.PylonRegions
+            .Select(p => (p.Name, new Rectangle(p.X, p.Y, p.Width, p.Height)))
+            .ToList();
 
     private void ToggleDebug()
     {
-        // TODO(M3): показать debug-боксы распознавания.
+        if (_priceOverlay is not null)
+        {
+            _priceOverlay.DebugMode = !_priceOverlay.DebugMode;
+        }
     }
 
     private void ExitApp()

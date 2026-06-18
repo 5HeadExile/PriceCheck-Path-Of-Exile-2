@@ -54,9 +54,18 @@ public sealed class AppConfig
     /// <summary>Прозрачность оверлея цен (0..1).</summary>
     public double PriceOverlayOpacity { get; set; } = 0.9;
 
-    public List<CalibrationProfile> Profiles { get; set; } = new();
+    /// <summary>
+    /// Откалиброванные области пилонов. Игрок выбирает один пилон из нескольких,
+    /// поэтому регионов может быть несколько — каждый оценивается отдельно, а
+    /// лучший подсвечивается.
+    /// </summary>
+    public List<CalibrationProfile> PylonRegions { get; set; } = new();
 
-    public string? ActiveProfile { get; set; }
+    /// <summary>Порог бинаризации для предобработки OCR (0..255).</summary>
+    public int OcrThreshold { get; set; } = 110;
+
+    /// <summary>Сохранять предобработанные кадры OCR рядом с exe (для отладки).</summary>
+    public bool SaveOcrDebugImages { get; set; }
 
     private static string ConfigPath =>
         Path.Combine(AppContext.BaseDirectory, "config.json");

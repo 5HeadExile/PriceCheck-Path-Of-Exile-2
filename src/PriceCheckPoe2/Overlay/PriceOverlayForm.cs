@@ -1,18 +1,18 @@
 using System.Drawing;
 using System.Windows.Forms;
-using PriceCheckPoe2.Pricing;
+using PriceCheckPoe2.Scanning;
 
 namespace PriceCheckPoe2.Overlay;
 
 /// <summary>
-/// Прозрачный click-through оверлей: рисует цены наград и итог по пилону поверх
-/// игры, не перехватывая ввод.
-/// TODO(M4/M5): позиционировать строки относительно области пилона и подсветить
-/// лучший пилон по результату <see cref="PylonEvaluator"/>.
+/// Прозрачный click-through оверлей: рисует суммарную ценность каждого пилона
+/// у его области и подсвечивает лучший выбор. В debug-режиме рисует рамки
+/// откалиброванных областей.
 /// </summary>
 public sealed class PriceOverlayForm : Form
 {
-    private IReadOnlyList<PylonValuation> _valuations = Array.Empty<PylonValuation>();
+    private IReadOnlyList<PylonScanResult> _results = Array.Empty<PylonScanResult>();
+    private bool _debug;
 
     public PriceOverlayForm()
     {
@@ -40,9 +40,19 @@ public sealed class PriceOverlayForm : Form
         }
     }
 
-    public void Update(IReadOnlyList<PylonValuation> valuations)
+    public bool DebugMode
     {
-        _valuations = valuations;
+        get => _debug;
+        set
+        {
+            _debug = value;
+            Invalidate();
+        }
+    }
+
+    public void Update(IReadOnlyList<PylonScanResult> results)
+    {
+        _results = results;
         Invalidate();
     }
 
@@ -50,16 +60,51 @@ public sealed class PriceOverlayForm : Form
     {
         base.OnPaint(e);
 
-        using var font = new Font("Segoe UI", 12F, FontStyle.Bold);
-        using var brush = new SolidBrush(Color.Gold);
+        // Лучший пилон — с максимальной суммарной ценностью.
+        var bestId = _results
+            .OrderByDescending(r => r.Valuation.TotalExalted)
+            .FirstOrDefault()?.Valuation.PylonId;
 
-        var y = 40;
-        foreach (var v in _valuations)
+        using var titleFont = new Font("Segoe UI", 13F, FontStyle.Bold);
+        using var lineFont = new Font("Segoe UI", 10F, FontStyle.Regular);
+        using var best = new SolidBrush(Color.Lime);
+        using var normal = new SolidBrush(Color.Gold);
+        using var dim = new SolidBrush(Color.Gainsboro);
+        using var shadow = new SolidBrush(Color.FromArgb(180, 0, 0, 0));
+        using var debugPen = new Pen(Color.DeepSkyBlue, 2);
+
+        foreach (var result in _results)
         {
-            e.Graphics.DrawString(
-                $"{v.PylonId}: {v.TotalExalted:0.0} ex",
-                font, brush, 40, y);
-            y += 28;
+            var v = result.Valuation;
+            var p = ToLocal(result.Region.Location);
+            var isBest = v.PylonId == bestId;
+
+            if (_debug)
+            {
+                var r = result.Region;
+                e.Graphics.DrawRectangle(debugPen, p.X, p.Y, r.Width, r.Height);
+            }
+
+            var header = isBest
+                ? $"★ {v.PylonId}: {v.TotalExalted:0.0} ex"
+                : $"{v.PylonId}: {v.TotalExalted:0.0} ex";
+
+            // Тень для читаемости поверх любого фона.
+            e.Graphics.DrawString(header, titleFont, shadow, p.X + 2, p.Y - 26);
+            e.Graphics.DrawString(header, titleFont, isBest ? best : normal, p.X, p.Y - 28);
+
+            var y = p.Y + result.Region.Height + 2;
+            foreach (var (reward, price, lineTotal) in v.Lines)
+            {
+                var text = price is null
+                    ? $"{reward.Stack}x {reward.Name}: ?"
+                    : $"{reward.Stack}x {reward.Name}: {lineTotal:0.0} ex";
+                e.Graphics.DrawString(text, lineFont, dim, p.X, y);
+                y += 18;
+            }
         }
     }
+
+    private Point ToLocal(Point screen) =>
+        new(screen.X - Bounds.X, screen.Y - Bounds.Y);
 }

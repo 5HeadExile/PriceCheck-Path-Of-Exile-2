@@ -7,11 +7,13 @@ using PriceCheckPoe2.Pricing;
 
 namespace PriceCheckPoe2.Scanning;
 
+/// <summary>Оценка одного пилона вместе с его областью на экране.</summary>
+public sealed record PylonScanResult(PylonValuation Valuation, Rectangle Region);
+
 /// <summary>
 /// Связывает весь пайплайн: захват области пилона → OCR → разбор строк в награды
-/// (с количеством в стаке) → цены из кэша → суммарная EV-оценка.
-/// TODO(M5): сегментировать область на несколько пилонов; сейчас вся область
-/// считается одним пилоном.
+/// (с количеством в стаке) → цены из кэша → суммарная EV-оценка. Поддерживает
+/// несколько областей-пилонов за один проход (цены берутся один раз).
 /// </summary>
 public sealed class PylonScanner
 {
@@ -34,8 +36,28 @@ public sealed class PylonScanner
         _config = config;
     }
 
-    public async Task<IReadOnlyList<PylonValuation>> ScanAsync(
-        Rectangle region, CancellationToken cancellationToken = default)
+    /// <summary>Сканирует и оценивает все переданные области-пилоны.</summary>
+    public async Task<IReadOnlyList<PylonScanResult>> ScanAllAsync(
+        IReadOnlyList<(string Id, Rectangle Region)> pylons,
+        CancellationToken cancellationToken = default)
+    {
+        var priceTable = await _prices.GetAsync(_config.League, cancellationToken).ConfigureAwait(false);
+        var evaluator = new PylonEvaluator(priceTable);
+
+        var results = new List<PylonScanResult>(pylons.Count);
+        foreach (var (id, region) in pylons)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var rewards = ReadRewards(region);
+            var valuation = evaluator.Evaluate(new Pylon(id, rewards));
+            results.Add(new PylonScanResult(valuation, region));
+        }
+
+        return results;
+    }
+
+    /// <summary>Захватывает область, распознаёт и парсит награды.</summary>
+    private IReadOnlyList<Reward> ReadRewards(Rectangle region)
     {
         using var bitmap = ScreenCapturer.Capture(region);
         var lines = _ocr.ReadLines(bitmap);
@@ -51,11 +73,7 @@ public sealed class PylonScanner
             }
         }
 
-        var priceTable = await _prices.GetAsync(_config.League, cancellationToken).ConfigureAwait(false);
-        var evaluator = new PylonEvaluator(priceTable);
-        var pylon = new Pylon("pylon", rewards);
-
-        return new[] { evaluator.Evaluate(pylon) };
+        return rewards;
     }
 
     /// <summary>Извлекает количество из строки OCR, возвращает (стак, остаток).</summary>

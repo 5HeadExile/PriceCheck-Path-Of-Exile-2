@@ -21,6 +21,8 @@ public sealed class SettingsForm : Form
     private readonly TextBox _recalibrateHotkey = new();
     private readonly TrackBar _dim = new() { Minimum = 0, Maximum = 100 };
     private readonly TrackBar _overlayOpacity = new() { Minimum = 0, Maximum = 100 };
+    private readonly NumericUpDown _ocrThreshold = new() { Minimum = 0, Maximum = 255 };
+    private readonly CheckBox _saveDebug = new() { Text = "Сохранять кадры OCR" };
 
     public SettingsForm(AppConfig config)
     {
@@ -31,7 +33,7 @@ public sealed class SettingsForm : Form
         StartPosition = FormStartPosition.CenterScreen;
         MaximizeBox = false;
         MinimizeBox = false;
-        ClientSize = new Size(440, 360);
+        ClientSize = new Size(440, 480);
 
         BuildLayout();
         LoadFromConfig();
@@ -56,6 +58,8 @@ public sealed class SettingsForm : Form
         AddRow(layout, "Хоткей калибровки", _recalibrateHotkey);
         AddRow(layout, "Затемнение меню, %", _dim);
         AddRow(layout, "Прозрачность оверлея, %", _overlayOpacity);
+        AddRow(layout, "Порог OCR (0..255)", _ocrThreshold);
+        AddRow(layout, "Отладка OCR", _saveDebug);
 
         var save = new Button { Text = "Сохранить", DialogResult = DialogResult.OK, Width = 100 };
         save.Click += (_, _) => SaveToConfig();
@@ -98,6 +102,8 @@ public sealed class SettingsForm : Form
         _recalibrateHotkey.Text = _config.RecalibrateHotkey;
         _dim.Value = (int)Math.Clamp(_config.MenuDimOpacity * 100, 0, 100);
         _overlayOpacity.Value = (int)Math.Clamp(_config.PriceOverlayOpacity * 100, 0, 100);
+        _ocrThreshold.Value = Math.Clamp(_config.OcrThreshold, 0, 255);
+        _saveDebug.Checked = _config.SaveOcrDebugImages;
     }
 
     private void SaveToConfig()
@@ -109,6 +115,8 @@ public sealed class SettingsForm : Form
         _config.RecalibrateHotkey = _recalibrateHotkey.Text.Trim();
         _config.MenuDimOpacity = _dim.Value / 100.0;
         _config.PriceOverlayOpacity = _overlayOpacity.Value / 100.0;
+        _config.OcrThreshold = (int)_ocrThreshold.Value;
+        _config.SaveOcrDebugImages = _saveDebug.Checked;
         _config.Save();
     }
 }
