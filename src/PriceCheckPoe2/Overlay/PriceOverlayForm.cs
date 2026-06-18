@@ -1,18 +1,27 @@
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using PriceCheckPoe2.Scanning;
 
 namespace PriceCheckPoe2.Overlay;
 
 /// <summary>
-/// Прозрачный click-through оверлей: рисует цену напротив каждой награды
-/// (по координатам строки OCR) и компактный итог по каждому пилону. Лучший
-/// пилон подсвечивается. В debug-режиме рисует рамки области и строк.
+/// Прозрачный click-through оверлей. Рисует цену напротив каждой награды на
+/// тёмной плашке (читаемо на любом фоне), цвет — по тиру ценности, лучшая
+/// награда подсвечена. Крупные суммы — в divine, мелкие — в exalted. При
+/// появлении плавно проявляется (fade-in).
 /// </summary>
 public sealed class PriceOverlayForm : Form
 {
+    private const int EdgeMargin = 8;
+    private const int Gap = 10;
+    private const double DivineThreshold = 1.0; // от скольких div показываем в divine
+    private const double TargetOpacity = 1.0;
+
     private IReadOnlyList<PylonScanResult> _results = Array.Empty<PylonScanResult>();
     private bool _debug;
+
+    private readonly System.Windows.Forms.Timer _fadeTimer;
 
     public PriceOverlayForm()
     {
@@ -20,10 +29,25 @@ public sealed class PriceOverlayForm : Form
         StartPosition = FormStartPosition.Manual;
         Bounds = SystemInformation.VirtualScreen;
         BackColor = Color.Magenta;
-        TransparencyKey = Color.Magenta; // делает фон полностью прозрачным
+        TransparencyKey = Color.Magenta; // фон полностью прозрачный
         TopMost = true;
         ShowInTaskbar = false;
         DoubleBuffered = true;
+
+        _fadeTimer = new System.Windows.Forms.Timer { Interval = 16 };
+        _fadeTimer.Tick += FadeTick;
+        VisibleChanged += (_, _) =>
+        {
+            if (Visible)
+            {
+                Opacity = 0;
+                _fadeTimer.Start();
+            }
+            else
+            {
+                _fadeTimer.Stop();
+            }
+        };
     }
 
     /// <summary>Click-through: окно не перехватывает мышь.</summary>
@@ -56,70 +80,172 @@ public sealed class PriceOverlayForm : Form
         Invalidate();
     }
 
+    private void FadeTick(object? sender, EventArgs e)
+    {
+        var next = Opacity + 0.12;
+        if (next >= TargetOpacity)
+        {
+            Opacity = TargetOpacity;
+            _fadeTimer.Stop();
+        }
+        else
+        {
+            Opacity = next;
+        }
+    }
+
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
-        e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
-        var bestId = _results
-            .OrderByDescending(r => r.TotalExalted)
-            .FirstOrDefault()?.PylonId;
+        // Лучшая награда по ценности — для подсветки.
+        var best = _results
+            .SelectMany(r => r.Rewards)
+            .Where(x => x.Price is not null)
+            .OrderByDescending(x => x.LineTotal)
+            .FirstOrDefault();
 
-        using var totalFont = new Font("Segoe UI", 12F, FontStyle.Bold);
-        using var lineFont = new Font("Segoe UI", 10F, FontStyle.Bold);
-        using var bestBrush = new SolidBrush(Color.Lime);
-        using var totalBrush = new SolidBrush(Color.Gold);
-        using var priceBrush = new SolidBrush(Color.Gold);
-        using var unknownBrush = new SolidBrush(Color.OrangeRed);
-        using var shadow = new SolidBrush(Color.FromArgb(200, 0, 0, 0));
-        using var regionPen = new Pen(Color.DeepSkyBlue, 2);
-        using var linePen = new Pen(Color.FromArgb(120, 0, 255, 0), 1);
+        using var priceFont = new Font("Segoe UI", 10.5f, FontStyle.Bold);
+        using var totalFont = new Font("Segoe UI", 11.5f, FontStyle.Bold);
 
         foreach (var result in _results)
         {
-            var isBest = result.PylonId == bestId;
-
             if (_debug)
             {
-                var rr = ToLocal(result.Region);
-                e.Graphics.DrawRectangle(regionPen, rr);
+                using var pen = new Pen(Color.DeepSkyBlue, 2);
+                g.DrawRectangle(pen, ToLocal(result.Region));
             }
 
-            // Итог по пилону — над областью.
-            var origin = ToLocal(result.Region.Location);
-            var header = isBest
-                ? $"★ {result.TotalExalted:0.#} ex"
-                : $"{result.TotalExalted:0.#} ex";
-            DrawWithShadow(e.Graphics, header, totalFont,
-                isBest ? bestBrush : totalBrush, shadow, origin.X, origin.Y - 26);
+            DrawTotalChip(g, result, totalFont);
 
-            // Цена напротив каждой награды.
             foreach (var reward in result.Rewards)
             {
                 var b = ToLocal(reward.ScreenBounds);
                 if (_debug)
                 {
-                    e.Graphics.DrawRectangle(linePen, b);
+                    using var lp = new Pen(Color.FromArgb(120, 0, 255, 0), 1);
+                    g.DrawRectangle(lp, b);
                 }
 
-                var text = reward.Price is null
-                    ? "?"
-                    : $"{reward.LineTotal:0.##} ex";
-                var brush = reward.Price is null ? unknownBrush : priceBrush;
+                var isBest = best is not null
+                    && ReferenceEquals(reward, best);
 
-                // Справа от строки, по центру её высоты.
-                var x = b.Right + 8;
-                var y = b.Y + Math.Max(0, (b.Height - lineFont.Height) / 2);
-                DrawWithShadow(e.Graphics, text, lineFont, brush, shadow, x, y);
+                DrawPriceChip(g, reward, priceFont, b, isBest);
             }
         }
     }
 
-    private static void DrawWithShadow(
-        Graphics g, string text, Font font, Brush brush, Brush shadow, int x, int y)
+    private void DrawPriceChip(Graphics g, PricedReward reward, Font font, Rectangle row, bool best)
     {
-        g.DrawString(text, font, shadow, x + 1, y + 1);
-        g.DrawString(text, font, brush, x, y);
+        var (text, color) = PriceLabel(reward);
+        if (best)
+        {
+            text = "★ " + text;
+        }
+
+        var size = g.MeasureString(text, font);
+        var w = (int)size.Width + 16;
+        var h = (int)size.Height + 6;
+
+        // Ставим плашку сразу после названия, но не даём вылезти за экран.
+        var desiredLeft = row.Right + Gap;
+        var maxLeft = Width - w - EdgeMargin;
+        var left = Math.Min(desiredLeft, maxLeft);
+        left = Math.Max(left, EdgeMargin);
+        var top = row.Y + (row.Height - h) / 2;
+
+        var rect = new Rectangle(left, top, w, h);
+
+        if (best)
+        {
+            // Мягкое свечение под лучшей наградой.
+            var glow = Rectangle.Inflate(rect, 3, 3);
+            using var glowBrush = new SolidBrush(Color.FromArgb(70, 80, 255, 120));
+            using var glowPath = Rounded(glow, 11);
+            g.FillPath(glowBrush, glowPath);
+        }
+
+        using var path = Rounded(rect, 8);
+        using var bg = new SolidBrush(Color.FromArgb(216, 14, 14, 18));
+        g.FillPath(bg, path);
+        using var border = new Pen(
+            best ? Color.FromArgb(180, 110, 255, 150) : Color.FromArgb(70, 255, 255, 255),
+            best ? 2f : 1f);
+        g.DrawPath(border, path);
+
+        using var brush = new SolidBrush(color);
+        g.DrawString(text, font, brush, left + 8, top + 3);
+    }
+
+    private void DrawTotalChip(Graphics g, PylonScanResult result, Font font)
+    {
+        double ex = 0, div = 0;
+        foreach (var r in result.Rewards)
+        {
+            ex += r.LineTotal;
+            div += (r.Price?.DivineValue ?? 0) * r.Stack;
+        }
+
+        var text = "Σ " + FormatValue(ex, div);
+        var size = g.MeasureString(text, font);
+        var w = (int)size.Width + 18;
+        var h = (int)size.Height + 8;
+
+        var origin = ToLocal(result.Region.Location);
+        var left = Math.Max(origin.X, EdgeMargin);
+        var top = Math.Max(origin.Y - h - 6, EdgeMargin);
+        var rect = new Rectangle(left, top, w, h);
+
+        using var path = Rounded(rect, 9);
+        using var bg = new SolidBrush(Color.FromArgb(224, 18, 18, 24));
+        g.FillPath(bg, path);
+        using var border = new Pen(Color.FromArgb(150, 120, 220, 255), 1.5f);
+        g.DrawPath(border, path);
+        using var brush = new SolidBrush(Color.FromArgb(150, 220, 255));
+        g.DrawString(text, font, brush, left + 9, top + 4);
+    }
+
+    /// <summary>Текст и цвет цены: «?» для нераспознанного, иначе сумма + тир-цвет.</summary>
+    private static (string Text, Color Color) PriceLabel(PricedReward reward)
+    {
+        if (reward.Price is null)
+        {
+            return ("?", Color.FromArgb(255, 120, 90));
+        }
+
+        var ex = reward.LineTotal;
+        var div = (reward.Price.DivineValue ?? 0) * reward.Stack;
+        return (FormatValue(ex, div), TierColor(ex));
+    }
+
+    private static string FormatValue(double exalted, double divine) =>
+        divine >= DivineThreshold
+            ? $"{divine:0.##} div"
+            : $"{exalted:0.##} ex";
+
+    // Цвет по ценности (в exalted): тривиальное → дорогое.
+    private static Color TierColor(double exalted) => exalted switch
+    {
+        < 0.1 => Color.FromArgb(150, 156, 163),   // тривиальное — серое
+        < 1.0 => Color.FromArgb(232, 232, 236),   // дешёвое — белое
+        < 5.0 => Color.FromArgb(255, 209, 102),   // среднее — золото
+        < 20.0 => Color.FromArgb(255, 159, 67),   // дорогое — оранжевое
+        _ => Color.FromArgb(255, 93, 143),         // топ — розово-красное
+    };
+
+    private static GraphicsPath Rounded(Rectangle r, int radius)
+    {
+        var d = radius * 2;
+        var path = new GraphicsPath();
+        path.AddArc(r.X, r.Y, d, d, 180, 90);
+        path.AddArc(r.Right - d, r.Y, d, d, 270, 90);
+        path.AddArc(r.Right - d, r.Bottom - d, d, d, 0, 90);
+        path.AddArc(r.X, r.Bottom - d, d, d, 90, 90);
+        path.CloseFigure();
+        return path;
     }
 
     private Point ToLocal(Point screen) =>
@@ -127,4 +253,14 @@ public sealed class PriceOverlayForm : Form
 
     private Rectangle ToLocal(Rectangle screen) =>
         new(screen.X - Bounds.X, screen.Y - Bounds.Y, screen.Width, screen.Height);
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _fadeTimer.Dispose();
+        }
+
+        base.Dispose(disposing);
+    }
 }
