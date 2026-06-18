@@ -1,6 +1,8 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using Tesseract;
+// Tesseract тоже определяет тип ImageFormat — фиксируем простое имя на System.Drawing.
+using ImageFormat = System.Drawing.Imaging.ImageFormat;
 
 namespace PriceCheckPoe2.Ocr;
 
@@ -18,7 +20,7 @@ public sealed class OcrEngine : IDisposable
     public OcrEngine(string? tessDataPath = null, int threshold = 110, bool saveDebug = false)
     {
         var path = tessDataPath ?? Path.Combine(AppContext.BaseDirectory, "tessdata");
-        _engine = new TesseractEngine(path, "eng", EngineMode.Default);
+        _engine = new TesseractEngine(path, "eng");
         _threshold = Math.Clamp(threshold, 0, 255);
         _saveDebug = saveDebug;
     }
@@ -33,7 +35,10 @@ public sealed class OcrEngine : IDisposable
             TrySaveDebug(prepared);
         }
 
-        using var pix = PixConverter.ToPix(prepared);
+        // Tesseract 5.x убрал PixConverter — грузим Pix из PNG-байтов в памяти.
+        using var ms = new MemoryStream();
+        prepared.Save(ms, ImageFormat.Png);
+        using var pix = Pix.LoadFromMemory(ms.ToArray());
         using var page = _engine.Process(pix);
 
         return page.GetText()

@@ -30,3 +30,10 @@
 - `docs/ENDPOINT.md` — как сверить endpoint poe.ninja для PoE2; раздел
   «Как пользоваться» в README.
 - Журнал проекта в `.claude/skills/poe2-pricecheck/SKILL.md`.
+
+### Fixed
+- Сборка на Windows (.NET 8): `KeyCode` из `SharpHook.Data` (не `.Native`);
+  возвращены global usings `System.IO`/`System.Net.Http` (WinForms даёт урезанный
+  набор); Tesseract 5.x — `Pix.LoadFromMemory` вместо `PixConverter`, алиас для
+  `ImageFormat`, 2-арг конструктор `TesseractEngine`; DPI перенесён в
+  `ApplicationHighDpiMode`. Сборка зелёная, 21/21 тест проходит.

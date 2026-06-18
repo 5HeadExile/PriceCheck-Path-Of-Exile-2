@@ -9,10 +9,6 @@
     </application>
   </compatibility>
 
-  <application xmlns="urn:schemas-microsoft-com:asm.v3">
-    <windowsSettings>
-      <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2</dpiAwareness>
-      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware>
-    </windowsSettings>
-  </application>
+  <!-- DPI задаётся через свойство проекта ApplicationHighDpiMode (PerMonitorV2),
+       чтобы не дублировать настройку и не ловить варнинг WFAC010. -->
 </assembly>

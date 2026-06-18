@@ -1,3 +1,4 @@
+using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using PriceCheckPoe2.Config;
 

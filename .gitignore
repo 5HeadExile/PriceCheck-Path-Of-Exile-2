@@ -6,6 +6,9 @@ obj/
 x64/
 *.user
 
+# Published output
+dist/
+
 # Rider / VS
 .vs/
 .idea/
