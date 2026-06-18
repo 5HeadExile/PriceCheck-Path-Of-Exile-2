@@ -32,6 +32,10 @@
 - Журнал проекта в `.claude/skills/poe2-pricecheck/SKILL.md`.
 
 ### Changed
+- Авто-режим: фоновый `RegionMonitor` + `ListDetector` сами показывают оверлей
+  при открытии панели пилона и скрывают при закрытии; OCR запускается только при
+  открытии/смене содержимого (детект по сигнатуре). Калибровка области → авто-скан.
+  Меню: «Оверлей: пауза/возобновить», «Пересканировать сейчас».
 - Подтверждён и прописан реальный endpoint poe.ninja PoE2
   (`…/exchange/current/overview?league=&type=Currency`); `PoeNinjaClient`
   переписан под схему core/lines/items с переводом в exalted.

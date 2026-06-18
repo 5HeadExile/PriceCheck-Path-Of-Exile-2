@@ -121,8 +121,8 @@ public sealed class MenuOverlay : IDisposable
 
         layout.Controls.Add(MakeButton("Добавить пилон (калибровка)", () => AddPylonRequested?.Invoke()));
         layout.Controls.Add(MakeButton("Сбросить пилоны", () => ClearPylonsRequested?.Invoke()));
-        layout.Controls.Add(MakeButton("Оценить пилоны (оверлей)", () => TogglePriceOverlayRequested?.Invoke()));
-        layout.Controls.Add(MakeButton("Пересканировать", () => RescanRequested?.Invoke()));
+        layout.Controls.Add(MakeButton("Оверлей: пауза / возобновить", () => TogglePriceOverlayRequested?.Invoke()));
+        layout.Controls.Add(MakeButton("Пересканировать сейчас", () => RescanRequested?.Invoke()));
         layout.Controls.Add(MakeButton("Настройки", () => SettingsRequested?.Invoke()));
         layout.Controls.Add(MakeButton("Закрыть меню", Hide));
         layout.Controls.Add(MakeButton("Выход", () => ExitRequested?.Invoke()));
