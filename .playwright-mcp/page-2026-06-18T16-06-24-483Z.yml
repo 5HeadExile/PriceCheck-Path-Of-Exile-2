@@ -1,0 +1,1768 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e33]:
+    - navigation "primary" [ref=e37]:
+      - generic [ref=e38]:
+        - link "logo poe.ninja" [ref=e40] [cursor=pointer]:
+          - /url: /
+          - img "logo" [ref=e41]
+          - generic [ref=e42]: poe.ninja
+        - generic [ref=e43]:
+          - link "Economy" [ref=e44] [cursor=pointer]:
+            - /url: /poe2/economy/runesofaldur/currency
+          - link "Builds" [ref=e45] [cursor=pointer]:
+            - /url: /poe2/builds
+          - link "Passive Skill Tree" [ref=e46] [cursor=pointer]:
+            - /url: /poe2/passive-skill-tree
+          - generic [ref=e47] [cursor=pointer]:
+            - text: More
+            - img [ref=e48]
+        - generic [ref=e50]:
+          - generic [ref=e52]:
+            - link "POE 1" [ref=e53] [cursor=pointer]:
+              - /url: /poe1/economy
+            - generic [ref=e55] [cursor=pointer]: POE 2
+          - link [ref=e56] [cursor=pointer]:
+            - /url: https://discord.gg/7qSRyKdyre
+            - img [ref=e57]
+          - link [ref=e60] [cursor=pointer]:
+            - /url: /support
+            - img [ref=e61]
+          - link "Log in" [ref=e63] [cursor=pointer]:
+            - /url: /account
+            - img [ref=e64]
+            - text: Log in
+  - generic [ref=e69]:
+    - navigation "secondary" [ref=e70]:
+      - generic [ref=e72]:
+        - generic: League
+        - combobox "League" [ref=e73]:
+          - option "Runes of Aldur" [selected]
+          - option "HC Runes of Aldur"
+          - option "Standard"
+          - option "Hardcore"
+          - option "Fate of the Vaal"
+          - option "HC Fate of the Vaal"
+      - combobox "Search by item…" [ref=e76]
+    - generic [ref=e77]:
+      - navigation "secondary" [ref=e78]:
+        - generic [ref=e80]:
+          - heading "General" [level=3] [ref=e81]
+          - list [ref=e82]:
+            - listitem [ref=e83]:
+              - link "Currency" [ref=e84] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/currency
+                - img [ref=e85]
+                - generic [ref=e86]: Currency
+            - listitem [ref=e87]:
+              - link "Fragments" [ref=e88] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/fragments
+                - img [ref=e89]
+                - generic [ref=e90]: Fragments
+            - listitem [ref=e91]:
+              - link "Abyssal Bones" [ref=e92] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/abyssal-bones
+                - img [ref=e93]
+                - generic [ref=e94]: Abyssal Bones
+            - listitem [ref=e95]:
+              - link "Uncut Gems" [ref=e96] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/uncut-gems
+                - img [ref=e97]
+                - generic [ref=e98]: Uncut Gems
+            - listitem [ref=e99]:
+              - link "Lineage Gems" [ref=e100] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/lineage-support-gems
+                - img [ref=e101]
+                - generic [ref=e102]: Lineage Gems
+            - listitem [ref=e103]:
+              - link "Essences" [ref=e104] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/essences
+                - img [ref=e105]
+                - generic [ref=e106]: Essences
+            - listitem [ref=e107]:
+              - link "Soul Cores" [ref=e108] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/soul-cores
+                - img [ref=e109]
+                - generic [ref=e110]: Soul Cores
+            - listitem [ref=e111]:
+              - link "Idols" [ref=e112] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/idols
+                - img [ref=e113]
+                - generic [ref=e114]: Idols
+            - listitem [ref=e115]:
+              - link "Runes" [ref=e116] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/runes
+                - img [ref=e117]
+                - generic [ref=e118]: Runes
+            - listitem [ref=e119]:
+              - link "Omens" [ref=e120] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/omens
+                - img [ref=e121]
+                - generic [ref=e122]: Omens
+            - listitem [ref=e123]:
+              - link "Expedition" [ref=e124] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/expedition
+                - img [ref=e125]
+                - generic [ref=e126]: Expedition
+            - listitem [ref=e127]:
+              - link "Liquid Emotions" [ref=e128] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/liquid-emotions
+                - img [ref=e129]
+                - generic [ref=e130]: Liquid Emotions
+            - listitem [ref=e131]:
+              - link "Catalysts" [ref=e132] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/breach-catalyst
+                - img [ref=e133]
+                - generic [ref=e134]: Catalysts
+            - listitem [ref=e135]:
+              - link "Verisium" [ref=e136] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/verisium
+                - img [ref=e137]
+                - generic [ref=e138]: Verisium
+          - heading "Equipment" [level=3] [ref=e139]
+          - list [ref=e140]:
+            - listitem [ref=e141]:
+              - link "Unique Weapons" [ref=e142] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/unique-weapons
+                - img [ref=e143]
+                - generic [ref=e144]: Unique Weapons
+            - listitem [ref=e145]:
+              - link "Unique Armours" [ref=e146] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/unique-armours
+                - img [ref=e147]
+                - generic [ref=e148]: Unique Armours
+            - listitem [ref=e149]:
+              - link "Unique Accessories" [ref=e150] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/unique-accessories
+                - img [ref=e151]
+                - generic [ref=e152]: Unique Accessories
+            - listitem [ref=e153]:
+              - link "Unique Flasks" [ref=e154] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/unique-flasks
+                - img [ref=e155]
+                - generic [ref=e156]: Unique Flasks
+            - listitem [ref=e157]:
+              - link "Unique Charms" [ref=e158] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/unique-charms
+                - img [ref=e159]
+                - generic [ref=e160]: Unique Charms
+            - listitem [ref=e161]:
+              - link "Unique Jewels" [ref=e162] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/unique-jewels
+                - img [ref=e163]
+                - generic [ref=e164]: Unique Jewels
+            - listitem [ref=e165]:
+              - link "Unique Relics" [ref=e166] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/unique-relics
+                - img [ref=e167]
+                - generic [ref=e168]: Unique Relics
+          - heading "Atlas" [level=3] [ref=e169]
+          - list [ref=e170]:
+            - listitem [ref=e171]:
+              - link "Unique Tablets" [ref=e172] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/unique-tablets
+                - img [ref=e173]
+                - generic [ref=e174]: Unique Tablets
+            - listitem [ref=e175]:
+              - link "Precursor Tablets" [ref=e176] [cursor=pointer]:
+                - /url: /poe2/economy/runesofaldur/precursor-tablets
+                - img [ref=e177]
+                - generic [ref=e178]: Precursor Tablets
+      - main [ref=e179]:
+        - generic [ref=e182]:
+          - generic [ref=e183]:
+            - navigation "Breadcrumb" [ref=e184]:
+              - list [ref=e185]:
+                - listitem [ref=e186]:
+                  - link "Economy" [ref=e187] [cursor=pointer]:
+                    - /url: /poe2/economy/
+                - listitem [ref=e188]:
+                  - text: ">"
+                  - link "Currency" [ref=e189] [cursor=pointer]:
+                    - /url: https://poe.ninja/poe2/economy/runesofaldur/currency
+            - heading "Currency" [level=1] [ref=e190]
+          - generic [ref=e192]:
+            - textbox "Filter by Name" [ref=e194]
+            - generic [ref=e195]:
+              - generic: Value Display
+              - combobox "Value Display" [ref=e196]:
+                - option "Adaptive" [selected]
+                - option "Divine Orb"
+                - option "Exalted Orb"
+                - option "Chaos Orb"
+          - generic [ref=e197]:
+            - generic [ref=e198]: (scroll to see more)
+            - table [ref=e200]:
+              - rowgroup [ref=e201]:
+                - row "Name Value Last 7 days Volume / Hour Most Popular" [ref=e202]:
+                  - columnheader "Name" [ref=e203] [cursor=pointer]
+                  - columnheader "Value" [ref=e204] [cursor=pointer]:
+                    - generic [ref=e205]:
+                      - text: Value
+                      - img [ref=e206]
+                  - columnheader "Last 7 days" [ref=e208] [cursor=pointer]
+                  - columnheader "Volume / Hour" [ref=e209] [cursor=pointer]:
+                    - generic [ref=e210]:
+                      - text: Volume / Hour
+                      - img [ref=e211]
+                  - columnheader "Most Popular" [ref=e213]:
+                    - generic [ref=e214]:
+                      - text: Most Popular
+                      - img [ref=e215]
+              - rowgroup [ref=e217]:
+                - row "Mirror of Kalandra wiki 4.2k Divine Orb 1.0 Mirror of Kalandra +33% 99k Divine Orb 4.2k Divine Orb 1.0 Mirror of Kalandra" [ref=e218]:
+                  - cell "Mirror of Kalandra wiki" [ref=e219]:
+                    - generic [ref=e221]:
+                      - link "Mirror of Kalandra" [ref=e223] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/mirror-of-kalandra
+                        - generic [ref=e224]: Mirror of Kalandra
+                      - link "wiki" [ref=e226] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Mirror_of Kalandra
+                        - text: wiki
+                        - img [ref=e227]
+                  - cell "4.2k Divine Orb" [ref=e231]:
+                    - generic [ref=e232]:
+                      - text: 4.2k
+                      - img "Divine Orb" [ref=e233]
+                  - cell [ref=e234]:
+                    - img [ref=e235]
+                  - cell "1.0 Mirror of Kalandra" [ref=e238]:
+                    - generic [ref=e239]:
+                      - text: "1.0"
+                      - img "Mirror of Kalandra" [ref=e240]
+                  - cell "+33%" [ref=e241]:
+                    - generic [ref=e242]:
+                      - img [ref=e244]
+                      - generic [ref=e248]: +33%
+                  - cell "99k Divine Orb" [ref=e249]:
+                    - generic [ref=e251]:
+                      - generic [ref=e252]: 99k
+                      - img "Divine Orb" [ref=e253]
+                  - cell "4.2k Divine Orb" [ref=e254]:
+                    - generic [ref=e255]:
+                      - text: 4.2k
+                      - img "Divine Orb" [ref=e256]
+                  - cell [ref=e257]:
+                    - img [ref=e258]
+                  - cell "1.0 Mirror of Kalandra" [ref=e261]:
+                    - generic [ref=e262]:
+                      - text: "1.0"
+                      - img "Mirror of Kalandra" [ref=e263]
+                - row "Hinekora's Lock wiki 605 Divine Orb 1.0 Hinekora's Lock +127% 72k Divine Orb 605 Divine Orb 1.0 Hinekora's Lock" [ref=e264]:
+                  - cell "Hinekora's Lock wiki" [ref=e265]:
+                    - generic [ref=e267]:
+                      - link "Hinekora's Lock" [ref=e269] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/hinekoras-lock
+                        - generic [ref=e270]: Hinekora's Lock
+                      - link "wiki" [ref=e272] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Hinekora's_Lock
+                        - text: wiki
+                        - img [ref=e273]
+                  - cell "605 Divine Orb" [ref=e277]:
+                    - generic [ref=e278]:
+                      - text: "605"
+                      - img "Divine Orb" [ref=e279]
+                  - cell [ref=e280]:
+                    - img [ref=e281]
+                  - cell "1.0 Hinekora's Lock" [ref=e284]:
+                    - generic [ref=e285]:
+                      - text: "1.0"
+                      - img "Hinekora's Lock" [ref=e286]
+                  - cell "+127%" [ref=e287]:
+                    - generic [ref=e288]:
+                      - img [ref=e290]
+                      - generic [ref=e294]: +127%
+                  - cell "72k Divine Orb" [ref=e295]:
+                    - generic [ref=e297]:
+                      - generic [ref=e298]: 72k
+                      - img "Divine Orb" [ref=e299]
+                  - cell "605 Divine Orb" [ref=e300]:
+                    - generic [ref=e301]:
+                      - text: "605"
+                      - img "Divine Orb" [ref=e302]
+                  - cell [ref=e303]:
+                    - img [ref=e304]
+                  - cell "1.0 Hinekora's Lock" [ref=e307]:
+                    - generic [ref=e308]:
+                      - text: "1.0"
+                      - img "Hinekora's Lock" [ref=e309]
+                - row "Perfect Chaos Orb wiki 4.1 Divine Orb 1.0 Perfect Chaos Orb +19% 18k Divine Orb 4.1 Divine Orb 1.0 Perfect Chaos Orb" [ref=e310]:
+                  - cell "Perfect Chaos Orb wiki" [ref=e311]:
+                    - generic [ref=e313]:
+                      - link "Perfect Chaos Orb" [ref=e315] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/perfect-chaos-orb
+                        - generic [ref=e316]: Perfect Chaos Orb
+                      - link "wiki" [ref=e318] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Perfect_Chaos Orb
+                        - text: wiki
+                        - img [ref=e319]
+                  - cell "4.1 Divine Orb" [ref=e323]:
+                    - generic [ref=e324]:
+                      - text: "4.1"
+                      - img "Divine Orb" [ref=e325]
+                  - cell [ref=e326]:
+                    - img [ref=e327]
+                  - cell "1.0 Perfect Chaos Orb" [ref=e330]:
+                    - generic [ref=e331]:
+                      - text: "1.0"
+                      - img "Perfect Chaos Orb" [ref=e332]
+                  - cell "+19%" [ref=e333]:
+                    - generic [ref=e334]:
+                      - img [ref=e336]
+                      - generic [ref=e340]: +19%
+                  - cell "18k Divine Orb" [ref=e341]:
+                    - generic [ref=e343]:
+                      - generic [ref=e344]: 18k
+                      - img "Divine Orb" [ref=e345]
+                  - cell "4.1 Divine Orb" [ref=e346]:
+                    - generic [ref=e347]:
+                      - text: "4.1"
+                      - img "Divine Orb" [ref=e348]
+                  - cell [ref=e349]:
+                    - img [ref=e350]
+                  - cell "1.0 Perfect Chaos Orb" [ref=e353]:
+                    - generic [ref=e354]:
+                      - text: "1.0"
+                      - img "Perfect Chaos Orb" [ref=e355]
+                - row "Fracturing Orb wiki 3.7 Divine Orb 1.0 Fracturing Orb +506% 14k Divine Orb 3.7 Divine Orb 1.0 Fracturing Orb" [ref=e356]:
+                  - cell "Fracturing Orb wiki" [ref=e357]:
+                    - generic [ref=e359]:
+                      - link "Fracturing Orb" [ref=e361] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/fracturing-orb
+                        - generic [ref=e362]: Fracturing Orb
+                      - link "wiki" [ref=e364] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Fracturing_Orb
+                        - text: wiki
+                        - img [ref=e365]
+                  - cell "3.7 Divine Orb" [ref=e369]:
+                    - generic [ref=e370]:
+                      - text: "3.7"
+                      - img "Divine Orb" [ref=e371]
+                  - cell [ref=e372]:
+                    - img [ref=e373]
+                  - cell "1.0 Fracturing Orb" [ref=e376]:
+                    - generic [ref=e377]:
+                      - text: "1.0"
+                      - img "Fracturing Orb" [ref=e378]
+                  - cell "+506%" [ref=e379]:
+                    - generic [ref=e380]:
+                      - img [ref=e382]
+                      - generic [ref=e386]: +506%
+                  - cell "14k Divine Orb" [ref=e387]:
+                    - generic [ref=e389]:
+                      - generic [ref=e390]: 14k
+                      - img "Divine Orb" [ref=e391]
+                  - cell "3.7 Divine Orb" [ref=e392]:
+                    - generic [ref=e393]:
+                      - text: "3.7"
+                      - img "Divine Orb" [ref=e394]
+                  - cell [ref=e395]:
+                    - img [ref=e396]
+                  - cell "1.0 Fracturing Orb" [ref=e399]:
+                    - generic [ref=e400]:
+                      - text: "1.0"
+                      - img "Fracturing Orb" [ref=e401]
+                - row "Perfect Exalted Orb wiki 2.8 Divine Orb 1.0 Perfect Exalted Orb -5% 16k Divine Orb 2.8 Divine Orb 1.0 Perfect Exalted Orb" [ref=e402]:
+                  - cell "Perfect Exalted Orb wiki" [ref=e403]:
+                    - generic [ref=e405]:
+                      - link "Perfect Exalted Orb" [ref=e407] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/perfect-exalted-orb
+                        - generic [ref=e408]: Perfect Exalted Orb
+                      - link "wiki" [ref=e410] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Perfect_Exalted Orb
+                        - text: wiki
+                        - img [ref=e411]
+                  - cell "2.8 Divine Orb" [ref=e415]:
+                    - generic [ref=e416]:
+                      - text: "2.8"
+                      - img "Divine Orb" [ref=e417]
+                  - cell [ref=e418]:
+                    - img [ref=e419]
+                  - cell "1.0 Perfect Exalted Orb" [ref=e422]:
+                    - generic [ref=e423]:
+                      - text: "1.0"
+                      - img "Perfect Exalted Orb" [ref=e424]
+                  - cell "-5%" [ref=e425]:
+                    - generic [ref=e426]:
+                      - img [ref=e428]
+                      - generic [ref=e432]: "-5%"
+                  - cell "16k Divine Orb" [ref=e433]:
+                    - generic [ref=e435]:
+                      - generic [ref=e436]: 16k
+                      - img "Divine Orb" [ref=e437]
+                  - cell "2.8 Divine Orb" [ref=e438]:
+                    - generic [ref=e439]:
+                      - text: "2.8"
+                      - img "Divine Orb" [ref=e440]
+                  - cell [ref=e441]:
+                    - img [ref=e442]
+                  - cell "1.0 Perfect Exalted Orb" [ref=e445]:
+                    - generic [ref=e446]:
+                      - text: "1.0"
+                      - img "Perfect Exalted Orb" [ref=e447]
+                - row "Vaal Catalysing Infuser wiki 2.7 Divine Orb 1.0 Vaal Catalysing Infuser +200% 1.3k Divine Orb 2.7 Divine Orb 1.0 Vaal Catalysing Infuser" [ref=e448]:
+                  - cell "Vaal Catalysing Infuser wiki" [ref=e449]:
+                    - generic [ref=e451]:
+                      - link "Vaal Catalysing Infuser" [ref=e453] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/vaal-catalysing-infuser
+                        - generic [ref=e454]: Vaal Catalysing Infuser
+                      - link "wiki" [ref=e456] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Vaal_Catalysing Infuser
+                        - text: wiki
+                        - img [ref=e457]
+                  - cell "2.7 Divine Orb" [ref=e461]:
+                    - generic [ref=e462]:
+                      - text: "2.7"
+                      - img "Divine Orb" [ref=e463]
+                  - cell [ref=e464]:
+                    - img [ref=e465]
+                  - cell "1.0 Vaal Catalysing Infuser" [ref=e468]:
+                    - generic [ref=e469]:
+                      - text: "1.0"
+                      - img "Vaal Catalysing Infuser" [ref=e470]
+                  - cell "+200%" [ref=e471]:
+                    - generic [ref=e472]:
+                      - img [ref=e474]
+                      - generic [ref=e478]: +200%
+                  - cell "1.3k Divine Orb" [ref=e479]:
+                    - generic [ref=e481]:
+                      - generic [ref=e482]: 1.3k
+                      - img "Divine Orb" [ref=e483]
+                  - cell "2.7 Divine Orb" [ref=e484]:
+                    - generic [ref=e485]:
+                      - text: "2.7"
+                      - img "Divine Orb" [ref=e486]
+                  - cell [ref=e487]:
+                    - img [ref=e488]
+                  - cell "1.0 Vaal Catalysing Infuser" [ref=e491]:
+                    - generic [ref=e492]:
+                      - text: "1.0"
+                      - img "Vaal Catalysing Infuser" [ref=e493]
+                - row "Architect's Orb wiki 1.7 Divine Orb 1.0 Architect's Orb +47% 1.9k Divine Orb 1.7 Divine Orb 1.0 Architect's Orb" [ref=e494]:
+                  - cell "Architect's Orb wiki" [ref=e495]:
+                    - generic [ref=e497]:
+                      - link "Architect's Orb" [ref=e499] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/architects-orb
+                        - generic [ref=e500]: Architect's Orb
+                      - link "wiki" [ref=e502] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Architect's_Orb
+                        - text: wiki
+                        - img [ref=e503]
+                  - cell "1.7 Divine Orb" [ref=e507]:
+                    - generic [ref=e508]:
+                      - text: "1.7"
+                      - img "Divine Orb" [ref=e509]
+                  - cell [ref=e510]:
+                    - img [ref=e511]
+                  - cell "1.0 Architect's Orb" [ref=e514]:
+                    - generic [ref=e515]:
+                      - text: "1.0"
+                      - img "Architect's Orb" [ref=e516]
+                  - cell "+47%" [ref=e517]:
+                    - generic [ref=e518]:
+                      - img [ref=e520]
+                      - generic [ref=e524]: +47%
+                  - cell "1.9k Divine Orb" [ref=e525]:
+                    - generic [ref=e527]:
+                      - generic [ref=e528]: 1.9k
+                      - img "Divine Orb" [ref=e529]
+                  - cell "1.7 Divine Orb" [ref=e530]:
+                    - generic [ref=e531]:
+                      - text: "1.7"
+                      - img "Divine Orb" [ref=e532]
+                  - cell [ref=e533]:
+                    - img [ref=e534]
+                  - cell "1.0 Architect's Orb" [ref=e537]:
+                    - generic [ref=e538]:
+                      - text: "1.0"
+                      - img "Architect's Orb" [ref=e539]
+                - row "Vaal Cultivation Orb wiki 1.5 Divine Orb 1.0 Vaal Cultivation Orb -6% 2.1k Divine Orb 1.5 Divine Orb 1.0 Vaal Cultivation Orb" [ref=e540]:
+                  - cell "Vaal Cultivation Orb wiki" [ref=e541]:
+                    - generic [ref=e543]:
+                      - link "Vaal Cultivation Orb" [ref=e545] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/vaal-cultivation-orb
+                        - generic [ref=e546]: Vaal Cultivation Orb
+                      - link "wiki" [ref=e548] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Vaal_Cultivation Orb
+                        - text: wiki
+                        - img [ref=e549]
+                  - cell "1.5 Divine Orb" [ref=e553]:
+                    - generic [ref=e554]:
+                      - text: "1.5"
+                      - img "Divine Orb" [ref=e555]
+                  - cell [ref=e556]:
+                    - img [ref=e557]
+                  - cell "1.0 Vaal Cultivation Orb" [ref=e560]:
+                    - generic [ref=e561]:
+                      - text: "1.0"
+                      - img "Vaal Cultivation Orb" [ref=e562]
+                  - cell "-6%" [ref=e563]:
+                    - generic [ref=e564]:
+                      - img [ref=e566]
+                      - generic [ref=e570]: "-6%"
+                  - cell "2.1k Divine Orb" [ref=e571]:
+                    - generic [ref=e573]:
+                      - generic [ref=e574]: 2.1k
+                      - img "Divine Orb" [ref=e575]
+                  - cell "1.5 Divine Orb" [ref=e576]:
+                    - generic [ref=e577]:
+                      - text: "1.5"
+                      - img "Divine Orb" [ref=e578]
+                  - cell [ref=e579]:
+                    - img [ref=e580]
+                  - cell "1.0 Vaal Cultivation Orb" [ref=e583]:
+                    - generic [ref=e584]:
+                      - text: "1.0"
+                      - img "Vaal Cultivation Orb" [ref=e585]
+                - row "Divine Orb wiki 8.9 Chaos Orb 1.0 Divine Orb -10% 145k Divine Orb 8.9 Chaos Orb 1.0 Divine Orb" [ref=e586]:
+                  - cell "Divine Orb wiki" [ref=e587]:
+                    - generic [ref=e589]:
+                      - link "Divine Orb" [ref=e591] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/divine-orb
+                        - generic [ref=e592]: Divine Orb
+                      - link "wiki" [ref=e594] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Divine_Orb
+                        - text: wiki
+                        - img [ref=e595]
+                  - cell "8.9 Chaos Orb" [ref=e599]:
+                    - generic [ref=e600]:
+                      - text: "8.9"
+                      - img "Chaos Orb" [ref=e601]
+                  - cell [ref=e602]:
+                    - img [ref=e603]
+                  - cell "1.0 Divine Orb" [ref=e606]:
+                    - generic [ref=e607]:
+                      - text: "1.0"
+                      - img "Divine Orb" [ref=e608]
+                  - cell "-10%" [ref=e609]:
+                    - generic [ref=e610]:
+                      - img [ref=e612]
+                      - generic [ref=e616]: "-10%"
+                  - cell "145k Divine Orb" [ref=e617]:
+                    - generic [ref=e619]:
+                      - generic [ref=e620]: 145k
+                      - img "Divine Orb" [ref=e621]
+                  - cell "8.9 Chaos Orb" [ref=e622]:
+                    - generic [ref=e623]:
+                      - text: "8.9"
+                      - img "Chaos Orb" [ref=e624]
+                  - cell [ref=e625]:
+                    - img [ref=e626]
+                  - cell "1.0 Divine Orb" [ref=e629]:
+                    - generic [ref=e630]:
+                      - text: "1.0"
+                      - img "Divine Orb" [ref=e631]
+                - row "Crystallised Corruption wiki 6.7 Chaos Orb 1.0 Crystallised Corruption +72% 648 Divine Orb 148 Exalted Orb 1.0 Crystallised Corruption" [ref=e632]:
+                  - cell "Crystallised Corruption wiki" [ref=e633]:
+                    - generic [ref=e635]:
+                      - link "Crystallised Corruption" [ref=e637] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/crystallised-corruption
+                        - generic [ref=e638]: Crystallised Corruption
+                      - link "wiki" [ref=e640] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Crystallised_Corruption
+                        - text: wiki
+                        - img [ref=e641]
+                  - cell "6.7 Chaos Orb" [ref=e645]:
+                    - generic [ref=e646]:
+                      - text: "6.7"
+                      - img "Chaos Orb" [ref=e647]
+                  - cell [ref=e648]:
+                    - img [ref=e649]
+                  - cell "1.0 Crystallised Corruption" [ref=e652]:
+                    - generic [ref=e653]:
+                      - text: "1.0"
+                      - img "Crystallised Corruption" [ref=e654]
+                  - cell "+72%" [ref=e655]:
+                    - generic [ref=e656]:
+                      - img [ref=e658]
+                      - generic [ref=e662]: +72%
+                  - cell "648 Divine Orb" [ref=e663]:
+                    - generic [ref=e665]:
+                      - generic [ref=e666]: "648"
+                      - img "Divine Orb" [ref=e667]
+                  - cell "148 Exalted Orb" [ref=e668]:
+                    - generic [ref=e669]:
+                      - text: "148"
+                      - img "Exalted Orb" [ref=e670]
+                  - cell [ref=e671]:
+                    - img [ref=e672]
+                  - cell "1.0 Crystallised Corruption" [ref=e675]:
+                    - generic [ref=e676]:
+                      - text: "1.0"
+                      - img "Crystallised Corruption" [ref=e677]
+                - row "Orb of Annulment wiki 5.4 Chaos Orb 1.0 Orb of Annulment +14% 23k Divine Orb 1.0 Divine Orb 1.6 Orb of Annulment" [ref=e678]:
+                  - cell "Orb of Annulment wiki" [ref=e679]:
+                    - generic [ref=e681]:
+                      - link "Orb of Annulment" [ref=e683] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/orb-of-annulment
+                        - generic [ref=e684]: Orb of Annulment
+                      - link "wiki" [ref=e686] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Orb_of Annulment
+                        - text: wiki
+                        - img [ref=e687]
+                  - cell "5.4 Chaos Orb" [ref=e691]:
+                    - generic [ref=e692]:
+                      - text: "5.4"
+                      - img "Chaos Orb" [ref=e693]
+                  - cell [ref=e694]:
+                    - img [ref=e695]
+                  - cell "1.0 Orb of Annulment" [ref=e698]:
+                    - generic [ref=e699]:
+                      - text: "1.0"
+                      - img "Orb of Annulment" [ref=e700]
+                  - cell "+14%" [ref=e701]:
+                    - generic [ref=e702]:
+                      - img [ref=e704]
+                      - generic [ref=e708]: +14%
+                  - cell "23k Divine Orb" [ref=e709]:
+                    - generic [ref=e711]:
+                      - generic [ref=e712]: 23k
+                      - img "Divine Orb" [ref=e713]
+                  - cell "1.0 Divine Orb" [ref=e714]:
+                    - generic [ref=e715]:
+                      - text: "1.0"
+                      - img "Divine Orb" [ref=e716]
+                  - cell [ref=e717]:
+                    - img [ref=e718]
+                  - cell "1.6 Orb of Annulment" [ref=e721]:
+                    - generic [ref=e722]:
+                      - text: "1.6"
+                      - img "Orb of Annulment" [ref=e723]
+                - row "Orb of Extraction wiki 4.7 Chaos Orb 1.0 Orb of Extraction +4% 181 Divine Orb 104 Exalted Orb 1.0 Orb of Extraction" [ref=e724]:
+                  - cell "Orb of Extraction wiki" [ref=e725]:
+                    - generic [ref=e727]:
+                      - link "Orb of Extraction" [ref=e729] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/orb-of-extraction
+                        - generic [ref=e730]: Orb of Extraction
+                      - link "wiki" [ref=e732] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Orb_of Extraction
+                        - text: wiki
+                        - img [ref=e733]
+                  - cell "4.7 Chaos Orb" [ref=e737]:
+                    - generic [ref=e738]:
+                      - text: "4.7"
+                      - img "Chaos Orb" [ref=e739]
+                  - cell [ref=e740]:
+                    - img [ref=e741]
+                  - cell "1.0 Orb of Extraction" [ref=e744]:
+                    - generic [ref=e745]:
+                      - text: "1.0"
+                      - img "Orb of Extraction" [ref=e746]
+                  - cell "+4%" [ref=e747]:
+                    - generic [ref=e748]:
+                      - img [ref=e750]
+                      - generic [ref=e754]: +4%
+                  - cell "181 Divine Orb" [ref=e755]:
+                    - generic [ref=e757]:
+                      - generic [ref=e758]: "181"
+                      - img "Divine Orb" [ref=e759]
+                  - cell "104 Exalted Orb" [ref=e760]:
+                    - generic [ref=e761]:
+                      - text: "104"
+                      - img "Exalted Orb" [ref=e762]
+                  - cell [ref=e763]:
+                    - img [ref=e764]
+                  - cell "1.0 Orb of Extraction" [ref=e767]:
+                    - generic [ref=e768]:
+                      - text: "1.0"
+                      - img "Orb of Extraction" [ref=e769]
+                - row "Core Destabiliser wiki 4.5 Chaos Orb 1.0 Core Destabiliser +148% 488 Divine Orb 100 Exalted Orb 1.0 Core Destabiliser" [ref=e770]:
+                  - cell "Core Destabiliser wiki" [ref=e771]:
+                    - generic [ref=e773]:
+                      - link "Core Destabiliser" [ref=e775] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/core-destabiliser
+                        - generic [ref=e776]: Core Destabiliser
+                      - link "wiki" [ref=e778] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Core_Destabiliser
+                        - text: wiki
+                        - img [ref=e779]
+                  - cell "4.5 Chaos Orb" [ref=e783]:
+                    - generic [ref=e784]:
+                      - text: "4.5"
+                      - img "Chaos Orb" [ref=e785]
+                  - cell [ref=e786]:
+                    - img [ref=e787]
+                  - cell "1.0 Core Destabiliser" [ref=e790]:
+                    - generic [ref=e791]:
+                      - text: "1.0"
+                      - img "Core Destabiliser" [ref=e792]
+                  - cell "+148%" [ref=e793]:
+                    - generic [ref=e794]:
+                      - img [ref=e796]
+                      - generic [ref=e800]: +148%
+                  - cell "488 Divine Orb" [ref=e801]:
+                    - generic [ref=e803]:
+                      - generic [ref=e804]: "488"
+                      - img "Divine Orb" [ref=e805]
+                  - cell "100 Exalted Orb" [ref=e806]:
+                    - generic [ref=e807]:
+                      - text: "100"
+                      - img "Exalted Orb" [ref=e808]
+                  - cell [ref=e809]:
+                    - img [ref=e810]
+                  - cell "1.0 Core Destabiliser" [ref=e813]:
+                    - generic [ref=e814]:
+                      - text: "1.0"
+                      - img "Core Destabiliser" [ref=e815]
+                - row "Vaal Armourer's Infuser wiki 4.1 Chaos Orb 1.0 Vaal Armourer's Infuser -24% 901 Divine Orb 1.0 Divine Orb 2.2 Vaal Armourer's Infuser" [ref=e816]:
+                  - cell "Vaal Armourer's Infuser wiki" [ref=e817]:
+                    - generic [ref=e819]:
+                      - link "Vaal Armourer's Infuser" [ref=e821] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/vaal-armourers-infuser
+                        - generic [ref=e822]: Vaal Armourer's Infuser
+                      - link "wiki" [ref=e824] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Vaal_Armourer's Infuser
+                        - text: wiki
+                        - img [ref=e825]
+                  - cell "4.1 Chaos Orb" [ref=e829]:
+                    - generic [ref=e830]:
+                      - text: "4.1"
+                      - img "Chaos Orb" [ref=e831]
+                  - cell [ref=e832]:
+                    - img [ref=e833]
+                  - cell "1.0 Vaal Armourer's Infuser" [ref=e836]:
+                    - generic [ref=e837]:
+                      - text: "1.0"
+                      - img "Vaal Armourer's Infuser" [ref=e838]
+                  - cell "-24%" [ref=e839]:
+                    - generic [ref=e840]:
+                      - img [ref=e842]
+                      - generic [ref=e846]: "-24%"
+                  - cell "901 Divine Orb" [ref=e847]:
+                    - generic [ref=e849]:
+                      - generic [ref=e850]: "901"
+                      - img "Divine Orb" [ref=e851]
+                  - cell "1.0 Divine Orb" [ref=e852]:
+                    - generic [ref=e853]:
+                      - text: "1.0"
+                      - img "Divine Orb" [ref=e854]
+                  - cell [ref=e855]:
+                    - img [ref=e856]
+                  - cell "2.2 Vaal Armourer's Infuser" [ref=e859]:
+                    - generic [ref=e860]:
+                      - text: "2.2"
+                      - img "Vaal Armourer's Infuser" [ref=e861]
+                - row "Perfect Jeweller's Orb wiki 3.7 Chaos Orb 1.0 Perfect Jeweller's Orb +8% 3.1k Divine Orb 82 Exalted Orb 1.0 Perfect Jeweller's Orb" [ref=e862]:
+                  - cell "Perfect Jeweller's Orb wiki" [ref=e863]:
+                    - generic [ref=e865]:
+                      - link "Perfect Jeweller's Orb" [ref=e867] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/perfect-jewellers-orb
+                        - generic [ref=e868]: Perfect Jeweller's Orb
+                      - link "wiki" [ref=e870] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Perfect_Jeweller's Orb
+                        - text: wiki
+                        - img [ref=e871]
+                  - cell "3.7 Chaos Orb" [ref=e875]:
+                    - generic [ref=e876]:
+                      - text: "3.7"
+                      - img "Chaos Orb" [ref=e877]
+                  - cell [ref=e878]:
+                    - img [ref=e879]
+                  - cell "1.0 Perfect Jeweller's Orb" [ref=e882]:
+                    - generic [ref=e883]:
+                      - text: "1.0"
+                      - img "Perfect Jeweller's Orb" [ref=e884]
+                  - cell "+8%" [ref=e885]:
+                    - generic [ref=e886]:
+                      - img [ref=e888]
+                      - generic [ref=e892]: +8%
+                  - cell "3.1k Divine Orb" [ref=e893]:
+                    - generic [ref=e895]:
+                      - generic [ref=e896]: 3.1k
+                      - img "Divine Orb" [ref=e897]
+                  - cell "82 Exalted Orb" [ref=e898]:
+                    - generic [ref=e899]:
+                      - text: "82"
+                      - img "Exalted Orb" [ref=e900]
+                  - cell [ref=e901]:
+                    - img [ref=e902]
+                  - cell "1.0 Perfect Jeweller's Orb" [ref=e905]:
+                    - generic [ref=e906]:
+                      - text: "1.0"
+                      - img "Perfect Jeweller's Orb" [ref=e907]
+                - row "Greater Chaos Orb wiki 3.0 Chaos Orb 1.0 Greater Chaos Orb +13% 13k Divine Orb 1.0 Divine Orb 3.0 Greater Chaos Orb" [ref=e908]:
+                  - cell "Greater Chaos Orb wiki" [ref=e909]:
+                    - generic [ref=e911]:
+                      - link "Greater Chaos Orb" [ref=e913] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/greater-chaos-orb
+                        - generic [ref=e914]: Greater Chaos Orb
+                      - link "wiki" [ref=e916] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Greater_Chaos Orb
+                        - text: wiki
+                        - img [ref=e917]
+                  - cell "3.0 Chaos Orb" [ref=e921]:
+                    - generic [ref=e922]:
+                      - text: "3.0"
+                      - img "Chaos Orb" [ref=e923]
+                  - cell [ref=e924]:
+                    - img [ref=e925]
+                  - cell "1.0 Greater Chaos Orb" [ref=e928]:
+                    - generic [ref=e929]:
+                      - text: "1.0"
+                      - img "Greater Chaos Orb" [ref=e930]
+                  - cell "+13%" [ref=e931]:
+                    - generic [ref=e932]:
+                      - img [ref=e934]
+                      - generic [ref=e938]: +13%
+                  - cell "13k Divine Orb" [ref=e939]:
+                    - generic [ref=e941]:
+                      - generic [ref=e942]: 13k
+                      - img "Divine Orb" [ref=e943]
+                  - cell "1.0 Divine Orb" [ref=e944]:
+                    - generic [ref=e945]:
+                      - text: "1.0"
+                      - img "Divine Orb" [ref=e946]
+                  - cell [ref=e947]:
+                    - img [ref=e948]
+                  - cell "3.0 Greater Chaos Orb" [ref=e951]:
+                    - generic [ref=e952]:
+                      - text: "3.0"
+                      - img "Greater Chaos Orb" [ref=e953]
+                - row "Vaal Blacksmith's Infuser wiki 2.8 Chaos Orb 1.0 Vaal Blacksmith's Infuser -64% 343 Divine Orb 1.0 Divine Orb 3.1 Vaal Blacksmith's Infuser" [ref=e954]:
+                  - cell "Vaal Blacksmith's Infuser wiki" [ref=e955]:
+                    - generic [ref=e957]:
+                      - link "Vaal Blacksmith's Infuser" [ref=e959] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/vaal-blacksmiths-infuser
+                        - generic [ref=e960]: Vaal Blacksmith's Infuser
+                      - link "wiki" [ref=e962] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Vaal_Blacksmith's Infuser
+                        - text: wiki
+                        - img [ref=e963]
+                  - cell "2.8 Chaos Orb" [ref=e967]:
+                    - generic [ref=e968]:
+                      - text: "2.8"
+                      - img "Chaos Orb" [ref=e969]
+                  - cell [ref=e970]:
+                    - img [ref=e971]
+                  - cell "1.0 Vaal Blacksmith's Infuser" [ref=e974]:
+                    - generic [ref=e975]:
+                      - text: "1.0"
+                      - img "Vaal Blacksmith's Infuser" [ref=e976]
+                  - cell "-64%" [ref=e977]:
+                    - generic [ref=e978]:
+                      - img [ref=e980]
+                      - generic [ref=e984]: "-64%"
+                  - cell "343 Divine Orb" [ref=e985]:
+                    - generic [ref=e987]:
+                      - generic [ref=e988]: "343"
+                      - img "Divine Orb" [ref=e989]
+                  - cell "1.0 Divine Orb" [ref=e990]:
+                    - generic [ref=e991]:
+                      - text: "1.0"
+                      - img "Divine Orb" [ref=e992]
+                  - cell [ref=e993]:
+                    - img [ref=e994]
+                  - cell "3.1 Vaal Blacksmith's Infuser" [ref=e997]:
+                    - generic [ref=e998]:
+                      - text: "3.1"
+                      - img "Vaal Blacksmith's Infuser" [ref=e999]
+                - row "Cryptic Key wiki 2.4 Chaos Orb 1.0 Cryptic Key +46% 84 Divine Orb 53 Exalted Orb 1.0 Cryptic Key" [ref=e1000]:
+                  - cell "Cryptic Key wiki" [ref=e1001]:
+                    - generic [ref=e1003]:
+                      - link "Cryptic Key" [ref=e1005] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/cryptic-key
+                        - generic [ref=e1006]: Cryptic Key
+                      - link "wiki" [ref=e1008] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Cryptic_Key
+                        - text: wiki
+                        - img [ref=e1009]
+                  - cell "2.4 Chaos Orb" [ref=e1013]:
+                    - generic [ref=e1014]:
+                      - text: "2.4"
+                      - img "Chaos Orb" [ref=e1015]
+                  - cell [ref=e1016]:
+                    - img [ref=e1017]
+                  - cell "1.0 Cryptic Key" [ref=e1020]:
+                    - generic [ref=e1021]:
+                      - text: "1.0"
+                      - img "Cryptic Key" [ref=e1022]
+                  - cell "+46%" [ref=e1023]:
+                    - generic [ref=e1024]:
+                      - img [ref=e1026]
+                      - generic [ref=e1030]: +46%
+                  - cell "84 Divine Orb" [ref=e1031]:
+                    - generic [ref=e1033]:
+                      - generic [ref=e1034]: "84"
+                      - img "Divine Orb" [ref=e1035]
+                  - cell "53 Exalted Orb" [ref=e1036]:
+                    - generic [ref=e1037]:
+                      - text: "53"
+                      - img "Exalted Orb" [ref=e1038]
+                  - cell [ref=e1039]:
+                    - img [ref=e1040]
+                  - cell "1.0 Cryptic Key" [ref=e1043]:
+                    - generic [ref=e1044]:
+                      - text: "1.0"
+                      - img "Cryptic Key" [ref=e1045]
+                - row "Ancient Infuser wiki 1.7 Chaos Orb 1.0 Ancient Infuser +60% 144 Divine Orb 37 Exalted Orb 1.0 Ancient Infuser" [ref=e1046]:
+                  - cell "Ancient Infuser wiki" [ref=e1047]:
+                    - generic [ref=e1049]:
+                      - link "Ancient Infuser" [ref=e1051] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/ancient-infuser
+                        - generic [ref=e1052]: Ancient Infuser
+                      - link "wiki" [ref=e1054] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Ancient_Infuser
+                        - text: wiki
+                        - img [ref=e1055]
+                  - cell "1.7 Chaos Orb" [ref=e1059]:
+                    - generic [ref=e1060]:
+                      - text: "1.7"
+                      - img "Chaos Orb" [ref=e1061]
+                  - cell [ref=e1062]:
+                    - img [ref=e1063]
+                  - cell "1.0 Ancient Infuser" [ref=e1066]:
+                    - generic [ref=e1067]:
+                      - text: "1.0"
+                      - img "Ancient Infuser" [ref=e1068]
+                  - cell "+60%" [ref=e1069]:
+                    - generic [ref=e1070]:
+                      - img [ref=e1072]
+                      - generic [ref=e1076]: +60%
+                  - cell "144 Divine Orb" [ref=e1077]:
+                    - generic [ref=e1079]:
+                      - generic [ref=e1080]: "144"
+                      - img "Divine Orb" [ref=e1081]
+                  - cell "37 Exalted Orb" [ref=e1082]:
+                    - generic [ref=e1083]:
+                      - text: "37"
+                      - img "Exalted Orb" [ref=e1084]
+                  - cell [ref=e1085]:
+                    - img [ref=e1086]
+                  - cell "1.0 Ancient Infuser" [ref=e1089]:
+                    - generic [ref=e1090]:
+                      - text: "1.0"
+                      - img "Ancient Infuser" [ref=e1091]
+                - row "Chaos Orb wiki 1.0 Divine Orb 8.9 Chaos Orb +12% 145k Divine Orb 1.0 Divine Orb 8.9 Chaos Orb" [ref=e1092]:
+                  - cell "Chaos Orb wiki" [ref=e1093]:
+                    - generic [ref=e1095]:
+                      - link "Chaos Orb" [ref=e1097] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/chaos-orb
+                        - generic [ref=e1098]: Chaos Orb
+                      - link "wiki" [ref=e1100] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Chaos_Orb
+                        - text: wiki
+                        - img [ref=e1101]
+                  - cell "1.0 Divine Orb" [ref=e1105]:
+                    - generic [ref=e1106]:
+                      - text: "1.0"
+                      - img "Divine Orb" [ref=e1107]
+                  - cell [ref=e1108]:
+                    - img [ref=e1109]
+                  - cell "8.9 Chaos Orb" [ref=e1112]:
+                    - generic [ref=e1113]:
+                      - text: "8.9"
+                      - img "Chaos Orb" [ref=e1114]
+                  - cell "+12%" [ref=e1115]:
+                    - generic [ref=e1116]:
+                      - img [ref=e1118]
+                      - generic [ref=e1122]: +12%
+                  - cell "145k Divine Orb" [ref=e1123]:
+                    - generic [ref=e1125]:
+                      - generic [ref=e1126]: 145k
+                      - img "Divine Orb" [ref=e1127]
+                  - cell "1.0 Divine Orb" [ref=e1128]:
+                    - generic [ref=e1129]:
+                      - text: "1.0"
+                      - img "Divine Orb" [ref=e1130]
+                  - cell [ref=e1131]:
+                    - img [ref=e1132]
+                  - cell "8.9 Chaos Orb" [ref=e1135]:
+                    - generic [ref=e1136]:
+                      - text: "8.9"
+                      - img "Chaos Orb" [ref=e1137]
+                - row "Perfect Regal Orb wiki 1.0 Chaos Orb 1.4 Perfect Regal Orb -10% 346 Divine Orb 16 Exalted Orb 1.0 Perfect Regal Orb" [ref=e1138]:
+                  - cell "Perfect Regal Orb wiki" [ref=e1139]:
+                    - generic [ref=e1141]:
+                      - link "Perfect Regal Orb" [ref=e1143] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/perfect-regal-orb
+                        - generic [ref=e1144]: Perfect Regal Orb
+                      - link "wiki" [ref=e1146] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Perfect_Regal Orb
+                        - text: wiki
+                        - img [ref=e1147]
+                  - cell "1.0 Chaos Orb" [ref=e1151]:
+                    - generic [ref=e1152]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1153]
+                  - cell [ref=e1154]:
+                    - img [ref=e1155]
+                  - cell "1.4 Perfect Regal Orb" [ref=e1158]:
+                    - generic [ref=e1159]:
+                      - text: "1.4"
+                      - img "Perfect Regal Orb" [ref=e1160]
+                  - cell "-10%" [ref=e1161]:
+                    - generic [ref=e1162]:
+                      - img [ref=e1164]
+                      - generic [ref=e1168]: "-10%"
+                  - cell "346 Divine Orb" [ref=e1169]:
+                    - generic [ref=e1171]:
+                      - generic [ref=e1172]: "346"
+                      - img "Divine Orb" [ref=e1173]
+                  - cell "16 Exalted Orb" [ref=e1174]:
+                    - generic [ref=e1175]:
+                      - text: "16"
+                      - img "Exalted Orb" [ref=e1176]
+                  - cell [ref=e1177]:
+                    - img [ref=e1178]
+                  - cell "1.0 Perfect Regal Orb" [ref=e1181]:
+                    - generic [ref=e1182]:
+                      - text: "1.0"
+                      - img "Perfect Regal Orb" [ref=e1183]
+                - row "Perfect Orb of Augmentation wiki 1.0 Chaos Orb 2.0 Perfect Orb of Augmentation -16% 1.2k Divine Orb 1.0 Divine Orb 18 Perfect Orb of Augmentation" [ref=e1184]:
+                  - cell "Perfect Orb of Augmentation wiki" [ref=e1185]:
+                    - generic [ref=e1187]:
+                      - link "Perfect Orb of Augmentation" [ref=e1189] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/perfect-orb-of-augmentation
+                        - generic [ref=e1190]: Perfect Orb of Augmentation
+                      - link "wiki" [ref=e1192] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Perfect_Orb of Augmentation
+                        - text: wiki
+                        - img [ref=e1193]
+                  - cell "1.0 Chaos Orb" [ref=e1197]:
+                    - generic [ref=e1198]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1199]
+                  - cell [ref=e1200]:
+                    - img [ref=e1201]
+                  - cell "2.0 Perfect Orb of Augmentation" [ref=e1204]:
+                    - generic [ref=e1205]:
+                      - text: "2.0"
+                      - img "Perfect Orb of Augmentation" [ref=e1206]
+                  - cell "-16%" [ref=e1207]:
+                    - generic [ref=e1208]:
+                      - img [ref=e1210]
+                      - generic [ref=e1214]: "-16%"
+                  - cell "1.2k Divine Orb" [ref=e1215]:
+                    - generic [ref=e1217]:
+                      - generic [ref=e1218]: 1.2k
+                      - img "Divine Orb" [ref=e1219]
+                  - cell "1.0 Divine Orb" [ref=e1220]:
+                    - generic [ref=e1221]:
+                      - text: "1.0"
+                      - img "Divine Orb" [ref=e1222]
+                  - cell [ref=e1223]:
+                    - img [ref=e1224]
+                  - cell "18 Perfect Orb of Augmentation" [ref=e1227]:
+                    - generic [ref=e1228]:
+                      - text: "18"
+                      - img "Perfect Orb of Augmentation" [ref=e1229]
+                - row "Perfect Orb of Transmutation wiki 1.0 Chaos Orb 2.2 Perfect Orb of Transmutation -40% 487 Divine Orb 10 Exalted Orb 1.0 Perfect Orb of Transmutation" [ref=e1230]:
+                  - cell "Perfect Orb of Transmutation wiki" [ref=e1231]:
+                    - generic [ref=e1233]:
+                      - link "Perfect Orb of Transmutation" [ref=e1235] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/perfect-orb-of-transmutation
+                        - generic [ref=e1236]: Perfect Orb of Transmutation
+                      - link "wiki" [ref=e1238] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Perfect_Orb of Transmutation
+                        - text: wiki
+                        - img [ref=e1239]
+                  - cell "1.0 Chaos Orb" [ref=e1243]:
+                    - generic [ref=e1244]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1245]
+                  - cell [ref=e1246]:
+                    - img [ref=e1247]
+                  - cell "2.2 Perfect Orb of Transmutation" [ref=e1250]:
+                    - generic [ref=e1251]:
+                      - text: "2.2"
+                      - img "Perfect Orb of Transmutation" [ref=e1252]
+                  - cell "-40%" [ref=e1253]:
+                    - generic [ref=e1254]:
+                      - img [ref=e1256]
+                      - generic [ref=e1260]: "-40%"
+                  - cell "487 Divine Orb" [ref=e1261]:
+                    - generic [ref=e1263]:
+                      - generic [ref=e1264]: "487"
+                      - img "Divine Orb" [ref=e1265]
+                  - cell "10 Exalted Orb" [ref=e1266]:
+                    - generic [ref=e1267]:
+                      - text: "10"
+                      - img "Exalted Orb" [ref=e1268]
+                  - cell [ref=e1269]:
+                    - img [ref=e1270]
+                  - cell "1.0 Perfect Orb of Transmutation" [ref=e1273]:
+                    - generic [ref=e1274]:
+                      - text: "1.0"
+                      - img "Perfect Orb of Transmutation" [ref=e1275]
+                - row "Orb of Chance wiki 1.0 Chaos Orb 2.5 Orb of Chance -58% 1.3k Divine Orb 1.0 Divine Orb 22 Orb of Chance" [ref=e1276]:
+                  - cell "Orb of Chance wiki" [ref=e1277]:
+                    - generic [ref=e1279]:
+                      - link "Orb of Chance" [ref=e1281] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/orb-of-chance
+                        - generic [ref=e1282]: Orb of Chance
+                      - link "wiki" [ref=e1284] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Orb_of Chance
+                        - text: wiki
+                        - img [ref=e1285]
+                  - cell "1.0 Chaos Orb" [ref=e1289]:
+                    - generic [ref=e1290]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1291]
+                  - cell [ref=e1292]:
+                    - img [ref=e1293]
+                  - cell "2.5 Orb of Chance" [ref=e1296]:
+                    - generic [ref=e1297]:
+                      - text: "2.5"
+                      - img "Orb of Chance" [ref=e1298]
+                  - cell "-58%" [ref=e1299]:
+                    - generic [ref=e1300]:
+                      - img [ref=e1302]
+                      - generic [ref=e1306]: "-58%"
+                  - cell "1.3k Divine Orb" [ref=e1307]:
+                    - generic [ref=e1309]:
+                      - generic [ref=e1310]: 1.3k
+                      - img "Divine Orb" [ref=e1311]
+                  - cell "1.0 Divine Orb" [ref=e1312]:
+                    - generic [ref=e1313]:
+                      - text: "1.0"
+                      - img "Divine Orb" [ref=e1314]
+                  - cell [ref=e1315]:
+                    - img [ref=e1316]
+                  - cell "22 Orb of Chance" [ref=e1319]:
+                    - generic [ref=e1320]:
+                      - text: "22"
+                      - img "Orb of Chance" [ref=e1321]
+                - row "Greater Exalted Orb wiki 1.0 Chaos Orb 6.7 Greater Exalted Orb -43% 531 Divine Orb 3.3 Exalted Orb 1.0 Greater Exalted Orb" [ref=e1322]:
+                  - cell "Greater Exalted Orb wiki" [ref=e1323]:
+                    - generic [ref=e1325]:
+                      - link "Greater Exalted Orb" [ref=e1327] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/greater-exalted-orb
+                        - generic [ref=e1328]: Greater Exalted Orb
+                      - link "wiki" [ref=e1330] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Greater_Exalted Orb
+                        - text: wiki
+                        - img [ref=e1331]
+                  - cell "1.0 Chaos Orb" [ref=e1335]:
+                    - generic [ref=e1336]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1337]
+                  - cell [ref=e1338]:
+                    - img [ref=e1339]
+                  - cell "6.7 Greater Exalted Orb" [ref=e1342]:
+                    - generic [ref=e1343]:
+                      - text: "6.7"
+                      - img "Greater Exalted Orb" [ref=e1344]
+                  - cell "-43%" [ref=e1345]:
+                    - generic [ref=e1346]:
+                      - img [ref=e1348]
+                      - generic [ref=e1352]: "-43%"
+                  - cell "531 Divine Orb" [ref=e1353]:
+                    - generic [ref=e1355]:
+                      - generic [ref=e1356]: "531"
+                      - img "Divine Orb" [ref=e1357]
+                  - cell "3.3 Exalted Orb" [ref=e1358]:
+                    - generic [ref=e1359]:
+                      - text: "3.3"
+                      - img "Exalted Orb" [ref=e1360]
+                  - cell [ref=e1361]:
+                    - img [ref=e1362]
+                  - cell "1.0 Greater Exalted Orb" [ref=e1365]:
+                    - generic [ref=e1366]:
+                      - text: "1.0"
+                      - img "Greater Exalted Orb" [ref=e1367]
+                - row "Vaal Orb wiki 1.0 Chaos Orb 12 Vaal Orb -21% 1.0k Divine Orb 1.9 Exalted Orb 1.0 Vaal Orb" [ref=e1368]:
+                  - cell "Vaal Orb wiki" [ref=e1369]:
+                    - generic [ref=e1371]:
+                      - link "Vaal Orb" [ref=e1373] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/vaal-orb
+                        - generic [ref=e1374]: Vaal Orb
+                      - link "wiki" [ref=e1376] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Vaal_Orb
+                        - text: wiki
+                        - img [ref=e1377]
+                  - cell "1.0 Chaos Orb" [ref=e1381]:
+                    - generic [ref=e1382]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1383]
+                  - cell [ref=e1384]:
+                    - img [ref=e1385]
+                  - cell "12 Vaal Orb" [ref=e1388]:
+                    - generic [ref=e1389]:
+                      - text: "12"
+                      - img "Vaal Orb" [ref=e1390]
+                  - cell "-21%" [ref=e1391]:
+                    - generic [ref=e1392]:
+                      - img [ref=e1394]
+                      - generic [ref=e1398]: "-21%"
+                  - cell "1.0k Divine Orb" [ref=e1399]:
+                    - generic [ref=e1401]:
+                      - generic [ref=e1402]: 1.0k
+                      - img "Divine Orb" [ref=e1403]
+                  - cell "1.9 Exalted Orb" [ref=e1404]:
+                    - generic [ref=e1405]:
+                      - text: "1.9"
+                      - img "Exalted Orb" [ref=e1406]
+                  - cell [ref=e1407]:
+                    - img [ref=e1408]
+                  - cell "1.0 Vaal Orb" [ref=e1411]:
+                    - generic [ref=e1412]:
+                      - text: "1.0"
+                      - img "Vaal Orb" [ref=e1413]
+                - row "Arcanist's Etcher wiki 1.0 Chaos Orb 18 Arcanist's Etcher +4% 112 Divine Orb 1.2 Exalted Orb 1.0 Arcanist's Etcher" [ref=e1414]:
+                  - cell "Arcanist's Etcher wiki" [ref=e1415]:
+                    - generic [ref=e1417]:
+                      - link "Arcanist's Etcher" [ref=e1419] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/arcanists-etcher
+                        - generic [ref=e1420]: Arcanist's Etcher
+                      - link "wiki" [ref=e1422] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Arcanist's_Etcher
+                        - text: wiki
+                        - img [ref=e1423]
+                  - cell "1.0 Chaos Orb" [ref=e1427]:
+                    - generic [ref=e1428]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1429]
+                  - cell [ref=e1430]:
+                    - img [ref=e1431]
+                  - cell "18 Arcanist's Etcher" [ref=e1434]:
+                    - generic [ref=e1435]:
+                      - text: "18"
+                      - img "Arcanist's Etcher" [ref=e1436]
+                  - cell "+4%" [ref=e1437]:
+                    - generic [ref=e1438]:
+                      - img [ref=e1440]
+                      - generic [ref=e1444]: +4%
+                  - cell "112 Divine Orb" [ref=e1445]:
+                    - generic [ref=e1447]:
+                      - generic [ref=e1448]: "112"
+                      - img "Divine Orb" [ref=e1449]
+                  - cell "1.2 Exalted Orb" [ref=e1450]:
+                    - generic [ref=e1451]:
+                      - text: "1.2"
+                      - img "Exalted Orb" [ref=e1452]
+                  - cell [ref=e1453]:
+                    - img [ref=e1454]
+                  - cell "1.0 Arcanist's Etcher" [ref=e1457]:
+                    - generic [ref=e1458]:
+                      - text: "1.0"
+                      - img "Arcanist's Etcher" [ref=e1459]
+                - row "Greater Regal Orb wiki 1.0 Chaos Orb 19 Greater Regal Orb +34% 75 Divine Orb 1.1 Exalted Orb 1.0 Greater Regal Orb" [ref=e1460]:
+                  - cell "Greater Regal Orb wiki" [ref=e1461]:
+                    - generic [ref=e1463]:
+                      - link "Greater Regal Orb" [ref=e1465] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/greater-regal-orb
+                        - generic [ref=e1466]: Greater Regal Orb
+                      - link "wiki" [ref=e1468] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Greater_Regal Orb
+                        - text: wiki
+                        - img [ref=e1469]
+                  - cell "1.0 Chaos Orb" [ref=e1473]:
+                    - generic [ref=e1474]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1475]
+                  - cell [ref=e1476]:
+                    - img [ref=e1477]
+                  - cell "19 Greater Regal Orb" [ref=e1480]:
+                    - generic [ref=e1481]:
+                      - text: "19"
+                      - img "Greater Regal Orb" [ref=e1482]
+                  - cell "+34%" [ref=e1483]:
+                    - generic [ref=e1484]:
+                      - img [ref=e1486]
+                      - generic [ref=e1490]: +34%
+                  - cell "75 Divine Orb" [ref=e1491]:
+                    - generic [ref=e1493]:
+                      - generic [ref=e1494]: "75"
+                      - img "Divine Orb" [ref=e1495]
+                  - cell "1.1 Exalted Orb" [ref=e1496]:
+                    - generic [ref=e1497]:
+                      - text: "1.1"
+                      - img "Exalted Orb" [ref=e1498]
+                  - cell [ref=e1499]:
+                    - img [ref=e1500]
+                  - cell "1.0 Greater Regal Orb" [ref=e1503]:
+                    - generic [ref=e1504]:
+                      - text: "1.0"
+                      - img "Greater Regal Orb" [ref=e1505]
+                - row "Exalted Orb wiki 1.0 Chaos Orb 22 Exalted Orb -33% 122k Divine Orb 1.0 Divine Orb 195 Exalted Orb" [ref=e1506]:
+                  - cell "Exalted Orb wiki" [ref=e1507]:
+                    - generic [ref=e1509]:
+                      - link "Exalted Orb" [ref=e1511] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/exalted-orb
+                        - generic [ref=e1512]: Exalted Orb
+                      - link "wiki" [ref=e1514] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Exalted_Orb
+                        - text: wiki
+                        - img [ref=e1515]
+                  - cell "1.0 Chaos Orb" [ref=e1519]:
+                    - generic [ref=e1520]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1521]
+                  - cell [ref=e1522]:
+                    - img [ref=e1523]
+                  - cell "22 Exalted Orb" [ref=e1526]:
+                    - generic [ref=e1527]:
+                      - text: "22"
+                      - img "Exalted Orb" [ref=e1528]
+                  - cell "-33%" [ref=e1529]:
+                    - generic [ref=e1530]:
+                      - img [ref=e1532]
+                      - generic [ref=e1536]: "-33%"
+                  - cell "122k Divine Orb" [ref=e1537]:
+                    - generic [ref=e1539]:
+                      - generic [ref=e1540]: 122k
+                      - img "Divine Orb" [ref=e1541]
+                  - cell "1.0 Divine Orb" [ref=e1542]:
+                    - generic [ref=e1543]:
+                      - text: "1.0"
+                      - img "Divine Orb" [ref=e1544]
+                  - cell [ref=e1545]:
+                    - img [ref=e1546]
+                  - cell "195 Exalted Orb" [ref=e1549]:
+                    - generic [ref=e1550]:
+                      - text: "195"
+                      - img "Exalted Orb" [ref=e1551]
+                - row "Gemcutter's Prism wiki 1.0 Chaos Orb 23 Gemcutter's Prism -29% 242 Divine Orb 1.0 Exalted Orb 1.0 Gemcutter's Prism" [ref=e1552]:
+                  - cell "Gemcutter's Prism wiki" [ref=e1553]:
+                    - generic [ref=e1555]:
+                      - link "Gemcutter's Prism" [ref=e1557] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/gemcutters-prism
+                        - generic [ref=e1558]: Gemcutter's Prism
+                      - link "wiki" [ref=e1560] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Gemcutter's_Prism
+                        - text: wiki
+                        - img [ref=e1561]
+                  - cell "1.0 Chaos Orb" [ref=e1565]:
+                    - generic [ref=e1566]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1567]
+                  - cell [ref=e1568]:
+                    - img [ref=e1569]
+                  - cell "23 Gemcutter's Prism" [ref=e1572]:
+                    - generic [ref=e1573]:
+                      - text: "23"
+                      - img "Gemcutter's Prism" [ref=e1574]
+                  - cell "-29%" [ref=e1575]:
+                    - generic [ref=e1576]:
+                      - img [ref=e1578]
+                      - generic [ref=e1582]: "-29%"
+                  - cell "242 Divine Orb" [ref=e1583]:
+                    - generic [ref=e1585]:
+                      - generic [ref=e1586]: "242"
+                      - img "Divine Orb" [ref=e1587]
+                  - cell "1.0 Exalted Orb" [ref=e1588]:
+                    - generic [ref=e1589]:
+                      - text: "1.0"
+                      - img "Exalted Orb" [ref=e1590]
+                  - cell [ref=e1591]:
+                    - img [ref=e1592]
+                  - cell "1.0 Gemcutter's Prism" [ref=e1595]:
+                    - generic [ref=e1596]:
+                      - text: "1.0"
+                      - img "Gemcutter's Prism" [ref=e1597]
+                - row "Vaal Arcanist's Infuser wiki 1.0 Chaos Orb 28 Vaal Arcanist's Infuser -35% 1.4 Divine Orb 1.0 Exalted Orb 1.3 Vaal Arcanist's Infuser" [ref=e1598]:
+                  - cell "Vaal Arcanist's Infuser wiki" [ref=e1599]:
+                    - generic [ref=e1601]:
+                      - link "Vaal Arcanist's Infuser" [ref=e1603] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/vaal-arcanists-infuser
+                        - generic [ref=e1604]: Vaal Arcanist's Infuser
+                      - link "wiki" [ref=e1606] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Vaal_Arcanist's Infuser
+                        - text: wiki
+                        - img [ref=e1607]
+                  - cell "1.0 Chaos Orb" [ref=e1611]:
+                    - generic [ref=e1612]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1613]
+                  - cell [ref=e1614]:
+                    - img [ref=e1615]
+                  - cell "28 Vaal Arcanist's Infuser" [ref=e1618]:
+                    - generic [ref=e1619]:
+                      - text: "28"
+                      - img "Vaal Arcanist's Infuser" [ref=e1620]
+                  - cell "-35%" [ref=e1621]:
+                    - generic [ref=e1622]:
+                      - img [ref=e1624]
+                      - generic [ref=e1628]: "-35%"
+                  - cell "1.4 Divine Orb" [ref=e1629]:
+                    - generic [ref=e1631]:
+                      - generic [ref=e1632]: "1.4"
+                      - img "Divine Orb" [ref=e1633]
+                  - cell "1.0 Exalted Orb" [ref=e1634]:
+                    - generic [ref=e1635]:
+                      - text: "1.0"
+                      - img "Exalted Orb" [ref=e1636]
+                  - cell [ref=e1637]:
+                    - img [ref=e1638]
+                  - cell "1.3 Vaal Arcanist's Infuser" [ref=e1641]:
+                    - generic [ref=e1642]:
+                      - text: "1.3"
+                      - img "Vaal Arcanist's Infuser" [ref=e1643]
+                - row "Greater Jeweller's Orb wiki 1.0 Chaos Orb 30 Greater Jeweller's Orb +72% 27 Divine Orb 1.0 Exalted Orb 1.4 Greater Jeweller's Orb" [ref=e1644]:
+                  - cell "Greater Jeweller's Orb wiki" [ref=e1645]:
+                    - generic [ref=e1647]:
+                      - link "Greater Jeweller's Orb" [ref=e1649] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/greater-jewellers-orb
+                        - generic [ref=e1650]: Greater Jeweller's Orb
+                      - link "wiki" [ref=e1652] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Greater_Jeweller's Orb
+                        - text: wiki
+                        - img [ref=e1653]
+                  - cell "1.0 Chaos Orb" [ref=e1657]:
+                    - generic [ref=e1658]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1659]
+                  - cell [ref=e1660]:
+                    - img [ref=e1661]
+                  - cell "30 Greater Jeweller's Orb" [ref=e1664]:
+                    - generic [ref=e1665]:
+                      - text: "30"
+                      - img "Greater Jeweller's Orb" [ref=e1666]
+                  - cell "+72%" [ref=e1667]:
+                    - generic [ref=e1668]:
+                      - img [ref=e1670]
+                      - generic [ref=e1674]: +72%
+                  - cell "27 Divine Orb" [ref=e1675]:
+                    - generic [ref=e1677]:
+                      - generic [ref=e1678]: "27"
+                      - img "Divine Orb" [ref=e1679]
+                  - cell "1.0 Exalted Orb" [ref=e1680]:
+                    - generic [ref=e1681]:
+                      - text: "1.0"
+                      - img "Exalted Orb" [ref=e1682]
+                  - cell [ref=e1683]:
+                    - img [ref=e1684]
+                  - cell "1.4 Greater Jeweller's Orb" [ref=e1687]:
+                    - generic [ref=e1688]:
+                      - text: "1.4"
+                      - img "Greater Jeweller's Orb" [ref=e1689]
+                - row "Glassblower's Bauble wiki 1.0 Chaos Orb 30 Glassblower's Bauble -32% 50 Divine Orb 1.0 Exalted Orb 1.4 Glassblower's Bauble" [ref=e1690]:
+                  - cell "Glassblower's Bauble wiki" [ref=e1691]:
+                    - generic [ref=e1693]:
+                      - link "Glassblower's Bauble" [ref=e1695] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/glassblowers-bauble
+                        - generic [ref=e1696]: Glassblower's Bauble
+                      - link "wiki" [ref=e1698] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Glassblower's_Bauble
+                        - text: wiki
+                        - img [ref=e1699]
+                  - cell "1.0 Chaos Orb" [ref=e1703]:
+                    - generic [ref=e1704]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1705]
+                  - cell [ref=e1706]:
+                    - img [ref=e1707]
+                  - cell "30 Glassblower's Bauble" [ref=e1710]:
+                    - generic [ref=e1711]:
+                      - text: "30"
+                      - img "Glassblower's Bauble" [ref=e1712]
+                  - cell "-32%" [ref=e1713]:
+                    - generic [ref=e1714]:
+                      - img [ref=e1716]
+                      - generic [ref=e1720]: "-32%"
+                  - cell "50 Divine Orb" [ref=e1721]:
+                    - generic [ref=e1723]:
+                      - generic [ref=e1724]: "50"
+                      - img "Divine Orb" [ref=e1725]
+                  - cell "1.0 Exalted Orb" [ref=e1726]:
+                    - generic [ref=e1727]:
+                      - text: "1.0"
+                      - img "Exalted Orb" [ref=e1728]
+                  - cell [ref=e1729]:
+                    - img [ref=e1730]
+                  - cell "1.4 Glassblower's Bauble" [ref=e1733]:
+                    - generic [ref=e1734]:
+                      - text: "1.4"
+                      - img "Glassblower's Bauble" [ref=e1735]
+                - row "Artificer's Shard wiki 1.0 Chaos Orb 30 Artificer's Shard +209% 0.1 Divine Orb 1.0 Exalted Orb 1.4 Artificer's Shard" [ref=e1736]:
+                  - cell "Artificer's Shard wiki" [ref=e1737]:
+                    - generic [ref=e1739]:
+                      - link "Artificer's Shard" [ref=e1741] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/artificers-shard
+                        - generic [ref=e1742]: Artificer's Shard
+                      - link "wiki" [ref=e1744] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Artificer's_Shard
+                        - text: wiki
+                        - img [ref=e1745]
+                  - cell "1.0 Chaos Orb" [ref=e1749]:
+                    - generic [ref=e1750]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1751]
+                  - cell [ref=e1752]:
+                    - img [ref=e1753]
+                  - cell "30 Artificer's Shard" [ref=e1756]:
+                    - generic [ref=e1757]:
+                      - text: "30"
+                      - img "Artificer's Shard" [ref=e1758]
+                  - cell "+209%" [ref=e1759]:
+                    - generic [ref=e1760]:
+                      - img [ref=e1762]
+                      - generic [ref=e1766]: +209%
+                  - cell "0.1 Divine Orb" [ref=e1767]:
+                    - generic [ref=e1769]:
+                      - generic [ref=e1770]: "0.1"
+                      - img "Divine Orb" [ref=e1771]
+                  - cell "1.0 Exalted Orb" [ref=e1772]:
+                    - generic [ref=e1773]:
+                      - text: "1.0"
+                      - img "Exalted Orb" [ref=e1774]
+                  - cell [ref=e1775]:
+                    - img [ref=e1776]
+                  - cell "1.4 Artificer's Shard" [ref=e1779]:
+                    - generic [ref=e1780]:
+                      - text: "1.4"
+                      - img "Artificer's Shard" [ref=e1781]
+                - row "Chance Shard wiki 1.0 Chaos Orb 31 Chance Shard -37% 1.3 Divine Orb 1.0 Exalted Orb 1.4 Chance Shard" [ref=e1782]:
+                  - cell "Chance Shard wiki" [ref=e1783]:
+                    - generic [ref=e1785]:
+                      - link "Chance Shard" [ref=e1787] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/chance-shard
+                        - generic [ref=e1788]: Chance Shard
+                      - link "wiki" [ref=e1790] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Chance_Shard
+                        - text: wiki
+                        - img [ref=e1791]
+                  - cell "1.0 Chaos Orb" [ref=e1795]:
+                    - generic [ref=e1796]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1797]
+                  - cell [ref=e1798]:
+                    - img [ref=e1799]
+                  - cell "31 Chance Shard" [ref=e1802]:
+                    - generic [ref=e1803]:
+                      - text: "31"
+                      - img "Chance Shard" [ref=e1804]
+                  - cell "-37%" [ref=e1805]:
+                    - generic [ref=e1806]:
+                      - img [ref=e1808]
+                      - generic [ref=e1812]: "-37%"
+                  - cell "1.3 Divine Orb" [ref=e1813]:
+                    - generic [ref=e1815]:
+                      - generic [ref=e1816]: "1.3"
+                      - img "Divine Orb" [ref=e1817]
+                  - cell "1.0 Exalted Orb" [ref=e1818]:
+                    - generic [ref=e1819]:
+                      - text: "1.0"
+                      - img "Exalted Orb" [ref=e1820]
+                  - cell [ref=e1821]:
+                    - img [ref=e1822]
+                  - cell "1.4 Chance Shard" [ref=e1825]:
+                    - generic [ref=e1826]:
+                      - text: "1.4"
+                      - img "Chance Shard" [ref=e1827]
+                - row "Armourer's Scrap wiki 1.0 Chaos Orb 32 Armourer's Scrap -14% 457 Divine Orb 1.0 Exalted Orb 1.4 Armourer's Scrap" [ref=e1828]:
+                  - cell "Armourer's Scrap wiki" [ref=e1829]:
+                    - generic [ref=e1831]:
+                      - link "Armourer's Scrap" [ref=e1833] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/armourers-scrap
+                        - generic [ref=e1834]: Armourer's Scrap
+                      - link "wiki" [ref=e1836] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Armourer's_Scrap
+                        - text: wiki
+                        - img [ref=e1837]
+                  - cell "1.0 Chaos Orb" [ref=e1841]:
+                    - generic [ref=e1842]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1843]
+                  - cell [ref=e1844]:
+                    - img [ref=e1845]
+                  - cell "32 Armourer's Scrap" [ref=e1848]:
+                    - generic [ref=e1849]:
+                      - text: "32"
+                      - img "Armourer's Scrap" [ref=e1850]
+                  - cell "-14%" [ref=e1851]:
+                    - generic [ref=e1852]:
+                      - img [ref=e1854]
+                      - generic [ref=e1858]: "-14%"
+                  - cell "457 Divine Orb" [ref=e1859]:
+                    - generic [ref=e1861]:
+                      - generic [ref=e1862]: "457"
+                      - img "Divine Orb" [ref=e1863]
+                  - cell "1.0 Exalted Orb" [ref=e1864]:
+                    - generic [ref=e1865]:
+                      - text: "1.0"
+                      - img "Exalted Orb" [ref=e1866]
+                  - cell [ref=e1867]:
+                    - img [ref=e1868]
+                  - cell "1.4 Armourer's Scrap" [ref=e1871]:
+                    - generic [ref=e1872]:
+                      - text: "1.4"
+                      - img "Armourer's Scrap" [ref=e1873]
+                - row "Orb of Alchemy wiki 1.0 Chaos Orb 43 Orb of Alchemy +15% 274 Divine Orb 1.0 Exalted Orb 1.9 Orb of Alchemy" [ref=e1874]:
+                  - cell "Orb of Alchemy wiki" [ref=e1875]:
+                    - generic [ref=e1877]:
+                      - link "Orb of Alchemy" [ref=e1879] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/orb-of-alchemy
+                        - generic [ref=e1880]: Orb of Alchemy
+                      - link "wiki" [ref=e1882] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Orb_of Alchemy
+                        - text: wiki
+                        - img [ref=e1883]
+                  - cell "1.0 Chaos Orb" [ref=e1887]:
+                    - generic [ref=e1888]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1889]
+                  - cell [ref=e1890]:
+                    - img [ref=e1891]
+                  - cell "43 Orb of Alchemy" [ref=e1894]:
+                    - generic [ref=e1895]:
+                      - text: "43"
+                      - img "Orb of Alchemy" [ref=e1896]
+                  - cell "+15%" [ref=e1897]:
+                    - generic [ref=e1898]:
+                      - img [ref=e1900]
+                      - generic [ref=e1904]: +15%
+                  - cell "274 Divine Orb" [ref=e1905]:
+                    - generic [ref=e1907]:
+                      - generic [ref=e1908]: "274"
+                      - img "Divine Orb" [ref=e1909]
+                  - cell "1.0 Exalted Orb" [ref=e1910]:
+                    - generic [ref=e1911]:
+                      - text: "1.0"
+                      - img "Exalted Orb" [ref=e1912]
+                  - cell [ref=e1913]:
+                    - img [ref=e1914]
+                  - cell "1.9 Orb of Alchemy" [ref=e1917]:
+                    - generic [ref=e1918]:
+                      - text: "1.9"
+                      - img "Orb of Alchemy" [ref=e1919]
+                - row "Artificer's Orb wiki 1.0 Chaos Orb 54 Artificer's Orb +146% 26 Divine Orb 1.0 Exalted Orb 2.5 Artificer's Orb" [ref=e1920]:
+                  - cell "Artificer's Orb wiki" [ref=e1921]:
+                    - generic [ref=e1923]:
+                      - link "Artificer's Orb" [ref=e1925] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/artificers-orb
+                        - generic [ref=e1926]: Artificer's Orb
+                      - link "wiki" [ref=e1928] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Artificer's_Orb
+                        - text: wiki
+                        - img [ref=e1929]
+                  - cell "1.0 Chaos Orb" [ref=e1933]:
+                    - generic [ref=e1934]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1935]
+                  - cell [ref=e1936]:
+                    - img [ref=e1937]
+                  - cell "54 Artificer's Orb" [ref=e1940]:
+                    - generic [ref=e1941]:
+                      - text: "54"
+                      - img "Artificer's Orb" [ref=e1942]
+                  - cell "+146%" [ref=e1943]:
+                    - generic [ref=e1944]:
+                      - img [ref=e1946]
+                      - generic [ref=e1950]: +146%
+                  - cell "26 Divine Orb" [ref=e1951]:
+                    - generic [ref=e1953]:
+                      - generic [ref=e1954]: "26"
+                      - img "Divine Orb" [ref=e1955]
+                  - cell "1.0 Exalted Orb" [ref=e1956]:
+                    - generic [ref=e1957]:
+                      - text: "1.0"
+                      - img "Exalted Orb" [ref=e1958]
+                  - cell [ref=e1959]:
+                    - img [ref=e1960]
+                  - cell "2.5 Artificer's Orb" [ref=e1963]:
+                    - generic [ref=e1964]:
+                      - text: "2.5"
+                      - img "Artificer's Orb" [ref=e1965]
+                - row "Regal Orb wiki 1.0 Chaos Orb 64 Regal Orb +81% 67 Divine Orb 1.0 Exalted Orb 2.9 Regal Orb" [ref=e1966]:
+                  - cell "Regal Orb wiki" [ref=e1967]:
+                    - generic [ref=e1969]:
+                      - link "Regal Orb" [ref=e1971] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/regal-orb
+                        - generic [ref=e1972]: Regal Orb
+                      - link "wiki" [ref=e1974] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Regal_Orb
+                        - text: wiki
+                        - img [ref=e1975]
+                  - cell "1.0 Chaos Orb" [ref=e1979]:
+                    - generic [ref=e1980]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e1981]
+                  - cell [ref=e1982]:
+                    - img [ref=e1983]
+                  - cell "64 Regal Orb" [ref=e1986]:
+                    - generic [ref=e1987]:
+                      - text: "64"
+                      - img "Regal Orb" [ref=e1988]
+                  - cell "+81%" [ref=e1989]:
+                    - generic [ref=e1990]:
+                      - img [ref=e1992]
+                      - generic [ref=e1996]: +81%
+                  - cell "67 Divine Orb" [ref=e1997]:
+                    - generic [ref=e1999]:
+                      - generic [ref=e2000]: "67"
+                      - img "Divine Orb" [ref=e2001]
+                  - cell "1.0 Exalted Orb" [ref=e2002]:
+                    - generic [ref=e2003]:
+                      - text: "1.0"
+                      - img "Exalted Orb" [ref=e2004]
+                  - cell [ref=e2005]:
+                    - img [ref=e2006]
+                  - cell "2.9 Regal Orb" [ref=e2009]:
+                    - generic [ref=e2010]:
+                      - text: "2.9"
+                      - img "Regal Orb" [ref=e2011]
+                - row "Blacksmith's Whetstone wiki 1.0 Chaos Orb 75 Blacksmith's Whetstone -21% 61 Divine Orb 1.0 Exalted Orb 3.4 Blacksmith's Whetstone" [ref=e2012]:
+                  - cell "Blacksmith's Whetstone wiki" [ref=e2013]:
+                    - generic [ref=e2015]:
+                      - link "Blacksmith's Whetstone" [ref=e2017] [cursor=pointer]:
+                        - /url: /poe2/economy/runesofaldur/currency/blacksmiths-whetstone
+                        - generic [ref=e2018]: Blacksmith's Whetstone
+                      - link "wiki" [ref=e2020] [cursor=pointer]:
+                        - /url: https://poe2wiki.net/wiki/Blacksmith's_Whetstone
+                        - text: wiki
+                        - img [ref=e2021]
+                  - cell "1.0 Chaos Orb" [ref=e2025]:
+                    - generic [ref=e2026]:
+                      - text: "1.0"
+                      - img "Chaos Orb" [ref=e2027]
+                  - cell [ref=e2028]:
+                    - img [ref=e2029]
+                  - cell "75 Blacksmith's Whetstone" [ref=e2032]:
+                    - generic [ref=e2033]:
+                      - text: "75"
+                      - img "Blacksmith's Whetstone" [ref=e2034]
+                  - cell "-21%" [ref=e2035]:
+                    - generic [ref=e2036]:
+                      - img [ref=e2038]
+                      - generic [ref=e2042]: "-21%"
+                  - cell "61 Divine Orb" [ref=e2043]:
+                    - generic [ref=e2045]:
+                      - generic [ref=e2046]: "61"
+                      - img "Divine Orb" [ref=e2047]
+                  - cell "1.0 Exalted Orb" [ref=e2048]:
+                    - generic [ref=e2049]:
+                      - text: "1.0"
+                      - img "Exalted Orb" [ref=e2050]
+                  - cell [ref=e2051]:
+                    - img [ref=e2052]
+                  - cell "3.4 Blacksmith's Whetstone" [ref=e2055]:
+                    - generic [ref=e2056]:
+                      - text: "3.4"
+                      - img "Blacksmith's Whetstone" [ref=e2057]
+          - button "Show more" [ref=e2058] [cursor=pointer]
+  - contentinfo [ref=e5]:
+    - generic [ref=e6]:
+      - link "Account" [ref=e8] [cursor=pointer]:
+        - /url: /account
+        - img [ref=e9]
+        - text: Account
+      - generic [ref=e12]:
+        - generic [ref=e13]:
+          - text: Contribute
+          - img [ref=e14]
+        - link "Support the site" [ref=e16] [cursor=pointer]:
+          - /url: /support
+      - generic [ref=e17]:
+        - generic [ref=e18]: About
+        - link "FAQ" [ref=e19] [cursor=pointer]:
+          - /url: /faq
+        - link "Discord" [ref=e20] [cursor=pointer]:
+          - /url: https://discord.gg/7qSRyKdyre
+          - text: Discord
+          - img [ref=e21]
+        - link "Statistics" [ref=e24] [cursor=pointer]:
+          - /url: /stats
+        - link "Data dumps" [ref=e25] [cursor=pointer]:
+          - /url: /poe1/data
+      - generic [ref=e26]:
+        - generic [ref=e27]: Resources
+        - link "Privacy Policy" [ref=e28] [cursor=pointer]:
+          - /url: /privacy
+        - paragraph [ref=e2059]:
+          - link "Ads-Powered-by-playwire-2021-standalone-small-white-300px" [ref=e2060] [cursor=pointer]:
+            - /url: https://www.playwire.com/contact-direct-sales
+            - img "Ads-Powered-by-playwire-2021-standalone-small-white-300px" [ref=e2061]
+        - paragraph [ref=e29]:
+          - link "Advertise on this site" [ref=e30] [cursor=pointer]:
+            - /url: https://www.playwire.com/contact-direct-sales
+    - generic [ref=e32]: poe.ninja is not affiliated with or endorsed by Grinding Gear Games.

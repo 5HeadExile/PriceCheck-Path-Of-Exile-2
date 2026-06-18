@@ -1,39 +1,45 @@
-# Сверка endpoint цен poe.ninja (PoE2)
+# Endpoint цен poe.ninja (PoE2) — подтверждён
 
-Точный API-путь экономики PoE2 на poe.ninja **не задокументирован** и может
-меняться между лигами. Поэтому он вынесен в настройки (`PriceApiBaseUrl`,
-`PriceOverviews` в `config.json`). Ниже — как подобрать рабочий URL и поля.
+Проверено в браузере (DevTools → Network) на лиге **Runes of Aldur** 2026-06-18.
 
-## Как найти URL
+## Рабочий запрос
 
-1. Открой в браузере страницу экономики текущей лиги, например:
-   `https://poe.ninja/poe2/economy/runesofaldur/currency`
-2. Открой DevTools (`F12`) → вкладка **Network** → фильтр **Fetch/XHR**.
-3. Переключи категорию (Currency / Runes / Fragments…) — в списке появится
-   запрос с JSON цен. Скопируй его полный URL и посмотри ответ.
-4. Базовую часть URL (без `leagueName`/`overviewName` или их аналогов) впиши в
-   настройках в поле **«URL цен»**. Имена категорий — в `PriceOverviews`
-   (`config.json`).
+```
+GET https://poe.ninja/poe2/api/economy/exchange/current/overview?league=Runes+of+Aldur&type=Currency
+```
 
-Кандидат по умолчанию (требует проверки):
-`https://poe.ninja/poe2/api/economy/currencyexchange/overview`
-с параметрами `leagueName` и `overviewName`.
+- `league` — имя лиги (пробелы как `+`/`%20`); список лиг: `…/poe2/api/data/index-state`.
+- `type` — категория. `Currency` покрывает орбы (включая Jeweller's/Gemcutter's/
+  Glassblower's, Orb of Transmutation/Augmentation и т.д.).
 
-## Поля ответа
+В приложении это `PriceApiBaseUrl` + `PriceOverviews` (настройки/`config.json`);
+параметры `league`/`type` подставляет `PoeNinjaClient`.
 
-Парсер (`PoeNinjaClient.MergeOverview`) устойчив к нескольким формам и ищет:
+## Схема ответа
 
-- **массив** под ключом `lines` / `items` / `entries` (или корневой массив);
-- **имя**: `name` / `currencyTypeName` / `itemName` / `text`;
-- **цену**: `exaltedValue` / `chaosValue` / `value` / `receive`;
-- **divine** (опц.): `divineValue`.
+```json
+{
+  "core":  { "rates": { "exalted": 195.5, "chaos": 8.86 }, "primary": "divine" },
+  "lines": [ { "id": "exalted", "primaryValue": 0.005114, ... } ],
+  "items": [ { "id": "exalted", "name": "Exalted Orb", ... } ]
+}
+```
 
-Если реальная схема PoE2 отличается (например, currency-exchange отдаёт
-соотношения, а не значения в exalted) — поправь `MergeOverview` под фактические
-поля. Структуру ответа удобно сверить прямо из DevTools (вкладка Response).
+- `lines[].id` → слаг; `lines[].primaryValue` → цена в основной валюте
+  (`core.primary`, обычно **divine**).
+- `items[]` — маппинг `id → name` (отображаемое имя, по нему матчим OCR).
+- Перевод в exalted: `exaltedValue = primaryValue * core.rates.exalted`
+  (при `primary == "exalted"` множитель = 1).
+
+`PoeNinjaClient.MergeOverview` парсит ровно эту схему.
+
+## Чего нет в Currency
+
+`Uncut Spirit Gem` и прочие гемы — отдельная категория (другой `type`),
+в `Currency` отсутствуют → показываются как `?`. Добавить можно, дописав нужный
+`type` в `PriceOverviews` (уточнить имя категории тем же способом через Network).
 
 ## Замена источника
 
-Если poe.ninja не подойдёт, источник заменяем без правок остального кода:
-реализуй `IPriceSource` (например, поверх официального Trade API PoE2) и
-подставь его в `PriceCache` вместо `PoeNinjaClient`.
+Источник заменяем без правок остального кода: реализуй `IPriceSource`
+(например, поверх официального Trade API PoE2) и подставь в `PriceCache`.

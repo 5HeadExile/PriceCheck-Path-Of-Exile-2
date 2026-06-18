@@ -31,7 +31,18 @@
   «Как пользоваться» в README.
 - Журнал проекта в `.claude/skills/poe2-pricecheck/SKILL.md`.
 
+### Changed
+- Подтверждён и прописан реальный endpoint poe.ninja PoE2
+  (`…/exchange/current/overview?league=&type=Currency`); `PoeNinjaClient`
+  переписан под схему core/lines/items с переводом в exalted.
+- Имена наград матчатся по живому прайс-листу (`RewardParser.FromNames`),
+  нормализация имён без пунктуации; `reward-aliases.json` — теперь fallback.
+- OCR возвращает строки с координатами (`OcrLine`); оверлей рисует цену
+  напротив каждой награды и компактный итог по пилону.
+
 ### Fixed
+- Первый живой тест: всё оценивалось в 0.0 (неверный endpoint + имена PoE1 в
+  словаре). Исправлено — цены реально считаются.
 - Сборка на Windows (.NET 8): `KeyCode` из `SharpHook.Data` (не `.Native`);
   возвращены global usings `System.IO`/`System.Net.Http` (WinForms даёт урезанный
   набор); Tesseract 5.x — `Pix.LoadFromMemory` вместо `PixConverter`, алиас для

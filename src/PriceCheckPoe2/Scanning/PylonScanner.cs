@@ -7,13 +7,26 @@ using PriceCheckPoe2.Pricing;
 
 namespace PriceCheckPoe2.Scanning;
 
-/// <summary>Оценка одного пилона вместе с его областью на экране.</summary>
-public sealed record PylonScanResult(PylonValuation Valuation, Rectangle Region);
+/// <summary>Награда с ценой и её прямоугольником на экране (для отрисовки рядом).</summary>
+public sealed record PricedReward(
+    int Stack,
+    string Name,
+    RewardPrice? Price,
+    double LineTotal,
+    Rectangle ScreenBounds);
+
+/// <summary>Результат оценки одной области-пилона: награды, сумма и сама область.</summary>
+public sealed record PylonScanResult(
+    string PylonId,
+    double TotalExalted,
+    IReadOnlyList<PricedReward> Rewards,
+    Rectangle Region);
 
 /// <summary>
-/// Связывает весь пайплайн: захват области пилона → OCR → разбор строк в награды
-/// (с количеством в стаке) → цены из кэша → суммарная EV-оценка. Поддерживает
-/// несколько областей-пилонов за один проход (цены берутся один раз).
+/// Связывает весь пайплайн: захват области → OCR (со строками и координатами) →
+/// разбор количества и имени → цена из кэша → суммарная EV. Канонические имена
+/// берутся из живого прайс-листа poe.ninja, чтобы совпадать с источником цен;
+/// при пустом прайсе используется запасной парсер (из reward-aliases.json).
 /// </summary>
 public sealed class PylonScanner
 {
@@ -24,16 +37,16 @@ public sealed class PylonScanner
         new(@"^(.+?)\s*[xX]?\s*(\d+)\s*$", RegexOptions.Compiled);
 
     private readonly OcrEngine _ocr;
-    private readonly RewardParser _parser;
     private readonly PriceCache _prices;
     private readonly AppConfig _config;
+    private readonly RewardParser? _fallbackParser;
 
-    public PylonScanner(OcrEngine ocr, RewardParser parser, PriceCache prices, AppConfig config)
+    public PylonScanner(OcrEngine ocr, PriceCache prices, AppConfig config, RewardParser? fallbackParser = null)
     {
         _ocr = ocr;
-        _parser = parser;
         _prices = prices;
         _config = config;
+        _fallbackParser = fallbackParser;
     }
 
     /// <summary>Сканирует и оценивает все переданные области-пилоны.</summary>
@@ -42,38 +55,56 @@ public sealed class PylonScanner
         CancellationToken cancellationToken = default)
     {
         var priceTable = await _prices.GetAsync(_config.League, cancellationToken).ConfigureAwait(false);
-        var evaluator = new PylonEvaluator(priceTable);
+        var parser = priceTable.Count > 0
+            ? RewardParser.FromNames(priceTable.Keys)
+            : _fallbackParser ?? RewardParser.FromNames(Array.Empty<string>());
 
         var results = new List<PylonScanResult>(pylons.Count);
         foreach (var (id, region) in pylons)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var rewards = ReadRewards(region);
-            var valuation = evaluator.Evaluate(new Pylon(id, rewards));
-            results.Add(new PylonScanResult(valuation, region));
+            results.Add(ScanRegion(id, region, parser, priceTable));
         }
 
         return results;
     }
 
-    /// <summary>Захватывает область, распознаёт и парсит награды.</summary>
-    private IReadOnlyList<Reward> ReadRewards(Rectangle region)
+    private PylonScanResult ScanRegion(
+        string id,
+        Rectangle region,
+        RewardParser parser,
+        IReadOnlyDictionary<string, RewardPrice> priceTable)
     {
         using var bitmap = ScreenCapturer.Capture(region);
         var lines = _ocr.ReadLines(bitmap);
 
-        var rewards = new List<Reward>();
+        var rewards = new List<PricedReward>();
+        double total = 0;
+
         foreach (var line in lines)
         {
-            var (stack, text) = SplitCount(line);
-            var canonical = _parser.Parse(text);
-            if (canonical is not null)
+            var (stack, text) = SplitCount(line.Text);
+            var canonical = parser.Parse(text);
+            if (canonical is null)
             {
-                rewards.Add(new Reward(canonical, stack));
+                continue;
             }
+
+            priceTable.TryGetValue(canonical, out var price);
+            var lineTotal = (price?.ExaltedValue ?? 0) * stack;
+            total += lineTotal;
+
+            // Координаты строки OCR → экранные координаты.
+            var screen = new Rectangle(
+                region.X + line.Bounds.X,
+                region.Y + line.Bounds.Y,
+                line.Bounds.Width,
+                line.Bounds.Height);
+
+            rewards.Add(new PricedReward(stack, canonical, price, lineTotal, screen));
         }
 
-        return rewards;
+        return new PylonScanResult(id, total, rewards, region);
     }
 
     /// <summary>Извлекает количество из строки OCR, возвращает (стак, остаток).</summary>

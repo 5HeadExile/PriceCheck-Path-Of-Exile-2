@@ -1,0 +1,38 @@
+- generic [active] [ref=e1]:
+  - banner
+  - contentinfo [ref=e5]:
+    - generic [ref=e6]:
+      - link "Account" [ref=e8] [cursor=pointer]:
+        - /url: /account
+        - img [ref=e9]
+        - text: Account
+      - generic [ref=e12]:
+        - generic [ref=e13]:
+          - text: Contribute
+          - img [ref=e14]
+        - link "Support the site" [ref=e16] [cursor=pointer]:
+          - /url: /support
+      - generic [ref=e17]:
+        - generic [ref=e18]: About
+        - link "FAQ" [ref=e19] [cursor=pointer]:
+          - /url: /faq
+        - link "Discord" [ref=e20] [cursor=pointer]:
+          - /url: https://discord.gg/7qSRyKdyre
+          - text: Discord
+          - img [ref=e21]
+        - link "Statistics" [ref=e24] [cursor=pointer]:
+          - /url: /stats
+        - link "Data dumps" [ref=e25] [cursor=pointer]:
+          - /url: /poe1/data
+      - generic [ref=e26]:
+        - generic [ref=e27]: Resources
+        - link "Privacy Policy" [ref=e28] [cursor=pointer]:
+          - /url: /privacy
+        - paragraph:
+          - link "Ads-Powered-by-playwire-2021-standalone-small-white-300px":
+            - /url: https://www.playwire.com/contact-direct-sales
+            - img "Ads-Powered-by-playwire-2021-standalone-small-white-300px"
+        - paragraph [ref=e29]:
+          - link "Advertise on this site" [ref=e30] [cursor=pointer]:
+            - /url: https://www.playwire.com/contact-direct-sales
+    - generic [ref=e32]: poe.ninja is not affiliated with or endorsed by Grinding Gear Games.

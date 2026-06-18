@@ -5,11 +5,18 @@ using PriceCheckPoe2.Config;
 namespace PriceCheckPoe2.Pricing;
 
 /// <summary>
-/// Клиент poe.ninja для экономики PoE2. URL и категории берутся из
-/// <see cref="AppConfig"/>, т.к. путь PoE2 не задокументирован и может меняться
-/// между лигами (проверять через DevTools браузера на poe.ninja/poe2/economy).
-/// Парсинг устойчив к нескольким формам ответа (overview-стиль PoE1 и
-/// currency-exchange PoE2).
+/// Клиент poe.ninja для экономики PoE2 (currency exchange). Схема ответа
+/// (проверена на лиге Runes of Aldur):
+/// <code>
+/// {
+///   "core":  { "rates": { "exalted": 195.5, "chaos": 8.86 }, "primary": "divine" },
+///   "lines": [ { "id": "exalted", "primaryValue": 0.005114, ... } ],
+///   "items": [ { "id": "exalted", "name": "Exalted Orb", ... } ]
+/// }
+/// </code>
+/// <c>primaryValue</c> выражен в основной валюте (<c>core.primary</c>, обычно
+/// divine). Переводим в exalted: <c>primaryValue * core.rates.exalted</c>.
+/// Имя предмета берём из <c>items</c> по <c>id</c>.
 /// </summary>
 public sealed class PoeNinjaClient : IPriceSource, IDisposable
 {
@@ -55,85 +62,76 @@ public sealed class PoeNinjaClient : IPriceSource, IDisposable
 
     private Uri BuildRequestUri(string league, string overview)
     {
-        var query = $"?leagueName={Uri.EscapeDataString(league)}&overviewName={Uri.EscapeDataString(overview)}";
+        var query = $"?league={Uri.EscapeDataString(league)}&type={Uri.EscapeDataString(overview)}";
         return new Uri(_baseUrl + query);
     }
 
-    /// <summary>
-    /// Достаёт пары имя→цена из ответа. Терпим к расположению массива
-    /// (<c>lines</c>, <c>items</c>, <c>entries</c> или корневой массив) и к
-    /// набору полей цены (<c>exaltedValue</c>/<c>chaosValue</c>/<c>value</c>).
-    /// </summary>
+    /// <summary>Разбирает ответ poe.ninja PoE2 и добавляет цены в словарь.</summary>
     private static void MergeOverview(string json, IDictionary<string, RewardPrice> into)
     {
-        JToken root;
+        JObject root;
         try
         {
-            root = JToken.Parse(json);
+            root = JObject.Parse(json);
         }
         catch
         {
             return;
         }
 
-        var lines = FirstArray(root, "lines", "items", "entries") ?? root as JArray;
-        if (lines is null)
+        var lines = root["lines"] as JArray;
+        var items = root["items"] as JArray;
+        if (lines is null || items is null)
         {
             return;
         }
 
+        // id → отображаемое имя.
+        var names = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var item in items)
+        {
+            var id = (string?)item["id"];
+            var name = (string?)item["name"];
+            if (!string.IsNullOrWhiteSpace(id) && !string.IsNullOrWhiteSpace(name))
+            {
+                names[id] = name.Trim();
+            }
+        }
+
+        var exaltedPerPrimary = ExaltedFactor(root["core"]);
+
         foreach (var line in lines)
         {
-            var name = FirstString(line, "name", "currencyTypeName", "itemName", "text");
-            if (string.IsNullOrWhiteSpace(name))
+            var id = (string?)line["id"];
+            if (string.IsNullOrWhiteSpace(id) || !names.TryGetValue(id, out var name))
             {
                 continue;
             }
 
-            var exalted = FirstDouble(line, "exaltedValue", "chaosValue", "value", "receive");
-            var divine = (double?)line["divineValue"];
-            into[name.Trim()] = new RewardPrice(name.Trim(), exalted ?? 0.0, divine);
+            var primary = (double?)line["primaryValue"] ?? 0.0;
+            var exalted = primary * exaltedPerPrimary;
+            into[name] = new RewardPrice(name, exalted, primary);
         }
     }
 
-    private static JArray? FirstArray(JToken root, params string[] keys)
+    /// <summary>
+    /// Сколько exalted в одной единице основной валюты. Если основная валюта уже
+    /// exalted — множитель 1; иначе берём <c>core.rates.exalted</c>.
+    /// </summary>
+    private static double ExaltedFactor(JToken? core)
     {
-        foreach (var key in keys)
+        if (core is null)
         {
-            if (root[key] is JArray arr)
-            {
-                return arr;
-            }
+            return 1.0;
         }
 
-        return null;
-    }
-
-    private static string? FirstString(JToken token, params string[] keys)
-    {
-        foreach (var key in keys)
+        var primary = (string?)core["primary"];
+        if (string.Equals(primary, "exalted", StringComparison.OrdinalIgnoreCase))
         {
-            var value = (string?)token[key];
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                return value;
-            }
+            return 1.0;
         }
 
-        return null;
-    }
-
-    private static double? FirstDouble(JToken token, params string[] keys)
-    {
-        foreach (var key in keys)
-        {
-            if (token[key] is { } t && t.Type is JTokenType.Float or JTokenType.Integer)
-            {
-                return (double)t;
-            }
-        }
-
-        return null;
+        return (double?)core["rates"]?["exalted"] ?? 1.0;
     }
 
     public void Dispose() => _http.Dispose();

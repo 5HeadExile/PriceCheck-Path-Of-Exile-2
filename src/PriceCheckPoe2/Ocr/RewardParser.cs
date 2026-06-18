@@ -48,6 +48,18 @@ public sealed class RewardParser
         FromJson(File.ReadAllText(path), maxDistance);
 
     /// <summary>
+    /// Строит парсер из набора канонических имён (без алиасов) — например, из
+    /// живого прайс-листа poe.ninja, чтобы имена всегда совпадали с источником цен.
+    /// </summary>
+    public static RewardParser FromNames(IEnumerable<string> names, int maxDistance = 4)
+    {
+        var map = names
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(n => n, _ => (IReadOnlyList<string>)Array.Empty<string>());
+        return new RewardParser(map, maxDistance);
+    }
+
+    /// <summary>
     /// Возвращает каноническое имя для строки OCR или <c>null</c>, если
     /// уверенного совпадения нет.
     /// </summary>
@@ -80,10 +92,10 @@ public sealed class RewardParser
         return bestDistance <= _maxDistance ? best : null;
     }
 
+    // Оставляем только буквы и цифры: убирает пробелы, апострофы и мусор OCR
+    // (например, «Jeweller's» и «Jewellers» становятся одинаковыми).
     private static string Normalize(string value) =>
-        new string(value.Where(c => !char.IsWhiteSpace(c)).ToArray())
-            .Trim()
-            .ToLowerInvariant();
+        new string(value.Where(char.IsLetterOrDigit).ToArray()).ToLowerInvariant();
 
     internal static int Levenshtein(string a, string b)
     {

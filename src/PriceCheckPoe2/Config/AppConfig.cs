@@ -23,17 +23,17 @@ public sealed class AppConfig
     public string League { get; set; } = "Runes of Aldur";
 
     /// <summary>
-    /// Базовый URL экономики poe.ninja для PoE2. Вынесен в конфиг, т.к. точный
-    /// путь PoE2 не задокументирован и может меняться между лигами — проверять
-    /// через DevTools браузера (Network) на poe.ninja/poe2/economy.
+    /// Базовый URL экономики poe.ninja для PoE2 (currency exchange). Проверен на
+    /// лиге Runes of Aldur через DevTools: возвращает { core, lines, items }.
+    /// Запрос: {base}?league={League}&type={overview}.
     /// </summary>
     public string PriceApiBaseUrl { get; set; } =
-        "https://poe.ninja/poe2/api/economy/currencyexchange/overview";
+        "https://poe.ninja/poe2/api/economy/exchange/current/overview";
 
-    /// <summary>Имена overview-категорий, которые тянем (параметр overviewName).</summary>
+    /// <summary>Категории (параметр type), которые тянем. Currency покрывает орбы.</summary>
     public List<string> PriceOverviews { get; set; } = new()
     {
-        "Currency", "Fragments", "Runes", "Essences",
+        "Currency",
     };
 
     /// <summary>Период обновления цен, минуты.</summary>

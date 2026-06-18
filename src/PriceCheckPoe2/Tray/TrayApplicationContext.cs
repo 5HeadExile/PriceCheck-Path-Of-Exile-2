@@ -171,12 +171,13 @@ public sealed class TrayApplicationContext : ApplicationContext
         }
 
         _ocr = new OcrEngine(threshold: _config.OcrThreshold, saveDebug: _config.SaveOcrDebugImages);
+        // Запасной парсер из статичного файла — на случай недоступности цен.
         var aliasesPath = Path.Combine(AppContext.BaseDirectory, "Data", "reward-aliases.json");
-        _parser = RewardParser.FromFile(aliasesPath);
+        _parser = File.Exists(aliasesPath) ? RewardParser.FromFile(aliasesPath) : null;
         _priceCache = new PriceCache(
             new PoeNinjaClient(_config),
             TimeSpan.FromMinutes(_config.PriceRefreshMinutes));
-        _scanner = new PylonScanner(_ocr, _parser, _priceCache, _config);
+        _scanner = new PylonScanner(_ocr, _priceCache, _config, _parser);
     }
 
     private IReadOnlyList<(string Id, Rectangle Region)> PylonRegions() =>
