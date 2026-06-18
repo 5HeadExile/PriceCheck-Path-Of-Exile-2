@@ -1,0 +1,17 @@
+# .NET build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+*.user
+
+# Rider / VS
+.vs/
+.idea/
+
+# Runtime config written next to exe
+config.json
+
+# OCR data downloaded at build/runtime
+tessdata/
