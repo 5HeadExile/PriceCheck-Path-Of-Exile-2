@@ -119,8 +119,8 @@ public sealed class MenuOverlay : IDisposable
             Padding = new Padding(24, 8, 24, 24),
         };
 
-        layout.Controls.Add(MakeButton("Добавить пилон (калибровка)", () => AddPylonRequested?.Invoke()));
-        layout.Controls.Add(MakeButton("Сбросить пилоны", () => ClearPylonsRequested?.Invoke()));
+        layout.Controls.Add(MakeButton("Выделить область", () => AddPylonRequested?.Invoke()));
+        layout.Controls.Add(MakeButton("Сбросить выделенное", () => ClearPylonsRequested?.Invoke()));
         layout.Controls.Add(MakeButton("Оверлей: пауза / возобновить", () => TogglePriceOverlayRequested?.Invoke()));
         layout.Controls.Add(MakeButton("Пересканировать сейчас", () => RescanRequested?.Invoke()));
         layout.Controls.Add(MakeButton("Настройки", () => SettingsRequested?.Invoke()));

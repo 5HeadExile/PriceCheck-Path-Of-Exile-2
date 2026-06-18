@@ -28,8 +28,10 @@ public sealed class PriceOverlayForm : Form
         FormBorderStyle = FormBorderStyle.None;
         StartPosition = FormStartPosition.Manual;
         Bounds = SystemInformation.VirtualScreen;
-        BackColor = Color.Magenta;
-        TransparencyKey = Color.Magenta; // фон полностью прозрачный
+        // Чёрный ключ прозрачности: AA-края плашек/текста смешиваются с чёрным
+        // (тёмная кайма), а не с magenta (фиолетовая кайма — прежний баг).
+        BackColor = Color.Black;
+        TransparencyKey = Color.Black;
         TopMost = true;
         ShowInTaskbar = false;
         DoubleBuffered = true;
@@ -99,7 +101,9 @@ public sealed class PriceOverlayForm : Form
         base.OnPaint(e);
         var g = e.Graphics;
         g.SmoothingMode = SmoothingMode.AntiAlias;
-        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+        // Серое сглаживание (не ClearType): на прозрачном окне субпиксельный
+        // ClearType даёт цветные края.
+        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
         // Лучшая награда по ценности — для подсветки.
         var best = _results
