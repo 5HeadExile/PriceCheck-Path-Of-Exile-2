@@ -9,6 +9,9 @@ x64/
 # Published output
 dist/
 
+# Playwright MCP scratch artifacts
+.playwright-mcp/
+
 # Rider / VS
 .vs/
 .idea/
