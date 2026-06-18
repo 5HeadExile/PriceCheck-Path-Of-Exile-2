@@ -159,20 +159,14 @@ public sealed class PriceOverlayForm : Form
 
         var rect = new Rectangle(left, top, w, h);
 
-        if (best)
-        {
-            // Мягкое свечение под лучшей наградой.
-            var glow = Rectangle.Inflate(rect, 3, 3);
-            using var glowBrush = new SolidBrush(Color.FromArgb(70, 80, 255, 120));
-            using var glowPath = Rounded(glow, 11);
-            g.FillPath(glowBrush, glowPath);
-        }
-
         using var path = Rounded(rect, 8);
-        using var bg = new SolidBrush(Color.FromArgb(216, 14, 14, 18));
+        // Непрозрачный нейтральный фон: без примеси magenta-ключа (раньше плашки
+        // отдавали в фиолетовый) — ценностный цвет читается чётко.
+        using var bg = new SolidBrush(Color.FromArgb(255, 24, 24, 28));
         g.FillPath(bg, path);
+        // Лучшую награду выделяем только мягкой золотой рамкой (сдержанно).
         using var border = new Pen(
-            best ? Color.FromArgb(180, 110, 255, 150) : Color.FromArgb(70, 255, 255, 255),
+            best ? Color.FromArgb(255, 214, 182, 104) : Color.FromArgb(255, 58, 58, 66),
             best ? 2f : 1f);
         g.DrawPath(border, path);
 
@@ -200,11 +194,11 @@ public sealed class PriceOverlayForm : Form
         var rect = new Rectangle(left, top, w, h);
 
         using var path = Rounded(rect, 9);
-        using var bg = new SolidBrush(Color.FromArgb(224, 18, 18, 24));
+        using var bg = new SolidBrush(Color.FromArgb(255, 22, 22, 28));
         g.FillPath(bg, path);
-        using var border = new Pen(Color.FromArgb(150, 120, 220, 255), 1.5f);
+        using var border = new Pen(Color.FromArgb(255, 72, 76, 86), 1.5f);
         g.DrawPath(border, path);
-        using var brush = new SolidBrush(Color.FromArgb(150, 220, 255));
+        using var brush = new SolidBrush(Color.FromArgb(214, 218, 224));
         g.DrawString(text, font, brush, left + 9, top + 4);
     }
 
@@ -213,7 +207,7 @@ public sealed class PriceOverlayForm : Form
     {
         if (reward.Price is null)
         {
-            return ("?", Color.FromArgb(255, 120, 90));
+            return ("?", Color.FromArgb(181, 110, 96));
         }
 
         var ex = reward.LineTotal;
@@ -226,14 +220,15 @@ public sealed class PriceOverlayForm : Form
             ? $"{divine:0.##} div"
             : $"{exalted:0.##} ex";
 
-    // Цвет по ценности (в exalted): тривиальное → дорогое.
+    // Сдержанная палитра по ценности (в exalted): приглушённые тона, читаемые
+    // на нейтральном тёмном фоне плашки.
     private static Color TierColor(double exalted) => exalted switch
     {
-        < 0.1 => Color.FromArgb(150, 156, 163),   // тривиальное — серое
-        < 1.0 => Color.FromArgb(232, 232, 236),   // дешёвое — белое
-        < 5.0 => Color.FromArgb(255, 209, 102),   // среднее — золото
-        < 20.0 => Color.FromArgb(255, 159, 67),   // дорогое — оранжевое
-        _ => Color.FromArgb(255, 93, 143),         // топ — розово-красное
+        < 0.1 => Color.FromArgb(124, 130, 138),   // тривиальное — приглушённо-серое
+        < 1.0 => Color.FromArgb(198, 202, 208),   // дешёвое — мягкое белое
+        < 5.0 => Color.FromArgb(190, 162, 86),    // среднее — приглушённое золото
+        < 20.0 => Color.FromArgb(190, 130, 74),   // дорогое — приглушённая медь
+        _ => Color.FromArgb(190, 96, 110),         // топ — приглушённый терракот
     };
 
     private static GraphicsPath Rounded(Rectangle r, int radius)
