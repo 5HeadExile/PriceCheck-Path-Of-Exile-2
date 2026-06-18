@@ -10,6 +10,9 @@ namespace PriceCheckPoe2.Scanning;
 /// цены; когда закрывается — прячет оверлей. Повторный OCR запускается только при
 /// открытии или изменении содержимого (по сигнатуре), а не каждый тик — это
 /// «лучше», чем безусловный поллинг референса.
+/// <para>Confirm-gate: яркость лишь решает, стоит ли запускать OCR; оверлей
+/// показывается, только если OCR реально распознал список наград (≥ ConfirmRewards
+/// с ценой). Поэтому случайная яркость при беге по карте не даёт ложных показов.</para>
 /// </summary>
 public sealed class RegionMonitor : IDisposable
 {
@@ -22,6 +25,11 @@ public sealed class RegionMonitor : IDisposable
     private const int IdleCycleMs = 250;
     // Насколько должна измениться сигнатура, чтобы пересканировать открытую панель.
     private const long SignatureEpsilon = 1500;
+    // Не чаще, чем раз в N мс запускаем OCR (бережёт CPU при беге по карте).
+    private const int MinOcrIntervalMs = 350;
+    // Confirm-gate: показываем область, только если OCR распознал столько известных
+    // наград. Случайная яркость в мире не читается как список наград → ложных нет.
+    private const int ConfirmRewards = 2;
 
     private sealed class RegionState
     {
@@ -42,6 +50,7 @@ public sealed class RegionMonitor : IDisposable
 
     private CancellationTokenSource? _cts;
     private Task? _loop;
+    private DateTime _lastOcrUtc = DateTime.MinValue;
 
     /// <summary>Пауза: оверлей скрыт и сканирование не идёт (по кнопке в меню).</summary>
     public bool Paused { get; set; }
@@ -151,8 +160,9 @@ public sealed class RegionMonitor : IDisposable
                             overlayVisible = false;
                         }
                     }
-                    else if (needScan)
+                    else if (needScan && (DateTime.UtcNow - _lastOcrUtc).TotalMilliseconds >= MinOcrIntervalMs)
                     {
+                        _lastOcrUtc = DateTime.UtcNow;
                         var results = await _scanner.ScanAllAsync(openRegions, ct).ConfigureAwait(false);
                         foreach (var (id, _) in openRegions)
                         {
@@ -161,8 +171,23 @@ public sealed class RegionMonitor : IDisposable
                             st.ScannedSignature = st.LastSignature;
                         }
 
-                        _onResults(results);
-                        overlayVisible = true;
+                        // Confirm-gate: область показывается, только если в ней реально
+                        // распознан список наград (≥ ConfirmRewards с ценой). Это отсекает
+                        // ложные срабатывания от яркости мира при беге.
+                        var confirmed = results
+                            .Where(r => r.Rewards.Count(x => x.Price is not null) >= ConfirmRewards)
+                            .ToList();
+
+                        if (confirmed.Count > 0)
+                        {
+                            _onResults(confirmed);
+                            overlayVisible = true;
+                        }
+                        else if (overlayVisible)
+                        {
+                            _onHide();
+                            overlayVisible = false;
+                        }
                     }
                 }
             }

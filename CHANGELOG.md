@@ -32,6 +32,9 @@
 - Журнал проекта в `.claude/skills/poe2-pricecheck/SKILL.md`.
 
 ### Changed
+- Confirm-gate в `RegionMonitor`: оверлей показывается только когда OCR распознал
+  ≥2 известных награды (яркость — лишь триггер для OCR). Убирает ложные показы при
+  беге по карте. Добавлен троттлинг OCR (≥350 мс между запусками).
 - Пул цен расширен на все стакаемые категории лиги (Currency, Fragments, Runes,
   Essences, SoulCores, UncutGems, LineageSupportGems, Idols, Expedition,
   Verisium) — руны и прочие награды теперь оцениваются, а не показываются 0.
