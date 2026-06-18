@@ -30,10 +30,28 @@ public sealed class AppConfig
     public string PriceApiBaseUrl { get; set; } =
         "https://poe.ninja/poe2/api/economy/exchange/current/overview";
 
-    /// <summary>Категории (параметр type), которые тянем. Currency покрывает орбы.</summary>
+    /// <summary>
+    /// Категории (параметр type), которые тянем с poe.ninja. Перечислены все
+    /// стакаемые награды актуальной лиги (Runes of Aldur), которые выпадают из
+    /// пилонов; проверено через DevTools, что у каждой есть данные. Уники/omens и
+    /// т.п. идут другим механизмом (пустые здесь) и пилонами не выдаются.
+    /// <para>Это встроенный каталог, а не пользовательская настройка —
+    /// <see cref="JsonIgnoreAttribute"/> гарантирует, что список всегда берётся
+    /// из кода и старый config.json не «заморозит» урезанный набор.</para>
+    /// </summary>
+    [JsonIgnore]
     public List<string> PriceOverviews { get; set; } = new()
     {
         "Currency",
+        "Fragments",
+        "Runes",
+        "Essences",
+        "SoulCores",
+        "UncutGems",
+        "LineageSupportGems",
+        "Idols",
+        "Expedition",
+        "Verisium",
     };
 
     /// <summary>Период обновления цен, минуты.</summary>

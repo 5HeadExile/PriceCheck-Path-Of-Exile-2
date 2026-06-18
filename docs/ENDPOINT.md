@@ -33,11 +33,27 @@ GET https://poe.ninja/poe2/api/economy/exchange/current/overview?league=Runes+of
 
 `PoeNinjaClient.MergeOverview` парсит ровно эту схему.
 
-## Чего нет в Currency
+## Категории (`type`)
 
-`Uncut Spirit Gem` и прочие гемы — отдельная категория (другой `type`),
-в `Currency` отсутствуют → показываются как `?`. Добавить можно, дописав нужный
-`type` в `PriceOverviews` (уточнить имя категории тем же способом через Network).
+Все вкладки экономики идут через ОДИН и тот же endpoint, меняется только `type`.
+Тянем все стакаемые категории актуальной лиги (есть данные, проверено DevTools):
+
+`Currency`, `Fragments`, `Runes`, `Essences`, `SoulCores`, `UncutGems`,
+`LineageSupportGems`, `Idols`, `Expedition`, `Verisium`.
+
+`type` = PascalCase от slug вкладки (`soul-cores` → `SoulCores`). Уники
+(`UniqueWeapons` и т.п.), `Omens`, `AbyssalBones`, `LiquidEmotions`,
+`BreachCatalyst`, `PrecursorTablets` через этот endpoint пустые (другой механизм)
+и пилонами как стак не выдаются — не тянем.
+
+Список `PriceOverviews` помечен `[JsonIgnore]` (встроенный каталог): он всегда
+берётся из кода, старый `config.json` не «заморозит» урезанный набор.
+
+### Гемы (нюанс)
+
+`UncutGems` оцениваются ПО УРОВНЮ (`Uncut Skill Gem (Level 12)` и т.д.). Награда
+вида «Uncut Spirit Gem» без уровня надёжно не сопоставляется → показывается `?`
+(лучше, чем угадать чужой уровень). Точный матчинг по уровню — отдельная доработка.
 
 ## Замена источника
 

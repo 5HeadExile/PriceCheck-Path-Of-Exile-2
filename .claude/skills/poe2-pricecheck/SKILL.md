@@ -142,6 +142,11 @@ API — «Runes of Aldur» (дефолт в конфиге).
   финальную сверку делать в браузере (DevTools → Network на poe.ninja/poe2/economy).
   *Впредь:* не «подтверждать» внешний API по 404 из песочницы — помечать как
   требующий проверки и делать заменяемым.
+- **Старый config.json «замораживал» каталог категорий.** Руны/эссенции и пр. не
+  оценивались, т.к. сохранённый `config.json` держал `PriceOverviews=["Currency"]`
+  и переопределял новый дефолт. *Решение:* `[JsonIgnore]` на встроенных каталогах
+  (`PriceOverviews`) — берутся из кода, не из сохранённого конфига. *Впредь:*
+  встроенные справочники не персистить вместе с пользовательскими настройками.
 - **Тесты на internal-методы.** `RewardParser.Levenshtein` и
   `PylonScanner.SplitCount` — `internal`; тесты в другой сборке. *Решение:*
   `InternalsVisibleTo("PriceCheckPoe2.Tests")` в `Properties/AssemblyInfo.cs`.
@@ -192,6 +197,11 @@ API — «Runes of Aldur» (дефолт в конфиге).
   живому прайсу (`RewardParser.FromNames`). OCR отдаёт строки с координатами
   (`OcrLine`), оверлей рисует цену напротив каждой награды. Build/тесты зелёные,
   exe переиздан. docs/ENDPOINT.md обновлён под подтверждённую схему.
+- *2026-06-18* Расширен пул цен: тянем все стакаемые категории лиги (Currency,
+  Fragments, Runes, Essences, SoulCores, UncutGems, LineageSupportGems, Idols,
+  Expedition, Verisium) — руны (напр. «Fenumus' Rune») теперь оцениваются.
+  `PriceOverviews` помечен `[JsonIgnore]` (встроенный каталог), чтобы старый
+  config.json не «заморозил» урезанный набор. docs/ENDPOINT.md обновлён.
 - *2026-06-18* Авто-режим: добавлены `Capture/ListDetector` (яркость+сигнатура)
   и `Scanning/RegionMonitor` (фоновый цикл). Оверлей теперь сам показывается при
   открытии пилона и скрывается при закрытии; OCR — только при открытии/смене

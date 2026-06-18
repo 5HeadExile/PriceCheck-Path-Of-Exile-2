@@ -32,6 +32,10 @@
 - Журнал проекта в `.claude/skills/poe2-pricecheck/SKILL.md`.
 
 ### Changed
+- Пул цен расширен на все стакаемые категории лиги (Currency, Fragments, Runes,
+  Essences, SoulCores, UncutGems, LineageSupportGems, Idols, Expedition,
+  Verisium) — руны и прочие награды теперь оцениваются, а не показываются 0.
+  `PriceOverviews` помечен `[JsonIgnore]`, чтобы старый config не замораживал набор.
 - Авто-режим: фоновый `RegionMonitor` + `ListDetector` сами показывают оверлей
   при открытии панели пилона и скрывают при закрытии; OCR запускается только при
   открытии/смене содержимого (детект по сигнатуре). Калибровка области → авто-скан.
