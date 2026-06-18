@@ -20,7 +20,21 @@ public sealed class CalibrationProfile
 public sealed class AppConfig
 {
     /// <summary>Лига PoE2, по которой берём цены с poe.ninja.</summary>
-    public string League { get; set; } = "Standard";
+    public string League { get; set; } = "Runes of Aldur";
+
+    /// <summary>
+    /// Базовый URL экономики poe.ninja для PoE2. Вынесен в конфиг, т.к. точный
+    /// путь PoE2 не задокументирован и может меняться между лигами — проверять
+    /// через DevTools браузера (Network) на poe.ninja/poe2/economy.
+    /// </summary>
+    public string PriceApiBaseUrl { get; set; } =
+        "https://poe.ninja/poe2/api/economy/currencyexchange/overview";
+
+    /// <summary>Имена overview-категорий, которые тянем (параметр overviewName).</summary>
+    public List<string> PriceOverviews { get; set; } = new()
+    {
+        "Currency", "Fragments", "Runes", "Essences",
+    };
 
     /// <summary>Период обновления цен, минуты.</summary>
     public int PriceRefreshMinutes { get; set; } = 30;

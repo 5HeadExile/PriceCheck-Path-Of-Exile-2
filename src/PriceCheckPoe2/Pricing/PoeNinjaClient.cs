@@ -1,29 +1,31 @@
 using Newtonsoft.Json.Linq;
+using PriceCheckPoe2.Config;
 
 namespace PriceCheckPoe2.Pricing;
 
 /// <summary>
-/// Клиент poe.ninja для экономики PoE2.
-/// TODO(M4): подтвердить точный endpoint PoE2 (инспекцией запросов на
-/// poe.ninja/poe2/economy) и заполнить <see cref="BuildRequestUri"/> и парсинг.
-/// Структура намеренно похожа на реакцию референса: тянем снапшот категорий,
-/// собираем словарь имя→цена.
+/// Клиент poe.ninja для экономики PoE2. URL и категории берутся из
+/// <see cref="AppConfig"/>, т.к. путь PoE2 не задокументирован и может меняться
+/// между лигами (проверять через DevTools браузера на poe.ninja/poe2/economy).
+/// Парсинг устойчив к нескольким формам ответа (overview-стиль PoE1 и
+/// currency-exchange PoE2).
 /// </summary>
 public sealed class PoeNinjaClient : IPriceSource, IDisposable
 {
     private readonly HttpClient _http;
+    private readonly string _baseUrl;
+    private readonly IReadOnlyList<string> _overviews;
 
-    // Категории экономики PoE2, которые встречаются в наградах пилонов.
-    // Уточнить/дополнить под реальные типы наград (M3/M4).
-    private static readonly string[] Categories =
+    public PoeNinjaClient(AppConfig config, HttpClient? http = null)
     {
-        "Currency", "Fragments", "Runes", "Essences", "Catalysts",
-    };
-
-    public PoeNinjaClient(HttpClient? http = null)
-    {
+        _baseUrl = config.PriceApiBaseUrl;
+        _overviews = config.PriceOverviews;
         _http = http ?? new HttpClient();
-        _http.DefaultRequestHeaders.UserAgent.ParseAdd("PriceCheckPoe2/0.1");
+        if (!_http.DefaultRequestHeaders.UserAgent.Any())
+        {
+            _http.DefaultRequestHeaders.UserAgent.ParseAdd("PriceCheckPoe2/0.1 (+https://github.com/5HeadExile)");
+            _http.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+        }
     }
 
     public async Task<IReadOnlyDictionary<string, RewardPrice>> FetchAsync(
@@ -31,36 +33,37 @@ public sealed class PoeNinjaClient : IPriceSource, IDisposable
     {
         var prices = new Dictionary<string, RewardPrice>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var category in Categories)
+        foreach (var overview in _overviews)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var uri = BuildRequestUri(league, category);
+            var uri = BuildRequestUri(league, overview);
             try
             {
                 var json = await _http.GetStringAsync(uri, cancellationToken).ConfigureAwait(false);
-                MergeCategory(json, prices);
+                MergeOverview(json, prices);
             }
             catch (HttpRequestException)
             {
-                // Категория недоступна/пустая — пропускаем, остальные важнее.
+                // Категория недоступна/пустая — остальные важнее, не валим всё.
             }
         }
 
         return prices;
     }
 
-    /// <summary>
-    /// TODO(M4): заменить на реальный URL PoE2. Плейсхолдер показывает форму.
-    /// </summary>
-    private static Uri BuildRequestUri(string league, string category) =>
-        new($"https://poe.ninja/api/data/poe2/economy?league={Uri.EscapeDataString(league)}&type={category}");
+    private Uri BuildRequestUri(string league, string overview)
+    {
+        var query = $"?leagueName={Uri.EscapeDataString(league)}&overviewName={Uri.EscapeDataString(overview)}";
+        return new Uri(_baseUrl + query);
+    }
 
     /// <summary>
-    /// Разбор ответа. Реальная схема будет уточнена (M4) — здесь устойчивый
-    /// парсинг массива {name, exaltedValue, divineValue}.
+    /// Достаёт пары имя→цена из ответа. Терпим к расположению массива
+    /// (<c>lines</c>, <c>items</c>, <c>entries</c> или корневой массив) и к
+    /// набору полей цены (<c>exaltedValue</c>/<c>chaosValue</c>/<c>value</c>).
     /// </summary>
-    private static void MergeCategory(string json, IDictionary<string, RewardPrice> into)
+    private static void MergeOverview(string json, IDictionary<string, RewardPrice> into)
     {
         JToken root;
         try
@@ -72,7 +75,7 @@ public sealed class PoeNinjaClient : IPriceSource, IDisposable
             return;
         }
 
-        var lines = root["lines"] as JArray ?? root as JArray;
+        var lines = FirstArray(root, "lines", "items", "entries") ?? root as JArray;
         if (lines is null)
         {
             return;
@@ -80,16 +83,56 @@ public sealed class PoeNinjaClient : IPriceSource, IDisposable
 
         foreach (var line in lines)
         {
-            var name = (string?)line["name"] ?? (string?)line["currencyTypeName"];
+            var name = FirstString(line, "name", "currencyTypeName", "itemName", "text");
             if (string.IsNullOrWhiteSpace(name))
             {
                 continue;
             }
 
-            var exalted = (double?)line["exaltedValue"] ?? (double?)line["chaosValue"] ?? 0.0;
+            var exalted = FirstDouble(line, "exaltedValue", "chaosValue", "value", "receive");
             var divine = (double?)line["divineValue"];
-            into[name.Trim()] = new RewardPrice(name.Trim(), exalted, divine);
+            into[name.Trim()] = new RewardPrice(name.Trim(), exalted ?? 0.0, divine);
         }
+    }
+
+    private static JArray? FirstArray(JToken root, params string[] keys)
+    {
+        foreach (var key in keys)
+        {
+            if (root[key] is JArray arr)
+            {
+                return arr;
+            }
+        }
+
+        return null;
+    }
+
+    private static string? FirstString(JToken token, params string[] keys)
+    {
+        foreach (var key in keys)
+        {
+            var value = (string?)token[key];
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+        }
+
+        return null;
+    }
+
+    private static double? FirstDouble(JToken token, params string[] keys)
+    {
+        foreach (var key in keys)
+        {
+            if (token[key] is { } t && t.Type is JTokenType.Float or JTokenType.Integer)
+            {
+                return (double)t;
+            }
+        }
+
+        return null;
     }
 
     public void Dispose() => _http.Dispose();

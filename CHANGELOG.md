@@ -11,6 +11,14 @@
   (`Overlay/MenuOverlay`), перехват клавиш через SharpHook (`HotkeyManager`).
 - Доменные модели и оценка пилонов (`PylonEvaluator`) — суммарная EV-ценность.
 - Парсер названий наград с fuzzy-match по Левенштейну (`RewardParser`).
-- Стабы захвата экрана, OCR, клиента poe.ninja и оверлея цен под следующие вехи.
-- Unit-тесты парсера и evaluator (xUnit).
+- Захват экрана (`ScreenCapturer`), калибровка области (`CalibrationOverlay`),
+  OCR с предобработкой под тёмный фон (`OcrEngine`).
+- Конфигурируемый клиент poe.ninja PoE2 (`PoeNinjaClient`) + кэш (`PriceCache`);
+  дефолтная лига «Runes of Aldur», endpoint и категории вынесены в настройки.
+- Оркестратор пайплайна `PylonScanner` (захват→OCR→стак→цена→EV) и рендер
+  оверлея цен (`PriceOverlayForm`, click-through).
+- Окно настроек (`SettingsForm`, WinForms): лига, URL цен, интервал, хоткеи,
+  прозрачности; сохранение профиля калибровки.
+- Unit-тесты парсера, evaluator и разбора количества в `PylonScanner` (xUnit),
+  `InternalsVisibleTo` для тест-сборки.
 - Журнал проекта в `.claude/skills/poe2-pricecheck/SKILL.md`.

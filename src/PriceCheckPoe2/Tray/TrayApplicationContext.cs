@@ -1,13 +1,18 @@
 using System.Drawing;
 using System.Windows.Forms;
+using PriceCheckPoe2.Capture;
 using PriceCheckPoe2.Config;
+using PriceCheckPoe2.Ocr;
 using PriceCheckPoe2.Overlay;
+using PriceCheckPoe2.Pricing;
+using PriceCheckPoe2.Scanning;
+using PriceCheckPoe2.Settings;
 
 namespace PriceCheckPoe2.Tray;
 
 /// <summary>
-/// Корень жизненного цикла приложения. Держит трей-иконку, глобальные хоткеи и
-/// игровое меню. Главного окна нет — всё поднимается по запросу.
+/// Корень жизненного цикла приложения. Держит трей-иконку, глобальные хоткеи,
+/// игровое меню и оверлей цен. Главного окна нет — всё поднимается по запросу.
 /// </summary>
 public sealed class TrayApplicationContext : ApplicationContext
 {
@@ -18,6 +23,13 @@ public sealed class TrayApplicationContext : ApplicationContext
 
     // Невидимый control для перевода событий хука в UI-поток WinForms.
     private readonly Control _marshal;
+
+    // Пайплайн сканирования и оверлей цен создаются лениво (нужен tessdata).
+    private PriceOverlayForm? _priceOverlay;
+    private OcrEngine? _ocr;
+    private RewardParser? _parser;
+    private PriceCache? _priceCache;
+    private PylonScanner? _scanner;
 
     public TrayApplicationContext()
     {
@@ -73,22 +85,85 @@ public sealed class TrayApplicationContext : ApplicationContext
 
     private void OpenSettings()
     {
-        // TODO(M6): открыть WPF-окно настроек (MahApps.Metro).
         _menu.Hide();
-        MessageBox.Show("Окно настроек будет здесь (M6).", "PriceCheck PoE2");
+        using var form = new SettingsForm(_config);
+        form.ShowDialog();
+        // Хоткеи перечитываются HotkeyManager'ом из _config при каждом нажатии,
+        // поэтому отдельная перерегистрация не нужна.
     }
 
     private void StartCalibration()
     {
-        // TODO(M3): запустить CalibrationOverlay (drag-select области пилона).
         _menu.Hide();
-        MessageBox.Show("Калибровка области (M3).", "PriceCheck PoE2");
+        using var overlay = new CalibrationOverlay();
+        if (overlay.ShowDialog() == DialogResult.OK && overlay.Result is { } profile)
+        {
+            profile.Name = "default";
+            _config.Profiles.RemoveAll(p => p.Name == profile.Name);
+            _config.Profiles.Add(profile);
+            _config.ActiveProfile = profile.Name;
+            _config.Save();
+        }
     }
 
     private void TogglePriceOverlay()
     {
-        // TODO(M4/M5): включить/выключить click-through оверлей цен.
-        MessageBox.Show("Оверлей цен (M4/M5).", "PriceCheck PoE2");
+        if (_priceOverlay is { Visible: true })
+        {
+            _priceOverlay.Hide();
+            return;
+        }
+
+        var region = ActiveRegion();
+        if (region is null)
+        {
+            MessageBox.Show("Сначала откалибруйте область пилона (меню → Калибровка).",
+                "PriceCheck PoE2");
+            return;
+        }
+
+        _priceOverlay ??= new PriceOverlayForm();
+        _priceOverlay.Show();
+        _ = ScanAndRenderAsync(region.Value);
+    }
+
+    private async Task ScanAndRenderAsync(Rectangle region)
+    {
+        try
+        {
+            EnsureScanner();
+            var valuations = await _scanner!.ScanAsync(region).ConfigureAwait(true);
+            _priceOverlay?.Update(valuations);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Не удалось оценить пилон: {ex.Message}", "PriceCheck PoE2");
+        }
+    }
+
+    private void EnsureScanner()
+    {
+        if (_scanner is not null)
+        {
+            return;
+        }
+
+        _ocr = new OcrEngine();
+        var aliasesPath = Path.Combine(AppContext.BaseDirectory, "Data", "reward-aliases.json");
+        _parser = RewardParser.FromFile(aliasesPath);
+        _priceCache = new PriceCache(
+            new PoeNinjaClient(_config),
+            TimeSpan.FromMinutes(_config.PriceRefreshMinutes));
+        _scanner = new PylonScanner(_ocr, _parser, _priceCache, _config);
+    }
+
+    private Rectangle? ActiveRegion()
+    {
+        var profile = _config.Profiles.FirstOrDefault(p => p.Name == _config.ActiveProfile)
+                      ?? _config.Profiles.FirstOrDefault();
+        return profile is null
+            ? null
+            : new Rectangle(profile.X, profile.Y, profile.Width, profile.Height);
     }
 
     private void ToggleDebug()
@@ -108,6 +183,8 @@ public sealed class TrayApplicationContext : ApplicationContext
         {
             _hotkeys.Dispose();
             _menu.Dispose();
+            _priceOverlay?.Dispose();
+            _ocr?.Dispose();
             _trayIcon.Dispose();
             _marshal.Dispose();
         }
