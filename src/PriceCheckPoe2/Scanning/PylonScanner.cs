@@ -30,11 +30,18 @@ public sealed record PylonScanResult(
 /// </summary>
 public sealed class PylonScanner
 {
-    // "5x Exalted Orb", "Exalted Orb x5", "5 Exalted Orb" → (5, "Exalted Orb").
+    // Количество в начале: "3x Foo", "3 Foo", "3xFoo" (склеено). x опционален.
     private static readonly Regex LeadingCount =
-        new(@"^\s*(\d+)\s*[xX]?\s+(.+)$", RegexOptions.Compiled);
+        new(@"^\s*(\d+)\s*[xX×]?\s*(.+)$", RegexOptions.Compiled);
+    // В конце — только с явным x: "Foo x12". Без x не трогаем, иначе схватит
+    // число из "(Level 19)".
     private static readonly Regex TrailingCount =
-        new(@"^(.+?)\s*[xX]?\s*(\d+)\s*$", RegexOptions.Compiled);
+        new(@"^(.+?)\s*[xX×]\s*(\d+)\s*$", RegexOptions.Compiled);
+    // Тег-префикс награды: "Skill: ...", "Support: ..." → часть после двоеточия.
+    private static readonly Regex TagPrefix =
+        new(@"^\s*\p{L}[\p{L} ]{1,14}:\s+(.+)$", RegexOptions.Compiled);
+    private static readonly Regex KnownRewardTag =
+        new(@"^\s*(skill|support)\s*:", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private readonly OcrEngine _ocr;
     private readonly PriceCache _prices;
@@ -83,16 +90,30 @@ public sealed class PylonScanner
 
         foreach (var line in lines)
         {
-            var (stack, text) = SplitCount(line.Text);
-            var canonical = parser.Parse(text);
-            if (canonical is null)
+            var (stack, afterCount) = SplitCount(line.Text);
+            var name = StripTag(afterCount);            // снимаем тег "Skill:/Support:"
+            var canonical = parser.Parse(name);
+
+            RewardPrice? price = null;
+            double lineTotal = 0;
+            string displayName;
+
+            if (canonical is not null)
+            {
+                priceTable.TryGetValue(canonical, out price);
+                lineTotal = (price?.ExaltedValue ?? 0) * stack;
+                total += lineTotal;
+                displayName = canonical;
+            }
+            else if (KnownRewardTag.IsMatch(afterCount))
+            {
+                // Скилл/саппорт распознан по тегу, но цены на poe.ninja для него нет.
+                displayName = name;
+            }
+            else
             {
                 continue;
             }
-
-            priceTable.TryGetValue(canonical, out var price);
-            var lineTotal = (price?.ExaltedValue ?? 0) * stack;
-            total += lineTotal;
 
             // Координаты строки OCR → экранные координаты.
             var screen = new Rectangle(
@@ -101,7 +122,7 @@ public sealed class PylonScanner
                 line.Bounds.Width,
                 line.Bounds.Height);
 
-            rewards.Add(new PricedReward(stack, canonical, price, lineTotal, screen));
+            rewards.Add(new PricedReward(stack, displayName, price, lineTotal, screen));
         }
 
         return new PylonScanResult(id, total, rewards, region);
@@ -110,18 +131,29 @@ public sealed class PylonScanner
     /// <summary>Извлекает количество из строки OCR, возвращает (стак, остаток).</summary>
     internal static (int Stack, string Text) SplitCount(string line)
     {
-        var lead = LeadingCount.Match(line);
-        if (lead.Success && int.TryParse(lead.Groups[1].Value, out var leadCount))
+        var text = line.Trim();
+
+        var lead = LeadingCount.Match(text);
+        if (lead.Success && int.TryParse(lead.Groups[1].Value, out var leadCount)
+            && lead.Groups[2].Value.Any(char.IsLetter))
         {
             return (leadCount, lead.Groups[2].Value.Trim());
         }
 
-        var trail = TrailingCount.Match(line);
-        if (trail.Success && int.TryParse(trail.Groups[2].Value, out var trailCount))
+        var trail = TrailingCount.Match(text);
+        if (trail.Success && int.TryParse(trail.Groups[2].Value, out var trailCount)
+            && trail.Groups[1].Value.Any(char.IsLetter))
         {
             return (trailCount, trail.Groups[1].Value.Trim());
         }
 
-        return (1, line.Trim());
+        return (1, text);
+    }
+
+    /// <summary>Снимает тег-префикс ("Skill: ", "Support: ") — берём часть после двоеточия.</summary>
+    internal static string StripTag(string text)
+    {
+        var m = TagPrefix.Match(text);
+        return m.Success ? m.Groups[1].Value.Trim() : text.Trim();
     }
 }

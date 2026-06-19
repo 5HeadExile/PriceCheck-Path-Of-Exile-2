@@ -214,9 +214,18 @@ public sealed class PriceOverlayForm : Form
             return ("?", Color.FromArgb(181, 110, 96));
         }
 
-        var ex = reward.LineTotal;
-        var div = (reward.Price.DivineValue ?? 0) * reward.Stack;
-        return (FormatValue(ex, div), TierColor(ex));
+        var exTotal = reward.LineTotal;
+        var divTotal = (reward.Price.DivineValue ?? 0) * reward.Stack;
+        var text = FormatValue(exTotal, divTotal);
+
+        // Для стака >1 — сумма, а в скобках цена за 1 штуку.
+        if (reward.Stack > 1)
+        {
+            var unit = FormatValue(reward.Price.ExaltedValue, reward.Price.DivineValue ?? 0);
+            text += $" ({unit}/шт)";
+        }
+
+        return (text, TierColor(exTotal));
     }
 
     private static string FormatValue(double exalted, double divine) =>
