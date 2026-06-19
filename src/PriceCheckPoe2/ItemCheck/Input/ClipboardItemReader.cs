@@ -31,10 +31,13 @@ public sealed class ClipboardItemReader
     /// Шлёт Ctrl+C и возвращает текст из буфера, либо <c>null</c>, если за отведённые
     /// попытки текст не появился (например, курсор не на предмете).
     /// </summary>
-    public string? CopyAndRead()
+    public string? CopyAndRead(bool sendCopy = true)
     {
         var before = SafeGetText();
-        SendCopy();
+        if (sendCopy)
+        {
+            SendCopy();
+        }
 
         // Ждём, пока игра обновит буфер; считаем успехом непустой текст,
         // отличающийся от прежнего (или просто непустой, если прежний был пуст).

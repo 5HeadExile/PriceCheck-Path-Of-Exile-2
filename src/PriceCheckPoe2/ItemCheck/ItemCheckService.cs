@@ -54,11 +54,16 @@ public sealed class ItemCheckService
     {
         try
         {
-            Log("Ctrl+D: triggered");
+            Log("hotkey: triggered");
+            var sendCopy = _config.ItemCheckSendCopy;
+            // Пассивный режим (хоткей = Ctrl+C): игра копирует сама, инъекцию не шлём
+            // и не спамим подсказками при обычном копировании вне игры.
+            var passive = !sendCopy;
+
             string? text;
             try
             {
-                text = _reader.CopyAndRead();
+                text = _reader.CopyAndRead(sendCopy);
             }
             catch (Exception ex)
             {
@@ -66,17 +71,25 @@ public sealed class ItemCheckService
                 text = null;
             }
 
-            Log($"clipboard length = {text?.Length ?? -1}");
+            Log($"clipboard length = {text?.Length ?? -1} (sendCopy={sendCopy})");
             if (string.IsNullOrWhiteSpace(text))
             {
-                _notify?.Invoke("Ctrl+D: буфер пуст — наведи курсор на предмет в игре.");
+                if (!passive)
+                {
+                    _notify?.Invoke("Буфер пуст — наведи курсор на предмет в игре.");
+                }
+
                 return;
             }
 
             if (!ItemTextParser.TryParse(text, out var item))
             {
                 Log("parse failed; head: " + text[..Math.Min(60, text.Length)].Replace('\n', ' '));
-                _notify?.Invoke("Не распознан как предмет PoE2 (английский клиент?).");
+                if (!passive)
+                {
+                    _notify?.Invoke("Не распознан как предмет PoE2 (английский клиент?).");
+                }
+
                 return;
             }
 

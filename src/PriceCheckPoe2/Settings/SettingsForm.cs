@@ -23,6 +23,9 @@ public sealed class SettingsForm : Form
     private readonly TrackBar _overlayOpacity = new() { Minimum = 0, Maximum = 100 };
     private readonly NumericUpDown _ocrThreshold = new() { Minimum = 0, Maximum = 255 };
     private readonly CheckBox _saveDebug = new() { Text = "Сохранять кадры OCR" };
+    private readonly TextBox _itemHotkey = new();
+    private readonly CheckBox _itemUseCtrl = new() { Text = "с Ctrl" };
+    private readonly CheckBox _itemSendCopy = new() { Text = "слать Ctrl+C (для не-Ctrl+C хоткея)" };
 
     public SettingsForm(AppConfig config)
     {
@@ -33,7 +36,7 @@ public sealed class SettingsForm : Form
         StartPosition = FormStartPosition.CenterScreen;
         MaximizeBox = false;
         MinimizeBox = false;
-        ClientSize = new Size(440, 480);
+        ClientSize = new Size(460, 560);
 
         BuildLayout();
         LoadFromConfig();
@@ -60,6 +63,9 @@ public sealed class SettingsForm : Form
         AddRow(layout, "Прозрачность оверлея, %", _overlayOpacity);
         AddRow(layout, "Порог OCR (0..255)", _ocrThreshold);
         AddRow(layout, "Отладка OCR", _saveDebug);
+        AddRow(layout, "Хоткей предмета (KeyCode)", _itemHotkey);
+        AddRow(layout, "Модификатор предмета", _itemUseCtrl);
+        AddRow(layout, "Авто-копирование", _itemSendCopy);
 
         var save = new Button { Text = "Сохранить", DialogResult = DialogResult.OK, Width = 100 };
         save.Click += (_, _) => SaveToConfig();
@@ -104,6 +110,9 @@ public sealed class SettingsForm : Form
         _overlayOpacity.Value = (int)Math.Clamp(_config.PriceOverlayOpacity * 100, 0, 100);
         _ocrThreshold.Value = Math.Clamp(_config.OcrThreshold, 0, 255);
         _saveDebug.Checked = _config.SaveOcrDebugImages;
+        _itemHotkey.Text = _config.ItemCheckHotkey;
+        _itemUseCtrl.Checked = _config.ItemCheckUseCtrl;
+        _itemSendCopy.Checked = _config.ItemCheckSendCopy;
     }
 
     private void SaveToConfig()
@@ -117,6 +126,9 @@ public sealed class SettingsForm : Form
         _config.PriceOverlayOpacity = _overlayOpacity.Value / 100.0;
         _config.OcrThreshold = (int)_ocrThreshold.Value;
         _config.SaveOcrDebugImages = _saveDebug.Checked;
+        _config.ItemCheckHotkey = _itemHotkey.Text.Trim();
+        _config.ItemCheckUseCtrl = _itemUseCtrl.Checked;
+        _config.ItemCheckSendCopy = _itemSendCopy.Checked;
         _config.Save();
     }
 }
