@@ -162,10 +162,10 @@ public sealed class StatDatabase
         var matched = new List<MatchedStat>();
         foreach (var (mod, kind) in EnumerateMods(item))
         {
-            if (MatchLine(mod, kind) is { } ms)
-            {
-                matched.Add(ms);
-            }
+            // Несопоставленные моды тоже показываем (TradeId=null) — чтобы предмет
+            // был виден целиком, а несовпадения было видно в UI и логе.
+            matched.Add(MatchLine(mod, kind)
+                ?? new MatchedStat(string.Empty, null, kind, mod.Trim(), null, Array.Empty<double>()));
         }
 
         return new ItemStats { Mods = matched, Pseudo = PseudoRules.Compute(matched) };

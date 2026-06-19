@@ -94,7 +94,14 @@ public sealed class ItemCheckService
             }
 
             var stats = _stats.Value?.Match(item) ?? new ItemStats();
-            Log($"parsed: name='{item.Name}' base='{item.BaseType}' mods={stats.Mods.Count} pseudo={stats.Pseudo.Count}");
+            Log($"parsed: name='{item.Name}' base='{item.BaseType}' rarity={item.Rarity} " +
+                $"impl={item.Implicits.Count} expl={item.Explicits.Count} rune={item.Runes.Count} ench={item.Enchants.Count} " +
+                $"matched_mods={stats.Mods.Count} pseudo={stats.Pseudo.Count}");
+            foreach (var m in stats.Mods)
+            {
+                Log($"  mod[{m.Kind}] '{m.Text}' -> {(m.TradeId ?? "NO MATCH")}");
+            }
+
             ShowWindow(item, stats);
         }
         catch (Exception ex)

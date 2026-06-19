@@ -169,14 +169,18 @@ public sealed class ItemCheckWindow : Sw.Window
 
     private Swc.Border MakeModRow(MatchedStat m, bool preselect)
     {
+        var matched = m.TradeId is not null;
         var row = new Swc.StackPanel { Orientation = Swc.Orientation.Horizontal };
         var check = new Swc.CheckBox
         {
-            IsChecked = preselect,
+            IsChecked = preselect && matched,
+            IsEnabled = matched, // несопоставленный мод нельзя искать
             VerticalAlignment = Sw.VerticalAlignment.Center,
-            Foreground = m.IsPseudo ? Rgb(150, 200, 235) : Rgb(220, 220, 226),
+            Foreground = !matched ? Rgb(120, 120, 128)
+                : m.IsPseudo ? Rgb(150, 200, 235)
+                : Rgb(220, 220, 226),
             Width = 380,
-            Content = m.Text,
+            Content = matched ? m.Text : m.Text + "  (нет в базе)",
         };
         var min = new Swc.TextBox
         {
