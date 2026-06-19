@@ -1,0 +1,17 @@
+Item Class: Amulets
+Rarity: Unique
+Astramentis
+Stellar Amulet
+--------
+Requirements:
+Level: 20
+--------
+Item Level: 84
+--------
++12 to Spirit (implicit)
+--------
++50 to all Attributes
++5 to all Attributes per 10 Strength
+--------
+Corrupted
+--------

@@ -1,0 +1,12 @@
+Item Class: Skill Gems
+Rarity: Gem
+Spark
+--------
+Lightning, Projectile, Spell
+Level: 1
+Cost: 6 Mana
+--------
+Launches unpredictable sparks that move randomly until they hit an enemy.
+--------
+Place into an empty Skill Gem Socket to gain this skill.
+--------

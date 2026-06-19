@@ -1,0 +1,10 @@
+Item Class: Stackable Currency
+Rarity: Currency
+Exalted Orb
+--------
+Stack Size: 7/20
+--------
+Adds an explicit Modifier to a Rare item
+--------
+Right click this item then left click a Rare item to apply it.
+Shift click to unstack.

@@ -51,7 +51,15 @@ description: >-
 exe в `dist\`. Endpoint poe.ninja PoE2 **подтверждён**, цены реально считаются,
 имена матчатся по живому прайсу, оверлей рисует цену напротив каждой награды.
 Добавлен авто-режим (`RegionMonitor`): оверлей сам показывается/скрывается по
-открытию пилона. Следующее — живой тест авто-режима с игрой.
+открытию пилона.
+
+**Фича 2 (item price-check):** I0–I1 готовы. Завендорены данные EE2
+(`ItemCheck/Data/ee2/{stats,items}.ndjson`, MIT, +ATTRIBUTION). Создан модуль
+`ItemCheck/` (namespace `PriceCheckPoe2.ItemCheck`): `Input/ClipboardItemReader`
+(SendInput Ctrl+C + чтение буфера с ретраями) и `Parsing/{ParsedItem,
+ItemTextParser}` (разбор текста PoE2 по секциям). 6 тестов на 5 фикстурах
+(rare/unique/currency/gem/rare+руна). Сборка зелёная, **33/33 теста**. Пилоны не
+тронуты. Дальше — I2 (StatDatabase) после подтверждения.
 
 **Текущая лига PoE2:** «Return of the Ancients» (0.5.0), механика — «Runes of
 Aldur» (это и есть пилоны). На poe.ninja slug лиги — `runesofaldur`, имя для
@@ -76,6 +84,18 @@ API — «Runes of Aldur» (дефолт в конфиге).
   прозрачности, порог OCR), несколько областей пилонов, debug-режим (F3).
 - [x] **M7** — сборка зелёная на Windows, 21/21 тест проходит, exe опубликован,
   smoke-test ОК. README/CHANGELOG/docs готовы.
+
+### Вехи фичи 2 — item price-check (серия I)
+
+- [x] **I0** — разведка + план (`docs/PLAN-ITEMCHECK.md`) + вендоринг данных EE2
+  (`ItemCheck/Data/ee2/`, MIT + ATTRIBUTION, пин-коммит в `SOURCE_COMMIT.txt`).
+- [x] **I1** — `Input/ClipboardItemReader` + `Parsing/ParsedItem` +
+  `Parsing/ItemTextParser` + 6 тестов на фикстурах.
+- [ ] **I2** — `Data/StatDatabase` (матчинг мод→stat id по EE2) + `PseudoRules`.
+- [ ] **I3** — `Trade/TradeClient` + `RateLimiter` (гость) + `TradeQueryBuilder`.
+- [ ] **I4** — WPF `ItemCheckWindow`; хоткей `Ctrl+D`; пункт в трей-меню.
+- [ ] **I5** — inline poe.ninja, пресеты, память фильтров.
+- [ ] **I6** — опц. вход через WebView2.
 
 (`[x]` сделано, `[~]` в работе, `[ ]` запланировано.)
 
@@ -113,6 +133,19 @@ API — «Runes of Aldur» (дефолт в конфиге).
   открытии/смене содержимого (детект по «сигнатуре» области), а не каждый тик —
   меньше нагрузки. Калибровка области сразу подхватывается циклом (авто-скан).
   В меню «Оверлей: пауза/возобновить» (RegionMonitor.Paused) и «Пересканировать».
+- **Item price-check — отдельный модуль `ItemCheck/`**, полностью изолирован от
+  пилонов (Scanning/PriceOverlayForm/RegionMonitor не трогаем; точки контакта —
+  только аддитивные: HotkeyManager/AppConfig/трей, и то на I4).
+- **Данные модов берём из EE2** (`stats.ndjson`/`items.ndjson`, MIT) — вендорим с
+  пином коммита и ATTRIBUTION, не парсим игру сами. Схема: stat — `{ref, matchers,
+  trade.ids.{explicit,rune,...}, id}`; item — `{name, refName, namespace, ...}`.
+- **Парсер буфера = секции по `--------`**; моды разбираем только у снаряжения
+  (Magic/Rare/Unique), у валюты/гемов строки секций — описание, не моды; вид
+  аффикса — по суффиксу строки `(implicit|rune|enchant|...)`. Защита: строки
+  «Ключ:» (Requirements/Level/…) не считаются модами.
+- **Окно price-check (I4): открытый вопрос WPF vs WinForms.** План — WPF
+  (динамический список модов с биндингами). Остальной UI на WinForms. Спрошу
+  пользователя перед I4 (риск смешения стеков vs удобство биндингов).
 
 ## Инструменты по моментам
 
@@ -258,6 +291,12 @@ API — «Runes of Aldur» (дефолт в конфиге).
 Полный план и вехи I0–I7 — в `docs/PLAN-ITEMCHECK.md`. Сейчас сделан I0
 (разведка + план). Следующее: I1 — `ClipboardItemReader` + `ItemTextParser` +
 тесты на сэмплах текста буфера; затем вендоринг данных EE2 (I0) и `StatDatabase`.
+
+- *2026-06-19* Фича 2, I0–I1: завендорены данные EE2 (en stats/items ndjson, MIT,
+  пин-коммит `6860809…`, ATTRIBUTION). Модуль `ItemCheck/`: `ClipboardItemReader`
+  (SendInput Ctrl+C + чтение буфера), `ParsedItem` + `ItemTextParser` (секции
+  PoE2). 6 тестов на 5 фикстурах буфера. csproj: ndjson → вывод; фикстуры → вывод
+  тестов. Build зелёный, 33/33 теста. Пилоны не тронуты.
 
 ## TODO / следующие шаги (живое тестирование с игрой)
 
