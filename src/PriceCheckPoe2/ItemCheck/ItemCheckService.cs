@@ -13,62 +13,103 @@ namespace PriceCheckPoe2.ItemCheck;
 /// Оркестратор price-check: по хоткею копирует предмет, парсит, сопоставляет
 /// статы (EE2), показывает WPF-окно и по запросу ищет листинги в trade2. Также
 /// даёт быструю оценку через poe.ninja (I5). Полностью отделён от пилонов.
+/// Пишет диагностику в <c>itemcheck_log.txt</c> рядом с exe.
 /// </summary>
 public sealed class ItemCheckService
 {
     private readonly AppConfig _config;
+    private readonly Action<string>? _notify;
     private readonly ClipboardItemReader _reader = new();
     private readonly Lazy<StatDatabase?> _stats;
     private readonly HttpClient _http = new();
     private readonly TradeClient _trade;
     private readonly PriceCache _ninja;
+    private readonly string _logPath = Path.Combine(AppContext.BaseDirectory, "itemcheck_log.txt");
 
-    public ItemCheckService(AppConfig config)
+    public ItemCheckService(AppConfig config, Action<string>? notify = null)
     {
         _config = config;
+        _notify = notify;
         _stats = new Lazy<StatDatabase?>(LoadStats);
         _trade = new TradeClient(config.League, _http);
         _ninja = new PriceCache(new PoeNinjaClient(config), TimeSpan.FromMinutes(config.PriceRefreshMinutes));
     }
 
-    private static StatDatabase? LoadStats()
+    private StatDatabase? LoadStats()
     {
         var path = Path.Combine(AppContext.BaseDirectory, "ItemCheck", "Data", "ee2", "stats.ndjson");
-        return File.Exists(path) ? StatDatabase.Load(path) : null;
+        if (!File.Exists(path))
+        {
+            Log($"stats.ndjson НЕ найден: {path}");
+            return null;
+        }
+
+        var db = StatDatabase.Load(path);
+        Log("stats.ndjson загружен");
+        return db;
     }
 
     /// <summary>Вызывать в UI/STA-потоке (буфер обмена требует STA).</summary>
     public void Trigger()
     {
-        string? text;
         try
         {
-            text = _reader.CopyAndRead();
-        }
-        catch
-        {
-            text = null;
-        }
+            Log("Ctrl+D: triggered");
+            string? text;
+            try
+            {
+                text = _reader.CopyAndRead();
+            }
+            catch (Exception ex)
+            {
+                Log("clipboard error: " + ex.Message);
+                text = null;
+            }
 
-        if (string.IsNullOrWhiteSpace(text) || !ItemTextParser.TryParse(text, out var item))
-        {
-            return;
-        }
+            Log($"clipboard length = {text?.Length ?? -1}");
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                _notify?.Invoke("Ctrl+D: буфер пуст — наведи курсор на предмет в игре.");
+                return;
+            }
 
-        var stats = _stats.Value?.Match(item) ?? new ItemStats();
-        ShowWindow(item, stats);
+            if (!ItemTextParser.TryParse(text, out var item))
+            {
+                Log("parse failed; head: " + text[..Math.Min(60, text.Length)].Replace('\n', ' '));
+                _notify?.Invoke("Не распознан как предмет PoE2 (английский клиент?).");
+                return;
+            }
+
+            var stats = _stats.Value?.Match(item) ?? new ItemStats();
+            Log($"parsed: name='{item.Name}' base='{item.BaseType}' mods={stats.Mods.Count} pseudo={stats.Pseudo.Count}");
+            ShowWindow(item, stats);
+        }
+        catch (Exception ex)
+        {
+            Log("Trigger error: " + ex);
+            _notify?.Invoke("Ошибка price-check: " + ex.Message);
+        }
     }
 
     private void ShowWindow(ParsedItem item, ItemStats stats)
     {
         var thread = new Thread(() =>
         {
-            var window = new ItemCheckWindow(item, stats);
-            window.SearchRequested += filters => _ = SearchAsync(window, filters);
-            window.Closed += (_, _) => window.Dispatcher.InvokeShutdown();
-            window.Show();
-            _ = EstimateNinjaAsync(item, window);
-            System.Windows.Threading.Dispatcher.Run();
+            try
+            {
+                var window = new ItemCheckWindow(item, stats);
+                window.SearchRequested += filters => _ = SearchAsync(window, filters);
+                window.Closed += (_, _) => window.Dispatcher.InvokeShutdown();
+                window.Show();
+                window.Activate();
+                _ = EstimateNinjaAsync(item, window);
+                System.Windows.Threading.Dispatcher.Run();
+            }
+            catch (Exception ex)
+            {
+                Log("window error: " + ex);
+                _notify?.Invoke("Не удалось открыть окно: " + ex.Message);
+            }
         });
         thread.SetApartmentState(ApartmentState.STA);
         thread.IsBackground = true;
@@ -83,10 +124,12 @@ public sealed class ItemCheckService
             var listings = await _trade.SearchAndFetchAsync(body).ConfigureAwait(false);
             window.ShowListings(listings);
             window.SetStatus("Готово");
+            Log($"trade search ok: {listings.Count} listings, {filters.Count} filters");
         }
         catch (Exception ex)
         {
             window.SetStatus("Ошибка трейда: " + ex.Message);
+            Log("trade error: " + ex.Message);
         }
     }
 
@@ -108,6 +151,18 @@ public sealed class ItemCheckService
         catch
         {
             // оценка poe.ninja необязательна
+        }
+    }
+
+    private void Log(string message)
+    {
+        try
+        {
+            File.AppendAllText(_logPath, $"[{DateTime.Now:HH:mm:ss.fff}] {message}{Environment.NewLine}");
+        }
+        catch
+        {
+            // лог не критичен
         }
     }
 }

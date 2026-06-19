@@ -230,8 +230,12 @@ public sealed class TrayApplicationContext : ApplicationContext
 
     private void TriggerItemCheck()
     {
-        (_itemCheck ??= new ItemCheck.ItemCheckService(_config)).Trigger();
+        _itemCheck ??= new ItemCheck.ItemCheckService(_config, NotifyBalloon);
+        _itemCheck.Trigger();
     }
+
+    private void NotifyBalloon(string message) =>
+        OnUi(() => _trayIcon.ShowBalloonTip(2500, "PriceCheck PoE2", message, ToolTipIcon.Info));
 
     private void ExitApp()
     {
