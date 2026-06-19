@@ -111,7 +111,7 @@ public sealed class ItemCheckService
             try
             {
                 var window = new ItemCheckWindow(item, stats);
-                window.SearchRequested += filters => _ = SearchAsync(window, filters);
+                window.SearchRequested += filters => _ = SearchAsync(window, item, filters);
                 window.Closed += (_, _) => window.Dispatcher.InvokeShutdown();
                 window.Show();
                 window.Activate();
@@ -129,11 +129,12 @@ public sealed class ItemCheckService
         thread.Start();
     }
 
-    private async Task SearchAsync(ItemCheckWindow window, IReadOnlyList<TradeFilter> filters)
+    private async Task SearchAsync(ItemCheckWindow window, ParsedItem item, IReadOnlyList<TradeFilter> filters)
     {
         try
         {
-            var body = TradeQueryBuilder.Build(filters);
+            var (name, type) = TradeTarget(item);
+            var body = TradeQueryBuilder.Build(filters, name, type);
             var listings = await _trade.SearchAndFetchAsync(body).ConfigureAwait(false);
             window.ShowListings(listings);
             window.SetStatus("Готово");
@@ -145,6 +146,18 @@ public sealed class ItemCheckService
             Log("trade error: " + ex.Message);
         }
     }
+
+    /// <summary>Имя/тип для сужения поиска трейда под конкретный предмет.</summary>
+    private static (string? Name, string? Type) TradeTarget(ParsedItem item) => item.Rarity switch
+    {
+        // Уникал: имя + база. Rare: фиксируем базу, остальное — статами.
+        ItemRarity.Unique => (item.Name, item.BaseType),
+        ItemRarity.Rare => (null, item.BaseType),
+        // Magic/Normal: база «зашита» в строку с аффиксами — без БД не вычленить, пропускаем.
+        ItemRarity.Magic or ItemRarity.Normal => (null, null),
+        // Валюта/гемы/омены и пр.: их «тип» — это само имя.
+        _ => (null, item.Name ?? item.BaseType),
+    };
 
     private async Task EstimateNinjaAsync(ParsedItem item, ItemCheckWindow window)
     {
