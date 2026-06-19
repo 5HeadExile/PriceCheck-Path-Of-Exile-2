@@ -142,10 +142,15 @@ public sealed class ItemCheckService
         {
             var (name, type) = TradeTarget(item);
             var body = TradeQueryBuilder.Build(filters, name, type);
-            var listings = await _trade.SearchAndFetchAsync(body).ConfigureAwait(false);
+            var search = await _trade.SearchAsync(body).ConfigureAwait(false);
+
+            var url = $"https://www.pathofexile.com/trade2/search/poe2/{Uri.EscapeDataString(_config.League)}/{search.Id}";
+            window.SetTradeUrl(url);
+
+            var listings = await _trade.FetchAsync(search.Id, search.Hashes.Take(10).ToList()).ConfigureAwait(false);
             window.ShowListings(listings);
-            window.SetStatus("Готово");
-            Log($"trade search ok: {listings.Count} listings, {filters.Count} filters");
+            window.SetStatus($"Найдено: {search.Total}");
+            Log($"trade ok: total={search.Total} shown={listings.Count} filters={filters.Count} id={search.Id}");
         }
         catch (Exception ex)
         {
