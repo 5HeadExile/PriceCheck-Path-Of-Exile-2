@@ -86,6 +86,25 @@ public class ItemTextParserTests
     }
 
     [Fact]
+    public void AdvancedDescription_SkipsAnnotationsAndStripsRollRanges()
+    {
+        var item = Parse("rare_helmet_advanced.txt");
+
+        Assert.Equal(ItemRarity.Rare, item.Rarity);
+        Assert.True(item.Corrupted);
+
+        // «{ ... Modifier ... }» строки не моды; диапазоны ролла «(105-124)» убраны.
+        var allMods = item.Implicits.Concat(item.Explicits).Select(m => m.Text).ToList();
+        Assert.All(allMods, t => Assert.DoesNotContain("{", t));
+        Assert.All(allMods, t => Assert.DoesNotContain("(", t));
+
+        Assert.Contains("+114 to maximum Mana", item.Explicits.Select(m => m.Text));
+        Assert.Contains("+153 to maximum Life", item.Explicits.Select(m => m.Text));
+        Assert.Contains("+29% to Lightning Resistance", item.Explicits.Select(m => m.Text));
+        Assert.Contains("+27 to Spirit", item.Implicits.Select(m => m.Text));
+    }
+
+    [Fact]
     public void NonItemText_ReturnsFalse()
     {
         Assert.False(ItemTextParser.TryParse("just some random text", out _));

@@ -26,6 +26,10 @@ public static class ItemTextParser
         @"\s*\((implicit|rune|enchant|crafted|fractured|scourge|veiled|desecrated|explicit)\)\s*$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+    // Диапазон ролла в «Advanced Item Description»: «+153(150-174) to ...» → убираем «(150-174)».
+    private static readonly Regex RxRollRange = new(
+        @"\((?:\d[\d.,\s–—\-]*)\)", RegexOptions.Compiled);
+
     private static readonly HashSet<string> Flags = new(StringComparer.OrdinalIgnoreCase)
     {
         "Corrupted", "Unidentified", "Mirrored", "Split", "Fractured Item", "Synthesised Item",
@@ -96,6 +100,13 @@ public static class ItemTextParser
 
                 // Прочие «Ключ:»-строки (Requirements, Level, Str…) — свойства, не моды.
                 if (RxProperty.IsMatch(line))
+                {
+                    continue;
+                }
+
+                // Строки-аннотации аффиксов в Advanced Item Description:
+                // «{ Prefix Modifier "Fecund" (Tier: 1) — Life }» — не моды.
+                if (line.StartsWith("{", StringComparison.Ordinal))
                 {
                     continue;
                 }
@@ -199,10 +210,10 @@ public static class ItemTextParser
         var m = RxModSuffix.Match(line);
         if (!m.Success)
         {
-            return (line.Trim(), ModKind.Explicit);
+            return (CleanRanges(line), ModKind.Explicit);
         }
 
-        var text = line[..m.Index].Trim();
+        var text = CleanRanges(line[..m.Index]);
         var kind = m.Groups[1].Value.ToLowerInvariant() switch
         {
             "implicit" => ModKind.Implicit,
@@ -213,6 +224,13 @@ public static class ItemTextParser
             _ => ModKind.Explicit,
         };
         return (text, kind);
+    }
+
+    /// <summary>Убирает диапазон ролла «(150-174)» и схлопывает пробелы.</summary>
+    private static string CleanRanges(string s)
+    {
+        var cleaned = RxRollRange.Replace(s, string.Empty);
+        return Regex.Replace(cleaned, @"\s{2,}", " ").Trim();
     }
 
     private static ItemRarity MapRarity(string? rarity) => rarity?.Trim().ToLowerInvariant() switch
