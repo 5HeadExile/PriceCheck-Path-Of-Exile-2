@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
+      "Edit(**/*.md)",
+      "Write(**/*.md)",
       "Edit(/.claude/skills/poe2-pricecheck/**)",
+      "Write(/.claude/skills/poe2-pricecheck/**)",
       "mcp__playwright__browser_wait_for",
       "mcp__playwright__browser_network_requests",
       "mcp__playwright__browser_close"
