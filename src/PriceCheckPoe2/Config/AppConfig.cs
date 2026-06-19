@@ -66,6 +66,12 @@ public sealed class AppConfig
     /// <summary>Хоткей debug-боксов.</summary>
     public string DebugHotkey { get; set; } = "VcF3";
 
+    /// <summary>Хоткей price-check предмета (фича 2). По умолчанию Ctrl+D.</summary>
+    public string ItemCheckHotkey { get; set; } = "VcD";
+
+    /// <summary>Требовать ли Ctrl для хоткея price-check.</summary>
+    public bool ItemCheckUseCtrl { get; set; } = true;
+
     /// <summary>Прозрачность затемняющего слоя меню (0..1).</summary>
     public double MenuDimOpacity { get; set; } = 0.55;
 
