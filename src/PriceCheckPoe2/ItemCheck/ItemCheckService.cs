@@ -140,8 +140,7 @@ public sealed class ItemCheckService
     {
         try
         {
-            var (name, type) = TradeTarget(item);
-            var body = TradeQueryBuilder.Build(filters, name, type);
+            var body = TradeQueryBuilder.Build(BuildContext(item, filters));
             var search = await _trade.SearchAsync(body).ConfigureAwait(false);
 
             var url = $"https://www.pathofexile.com/trade2/search/poe2/{Uri.EscapeDataString(_config.League)}/{search.Id}";
@@ -159,17 +158,46 @@ public sealed class ItemCheckService
         }
     }
 
-    /// <summary>Имя/тип для сужения поиска трейда под конкретный предмет.</summary>
-    private static (string? Name, string? Type) TradeTarget(ParsedItem item) => item.Rarity switch
+    /// <summary>
+    /// Строит контекст trade2-запроса под предмет (логика EE2): уникал — по имени+базе;
+    /// снаряжение — по категории слота + статам; валюта/гемы — по имени-типу. Для
+    /// не-уникального снаряжения исключаем corrupted/mirrored (если предмет сам не
+    /// корраптнут).
+    /// </summary>
+    private static TradeQueryContext BuildContext(ParsedItem item, IReadOnlyList<TradeFilter> filters)
     {
-        // Уникал: имя + база. Rare: фиксируем базу, остальное — статами.
-        ItemRarity.Unique => (item.Name, item.BaseType),
-        ItemRarity.Rare => (null, item.BaseType),
-        // Magic/Normal: база «зашита» в строку с аффиксами — без БД не вычленить, пропускаем.
-        ItemRarity.Magic or ItemRarity.Normal => (null, null),
-        // Валюта/гемы/омены и пр.: их «тип» — это само имя.
-        _ => (null, item.Name ?? item.BaseType),
-    };
+        var stats = filters.Select(f => new StatQuery(f.TradeId, f.Min, f.Max)).ToList();
+        var nonUnique = item.Rarity is ItemRarity.Normal or ItemRarity.Magic or ItemRarity.Rare;
+
+        string? name = null, type = null, category = null;
+        if (item.Rarity == ItemRarity.Unique)
+        {
+            name = item.Name;
+            type = item.BaseType;
+        }
+        else if (item.IsGear)
+        {
+            category = TradeCategories.ForClass(item.ItemClass);
+            if (category is null)
+            {
+                type = item.BaseType; // класс не в карте — ищем по базе
+            }
+        }
+        else
+        {
+            type = item.Name ?? item.BaseType; // валюта/гемы/омены
+        }
+
+        return new TradeQueryContext
+        {
+            Name = name,
+            Type = type,
+            CategoryId = category,
+            Corrupted = item.Corrupted ? true : nonUnique ? false : (bool?)null,
+            Mirrored = nonUnique ? false : null,
+            Stats = stats,
+        };
+    }
 
     private async Task EstimateNinjaAsync(ParsedItem item, ItemCheckWindow window)
     {

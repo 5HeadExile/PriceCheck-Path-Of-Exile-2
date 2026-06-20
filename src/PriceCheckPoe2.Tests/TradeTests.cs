@@ -26,6 +26,29 @@ public class TradeTests
     }
 
     [Fact]
+    public void QueryBuilder_Context_BuildsCategoryFiltersAndStats()
+    {
+        var ctx = new TradeQueryContext
+        {
+            CategoryId = "armour.helmet",
+            Corrupted = false,
+            Mirrored = false,
+            Stats = new[] { new StatQuery("explicit.stat_3299347043", 90) },
+        };
+
+        var body = TradeQueryBuilder.Build(ctx);
+        var filters = body["query"]!["filters"]!;
+
+        Assert.Equal("armour.helmet", (string?)filters["type_filters"]!["filters"]!["category"]!["option"]);
+        Assert.Equal("false", (string?)filters["misc_filters"]!["filters"]!["corrupted"]!["option"]);
+        Assert.Equal("false", (string?)filters["misc_filters"]!["filters"]!["mirrored"]!["option"]);
+
+        var stat = body["query"]!["stats"]![0]!["filters"]![0]!;
+        Assert.Equal("explicit.stat_3299347043", (string?)stat["id"]);
+        Assert.Equal(90, (double?)stat["value"]!["min"]);
+    }
+
+    [Fact]
     public void RateLimiter_ParsesPolicy()
     {
         var rules = RateLimiter.ParsePolicy("8:10:60,15:60:300");
