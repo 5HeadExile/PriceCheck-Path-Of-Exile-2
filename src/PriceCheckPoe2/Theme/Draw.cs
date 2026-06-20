@@ -74,6 +74,28 @@ public static class Draw
             TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
     }
 
+    /// <summary>
+    /// Текст с межбуквенным трекингом (letter-spacing). GDI/TextRenderer не умеет
+    /// трекинг, поэтому рисуем посимвольно, прибавляя <paramref name="tracking"/> px.
+    /// Возвращает итоговую ширину.
+    /// </summary>
+    public static int TrackedText(Graphics g, string text, Font font, Color color, int x, int yCenter, float tracking)
+    {
+        var cx = x;
+        foreach (var ch in text)
+        {
+            var s = ch.ToString();
+            var w = TextRenderer.MeasureText(g, s, font, Size.Empty,
+                TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding).Width;
+            var h = font.Height;
+            TextRenderer.DrawText(g, s, font, new Rectangle(cx, yCenter - h / 2, w + 2, h), color,
+                TextFormatFlags.Left | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+            cx += w + (int)Math.Round(tracking);
+        }
+
+        return cx - x;
+    }
+
     /// <summary>Текст слева по вертикали по центру, с отступом.</summary>
     public static void LeftText(Graphics g, string text, Font font, Color color, Rectangle r, int padLeft)
     {

@@ -254,6 +254,18 @@ API — «Runes of Aldur» (дефолт в конфиге).
 
 ## Лог изменений (свежее сверху)
 
+- *2026-06-20* **Фикс шрифтов под референс.** Дизайн отличался от HTML-эталона:
+  причина — шрифты создавались в **пунктах**, а спека в **пикселях** (→ всё
+  ~+33% крупнее и вразнобой), плюс вес Bold(700) вместо Semibold(600). Перевёл
+  все `Palette`-шрифты на `GraphicsUnit.Pixel` с точными px из HTML (титул 13,
+  кнопка 12.5, лейбл 11.5, секция 9 mono, значение 11 mono, keycap 12 mono),
+  Semibold — семейством «Segoe UI Semibold». Добавлен `Draw.TrackedText`
+  (межбуквенный трекинг +1.5 для секций/бренда). Заголовки секций: тон Gold
+  (настройки) / Faint (меню и «Отладка») — в HTML меню-секции приглушённые, а
+  не золотые. Текст обычных кнопок — светлее (#C9C4B8), не muted. Иконки 13px.
+  Сверено скриншотами. *Урок:* WinForms `Font` по умолчанию в ПУНКТАХ — для
+  px-спеки всегда `GraphicsUnit.Pixel`; Semibold(600) — это отдельное семейство.
+
 - *2026-06-20* **РЕЛИЗ v0.2.0 на GitHub.** Собран single-file self-contained exe
   (win-x64, 85 МБ): `dotnet publish -r win-x64 --self-contained -p:PublishSingleFile=true
   -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true

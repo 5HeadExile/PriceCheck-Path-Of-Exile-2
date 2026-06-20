@@ -87,7 +87,7 @@ public sealed class KeycapInput : Control
         }
 
         var text = _capturing ? "…" : KeyName.Display(KeyCodeName);
-        using var font = Palette.Mono();
+        using var font = Palette.Mono12();
         Draw.CenterText(g, text, font, _capturing ? Palette.Accent : Palette.Text, r);
     }
 }

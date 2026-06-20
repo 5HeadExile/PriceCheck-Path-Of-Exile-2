@@ -66,7 +66,7 @@ public sealed class SettingsForm : RoundedForm
         y += 6;
 
         // ОТЛАДКА (приглушённая)
-        Controls.Add(new SectionHeader("Отладка", muted: true, badge: "ДОПОЛНИТЕЛЬНО")
+        Controls.Add(new SectionHeader("Отладка", SectionTone.Faint, "ДОПОЛНИТЕЛЬНО")
         {
             Location = new Point(Pad, y),
             Size = new Size(w, 18),
@@ -145,7 +145,7 @@ public sealed class SettingsForm : RoundedForm
         BorderStyle = BorderStyle.FixedSingle,
         BackColor = muted ? Palette.FieldMutedBg : Palette.InputBg,
         ForeColor = muted ? Palette.Hex("#7A766C") : Palette.Text,
-        Font = Palette.Label(),
+        Font = Palette.FieldText(),
     };
 
     private static void StyleNumeric(NumericUpDown n)
@@ -153,7 +153,7 @@ public sealed class SettingsForm : RoundedForm
         n.BorderStyle = BorderStyle.FixedSingle;
         n.BackColor = Palette.InputBg;
         n.ForeColor = Palette.Text;
-        n.Font = Palette.Label();
+        n.Font = Palette.FieldText();
     }
 
     protected override void OnPaint(PaintEventArgs e)
@@ -176,11 +176,12 @@ public sealed class SettingsForm : RoundedForm
         g.Restore(state);
 
         using var title = Palette.Title();
-        TextRenderer.DrawText(g, "Настройки", title, new Point(36, 15), Palette.Text, TextFormatFlags.NoPrefix);
+        TextRenderer.DrawText(g, "Настройки", title, new Rectangle(36, 0, 200, 46), Palette.Text,
+            TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
 
         // Кнопка закрытия (рисуем глиф; клик ловим в OnMouseDown)
-        using var icon = Palette.Icon(10f);
-        TextRenderer.DrawText(g, "", icon, new Rectangle(ClientSize.Width - 38, 12, 24, 24),
+        using var icon = Palette.Icon(12f);
+        TextRenderer.DrawText(g, "", icon, new Rectangle(ClientSize.Width - 40, 0, 28, 46),
             Palette.TextMuted, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
 
         using var pen = new Pen(Palette.BorderFaint, 1f);

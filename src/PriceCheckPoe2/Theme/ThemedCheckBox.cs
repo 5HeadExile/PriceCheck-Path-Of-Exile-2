@@ -38,7 +38,7 @@ public sealed class ThemedCheckBox : Control
         {
             Draw.FillVertical(g, box, 4, Palette.AccentLight, Palette.Accent);
             Draw.Border(g, box, 4, Palette.AccentBorder);
-            using var font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+            using var font = new Font("Segoe UI Semibold", 11f, FontStyle.Regular, GraphicsUnit.Pixel);
             Draw.CenterText(g, "✓", font, Palette.OnAccent, box);
         }
         else

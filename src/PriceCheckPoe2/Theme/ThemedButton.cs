@@ -116,28 +116,29 @@ public sealed class ThemedButton : Control
         var textLeft = 12;
         if (!string.IsNullOrEmpty(Glyph))
         {
-            using var iconFont = Palette.Icon(11f);
-            var iconRect = new Rectangle(10, 0, 20, Height);
+            using var iconFont = Palette.Icon(13f);
+            var iconRect = new Rectangle(10, 0, 22, Height);
             TextRenderer.DrawText(g, Glyph, iconFont, iconRect, glyphColor,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
-            textLeft = 34;
+            textLeft = 36;
         }
 
         // Правый тег-статус
         var textRightPad = 12;
         if (!string.IsNullOrEmpty(Tag2))
         {
-            using var tagFont = Palette.MonoSmall();
-            var tw = TextRenderer.MeasureText(g, Tag2, tagFont).Width + 12;
+            using var tagFont = Palette.Section();
+            var tw = TextRenderer.MeasureText(g, Tag2, tagFont).Width + 14;
             var tagRect = new Rectangle(Width - tw - 10, (Height - 18) / 2, tw, 18);
-            Draw.Fill(g, tagRect, 4, Palette.Surface);
             Draw.Border(g, tagRect, 4, Palette.AccentBorder);
             Draw.CenterText(g, Tag2, tagFont, Palette.Accent, tagRect);
             textRightPad = tw + 16;
         }
 
         // Текст
-        using var font = Palette.Action();
+        using var font = Variant is ButtonVariant.Primary or ButtonVariant.GoldFill
+            ? Palette.ActionSemibold()
+            : Palette.Action();
         var labelRect = new Rectangle(textLeft, 0, Width - textLeft - textRightPad, Height);
         TextRenderer.DrawText(g, Text, font, labelRect, textColor,
             TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
@@ -169,7 +170,7 @@ public sealed class ThemedButton : Control
 
                 return _hover
                     ? (Palette.SurfaceHover, Palette.SurfaceHover, Palette.BorderStrong, Palette.Text, Palette.AccentLighter)
-                    : (Palette.Surface, Palette.Surface, Palette.BorderQuiet, Palette.TextMuted, Palette.TextFaint);
+                    : (Palette.Surface, Palette.Surface, Palette.BorderQuiet, Palette.ButtonText, Palette.TextMuted);
         }
     }
 }

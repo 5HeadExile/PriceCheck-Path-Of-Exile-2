@@ -32,7 +32,7 @@ public sealed class MenuWindow : RoundedForm
         var w = ClientSize.Width - Pad * 2; // 296
         int y = 54;
 
-        Controls.Add(new SectionHeader("Область") { Location = new Point(Pad, y), Size = new Size(w, 18) });
+        Controls.Add(new SectionHeader("Область", SectionTone.Faint) { Location = new Point(Pad, y), Size = new Size(w, 18) });
         y += 22;
 
         var add = Button("Выделить область", ButtonVariant.Primary, "", () => AddPylon?.Invoke());
@@ -46,7 +46,7 @@ public sealed class MenuWindow : RoundedForm
         Controls.Add(clear);
         y += 40 + 10;
 
-        Controls.Add(new SectionHeader("Сканирование") { Location = new Point(Pad, y), Size = new Size(w, 18) });
+        Controls.Add(new SectionHeader("Сканирование", SectionTone.Faint) { Location = new Point(Pad, y), Size = new Size(w, 18) });
         y += 22;
 
         var toggle = Button(
@@ -103,12 +103,12 @@ public sealed class MenuWindow : RoundedForm
         // Брендовый бар (44h)
         DrawDiamond(g, new Point(18, 22));
 
-        using var brand = new Font("Segoe UI", 11f, FontStyle.Bold);
-        TextRenderer.DrawText(g, "PRICECHECK", brand, new Point(34, 14), Palette.Text, TextFormatFlags.NoPrefix);
-        var bw = TextRenderer.MeasureText(g, "PRICECHECK", brand).Width;
+        using var brand = Palette.Brand();
+        var bw = Draw.TrackedText(g, "PRICECHECK", brand, Palette.Text, 34, 22, 1.5f);
 
         using var sub = Palette.MonoSmall();
-        TextRenderer.DrawText(g, "PoE2", sub, new Point(34 + bw + 8, 17), Palette.Accent, TextFormatFlags.NoPrefix);
+        TextRenderer.DrawText(g, "PoE2", sub, new Rectangle(34 + bw + 8, 0, 60, 44), Palette.Accent,
+            TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
 
         // Точка статуса справа
         var dotColor = _overlayActive ? Palette.Success : Palette.TextFaint;

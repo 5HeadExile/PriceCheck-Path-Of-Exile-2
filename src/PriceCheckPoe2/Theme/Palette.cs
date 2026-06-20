@@ -48,12 +48,26 @@ public static class Palette
     // Тёмный текст на золотой заливке
     public static readonly Color OnAccent = Hex("#1A1408");
 
-    // Шрифты
-    public static Font Title() => new("Segoe UI", 11.5f, FontStyle.Bold);
-    public static Font Action() => new("Segoe UI", 10.5f, FontStyle.Bold);
-    public static Font Label() => new("Segoe UI", 10f, FontStyle.Regular);
-    public static Font Section() => new("Consolas", 8.5f, FontStyle.Regular);
-    public static Font Mono() => new("Consolas", 10f, FontStyle.Regular);
-    public static Font MonoSmall() => new("Consolas", 8.5f, FontStyle.Regular);
-    public static Font Icon(float size = 12f) => new("Segoe MDL2 Assets", size, FontStyle.Regular);
+    // Текст кнопок-действий (светлее, чем muted) и нижнего ряда
+    public static readonly Color ButtonText = Hex("#C9C4B8");
+    public static readonly Color ButtonTextDim = Hex("#B7B2A8");
+
+    // Шрифты — ВСЕ в пикселях (дизайн-спека в px; пункты давали ~+33% размера).
+    // Semibold-вес берём отдельным семейством «Segoe UI Semibold» (600), а не Bold (700).
+    public static Font Brand() => Pixel("Segoe UI Semibold", 12f);
+    public static Font Title() => Pixel("Segoe UI Semibold", 13f);
+    public static Font ActionSemibold() => Pixel("Segoe UI Semibold", 12.5f);
+    public static Font Action() => Pixel("Segoe UI", 12.5f);
+    public static Font ActionSmall() => Pixel("Segoe UI", 12f);
+    public static Font Label() => Pixel("Segoe UI", 11.5f);
+    public static Font FieldText() => Pixel("Segoe UI", 12f);
+    public static Font Section() => Pixel("Consolas", 9f);
+    public static Font Mono() => Pixel("Consolas", 11f);
+    public static Font Mono12() => Pixel("Consolas", 12f);
+    public static Font MonoSmall() => Pixel("Consolas", 10f);
+    public static Font Badge() => Pixel("Consolas", 8f);
+    public static Font Icon(float sizePx = 13f) => Pixel("Segoe MDL2 Assets", sizePx);
+
+    private static Font Pixel(string family, float sizePx) =>
+        new(family, sizePx, FontStyle.Regular, GraphicsUnit.Pixel);
 }
