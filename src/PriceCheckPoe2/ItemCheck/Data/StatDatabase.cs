@@ -29,6 +29,9 @@ public sealed class StatDatabase
     {
         public required string Id;
         public required string Ref;
+        public int Better = StatFilterMath.PositiveRoll; // EE2 better: 1/-1/0
+        public bool Dp;                                   // десятичный ролл
+        public bool Inverted;                             // trade.inverted (tradeInvert)
         public Dictionary<string, string> TradeByKind = new(StringComparer.OrdinalIgnoreCase);
     }
 
@@ -64,7 +67,14 @@ public sealed class StatDatabase
                 continue;
             }
 
-            var entry = new StatEntry { Id = id, Ref = refText };
+            var entry = new StatEntry
+            {
+                Id = id,
+                Ref = refText,
+                Better = (int?)o["better"] ?? StatFilterMath.PositiveRoll,
+                Dp = (bool?)o["dp"] ?? false,
+                Inverted = (bool?)o["trade"]?["inverted"] ?? false,
+            };
             if (o["trade"]?["ids"] is JObject ids)
             {
                 foreach (var prop in ids.Properties())
@@ -149,7 +159,9 @@ public sealed class StatDatabase
                 value = -value;
             }
 
-            best = new MatchedStat(stat.Id, PickTradeId(stat, kind), kind, trimmed, value, nums);
+            best = new MatchedStat(
+                stat.Id, PickTradeId(stat, kind), kind, trimmed, value, nums,
+                IsPseudo: false, Better: stat.Better, Dp: stat.Dp, Inverted: stat.Inverted);
             bestSpec = m.Specificity;
         }
 

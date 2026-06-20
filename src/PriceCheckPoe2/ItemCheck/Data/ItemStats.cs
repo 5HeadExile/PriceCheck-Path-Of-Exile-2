@@ -10,7 +10,10 @@ public sealed record MatchedStat(
     string Text,
     double? Value,
     IReadOnlyList<double> Values,
-    bool IsPseudo = false);
+    bool IsPseudo = false,
+    int Better = StatFilterMath.PositiveRoll,
+    bool Dp = false,
+    bool Inverted = false);
 
 /// <summary>Результат сопоставления предмета: реальные моды + вычисленные псевдо-моды.</summary>
 public sealed class ItemStats

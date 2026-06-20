@@ -15,7 +15,7 @@ namespace PriceCheckPoe2.ItemCheck.UI;
 /// </summary>
 public sealed class ItemCheckWindow : Sw.Window
 {
-    private readonly List<(MatchedStat Stat, Swc.CheckBox Check, Swc.TextBox Min)> _rows = new();
+    private readonly List<(MatchedStat Stat, Swc.CheckBox Check, Swc.TextBox Min, Swc.TextBox Max)> _rows = new();
     private readonly Swc.StackPanel _listings;
     private readonly Swc.TextBlock _status;
     private readonly Swc.TextBlock _ninja;
@@ -230,7 +230,7 @@ public sealed class ItemCheckWindow : Sw.Window
         b.Padding = new Sw.Thickness(8, 2, 8, 2);
         b.Click += (_, _) =>
         {
-            foreach (var (stat, check, _) in _rows)
+            foreach (var (stat, check, _, _) in _rows)
             {
                 if (check.IsEnabled)
                 {
@@ -261,15 +261,16 @@ public sealed class ItemCheckWindow : Sw.Window
     private void RaiseSearch()
     {
         var filters = new List<TradeFilter>();
-        foreach (var (stat, check, min) in _rows)
+        foreach (var (stat, check, min, max) in _rows)
         {
             if (check.IsChecked != true || stat.TradeId is null)
             {
                 continue;
             }
 
-            double? minValue = double.TryParse(min.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var v) ? v : null;
-            filters.Add(new TradeFilter(stat.TradeId, minValue));
+            double? minValue = double.TryParse(min.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var lo) ? lo : null;
+            double? maxValue = double.TryParse(max.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var hi) ? hi : null;
+            filters.Add(new TradeFilter(stat.TradeId, minValue, maxValue));
         }
 
         SetStatus("Поиск…");
@@ -291,27 +292,39 @@ public sealed class ItemCheckWindow : Sw.Window
             Width = 380,
             Content = matched ? m.Text : m.Text + "  (нет в базе)",
         };
-        var min = new Swc.TextBox
-        {
-            Width = 64,
-            VerticalAlignment = Sw.VerticalAlignment.Center,
-            Background = Brush(36, 36, 42),
-            Foreground = Rgb(230, 230, 235),
-            BorderBrush = Brush(70, 70, 80),
-            ToolTip = "минимум",
-        };
+        var min = MakeBoundBox("минимум");
+        var max = MakeBoundBox("максимум");
 
-        // Автоминимум ≈ 90% ролла, чтобы поиск ловил «такой же и лучше».
-        if (matched && m.Value is { } v && v > 0)
+        // Границы поиска как в EE2: окно ±10% вокруг ролла с учётом направления
+        // «лучше» (для negative-роллов заполняем max) и инверсии стата.
+        if (matched && m.Value is { } v)
         {
-            min.Text = ((int)Math.Floor(v * 0.9)).ToString(CultureInfo.InvariantCulture);
+            var (lo, hi) = StatFilterMath.FilterBounds(v, m.Better, m.Dp, m.Inverted);
+            if (lo.HasValue) min.Text = FormatBound(lo.Value, m.Dp);
+            if (hi.HasValue) max.Text = FormatBound(hi.Value, m.Dp);
         }
 
         row.Children.Add(check);
         row.Children.Add(min);
-        _rows.Add((m, check, min));
+        row.Children.Add(max);
+        _rows.Add((m, check, min, max));
         return new Swc.Border { Child = row, Padding = new Sw.Thickness(2, 3, 2, 3) };
     }
+
+    private Swc.TextBox MakeBoundBox(string tip) => new()
+    {
+        Width = 56,
+        Margin = new Sw.Thickness(2, 0, 0, 0),
+        VerticalAlignment = Sw.VerticalAlignment.Center,
+        Background = Brush(36, 36, 42),
+        Foreground = Rgb(230, 230, 235),
+        BorderBrush = Brush(70, 70, 80),
+        ToolTip = tip,
+    };
+
+    private static string FormatBound(double value, bool dp) =>
+        dp ? value.ToString("0.##", CultureInfo.InvariantCulture)
+           : ((long)Math.Round(value)).ToString(CultureInfo.InvariantCulture);
 
     private static bool IsImportant(string text)
     {
