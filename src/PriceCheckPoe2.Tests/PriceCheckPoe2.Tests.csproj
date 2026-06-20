@@ -18,10 +18,4 @@
     <ProjectReference Include="..\PriceCheckPoe2\PriceCheckPoe2.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="Fixtures\**\*.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
 </Project>

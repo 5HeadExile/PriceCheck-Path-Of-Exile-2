@@ -16,7 +16,6 @@ public sealed class HotkeyManager : IDisposable
     public event Action? MenuToggleRequested;
     public event Action? RecalibrateRequested;
     public event Action? DebugToggleRequested;
-    public event Action? ItemCheckRequested;
 
     public HotkeyManager(AppConfig config)
     {
@@ -31,17 +30,6 @@ public sealed class HotkeyManager : IDisposable
     private void OnKeyPressed(object? sender, KeyboardHookEventArgs e)
     {
         var key = e.Data.KeyCode;
-
-        // Состояние Ctrl берём из маски самого события — надёжнее, чем
-        // отслеживать нажатие/отпускание отдельными событиями.
-        var ctrl = (e.RawEvent.Mask & (EventMask.LeftCtrl | EventMask.RightCtrl)) != EventMask.None;
-
-        // Price-check (фича 2): хоткей с модификатором Ctrl (по умолчанию Ctrl+D).
-        if (key == Parse(_config.ItemCheckHotkey) && (!_config.ItemCheckUseCtrl || ctrl))
-        {
-            ItemCheckRequested?.Invoke();
-            return;
-        }
 
         if (key == Parse(_config.MenuHotkey))
         {

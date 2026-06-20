@@ -38,11 +38,4 @@
     </None>
   </ItemGroup>
 
-  <!-- Вендоренные данные EE2 (item price-check, фича I*) — копируем в вывод. -->
-  <ItemGroup>
-    <Content Include="ItemCheck\Data\ee2\*.ndjson">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
 </Project>

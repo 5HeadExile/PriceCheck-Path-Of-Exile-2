@@ -32,9 +32,6 @@ public sealed class TrayApplicationContext : ApplicationContext
     private PylonScanner? _scanner;
     private RegionMonitor? _monitor;
 
-    // Фича 2 (item price-check) — независимый сервис, создаётся лениво.
-    private ItemCheck.ItemCheckService? _itemCheck;
-
     public TrayApplicationContext()
     {
         _config = AppConfig.Load();
@@ -54,7 +51,6 @@ public sealed class TrayApplicationContext : ApplicationContext
         _hotkeys.MenuToggleRequested += () => OnUi(() => _menu.Toggle());
         _hotkeys.RecalibrateRequested += () => OnUi(AddPylonRegion);
         _hotkeys.DebugToggleRequested += () => OnUi(ToggleDebug);
-        _hotkeys.ItemCheckRequested += () => OnUi(TriggerItemCheck);
         _hotkeys.Start();
 
         _trayIcon = new NotifyIcon
@@ -75,7 +71,6 @@ public sealed class TrayApplicationContext : ApplicationContext
     {
         var menu = new ContextMenuStrip();
         menu.Items.Add("Открыть меню", null, (_, _) => _menu.Toggle());
-        menu.Items.Add("Price-check предмета (Ctrl+D)", null, (_, _) => TriggerItemCheck());
         menu.Items.Add("Настройки", null, (_, _) => OpenSettings());
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add("Выход", null, (_, _) => ExitApp());
@@ -227,15 +222,6 @@ public sealed class TrayApplicationContext : ApplicationContext
             _priceOverlay.DebugMode = !_priceOverlay.DebugMode;
         }
     }
-
-    private void TriggerItemCheck()
-    {
-        _itemCheck ??= new ItemCheck.ItemCheckService(_config, NotifyBalloon);
-        _itemCheck.Trigger();
-    }
-
-    private void NotifyBalloon(string message) =>
-        OnUi(() => _trayIcon.ShowBalloonTip(2500, "PriceCheck PoE2", message, ToolTipIcon.Info));
 
     private void ExitApp()
     {

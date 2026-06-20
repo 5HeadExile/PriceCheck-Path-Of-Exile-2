@@ -66,22 +66,6 @@ public sealed class AppConfig
     /// <summary>Хоткей debug-боксов.</summary>
     public string DebugHotkey { get; set; } = "VcF3";
 
-    /// <summary>
-    /// Хоткей price-check предмета (фича 2). По умолчанию Ctrl+C — это штатная
-    /// клавиша копирования предмета в PoE2 (не конфликтует с WASD-движением).
-    /// </summary>
-    public string ItemCheckHotkey { get; set; } = "VcC";
-
-    /// <summary>Требовать ли Ctrl для хоткея price-check.</summary>
-    public bool ItemCheckUseCtrl { get; set; } = true;
-
-    /// <summary>
-    /// Слать ли свой Ctrl+C при срабатывании. Для хоткея Ctrl+C — <c>false</c>:
-    /// игра уже копирует предмет сама, а инъекция Ctrl+C зациклила бы хук.
-    /// Для произвольного хоткея (напр. F5) — <c>true</c>.
-    /// </summary>
-    public bool ItemCheckSendCopy { get; set; }
-
     /// <summary>Прозрачность затемняющего слоя меню (0..1).</summary>
     public double MenuDimOpacity { get; set; } = 0.55;
 
