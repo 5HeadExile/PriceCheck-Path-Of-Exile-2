@@ -50,7 +50,7 @@ public sealed class MenuWindow : RoundedForm
         y += 22;
 
         var toggle = Button(
-            "Оверлей: пауза / возобновить",
+            "Оверлей: пауза",
             ButtonVariant.Normal,
             _overlayActive ? "" : "",
             () => TogglePriceOverlay?.Invoke());

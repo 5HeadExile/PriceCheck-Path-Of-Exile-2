@@ -20,6 +20,9 @@ public class RoundedForm : Form
         DoubleBuffered = true;
         BackColor = Palette.WindowBottom;
         Font = Palette.Label();
+        // Раскладка полностью ручная в пикселях — отключаем авто-масштаб WinForms
+        // (по умолчанию AutoScaleMode.Font раздувал всё окно от размера шрифта).
+        AutoScaleMode = AutoScaleMode.None;
     }
 
     protected override CreateParams CreateParams

@@ -36,6 +36,24 @@ internal static class Program
             return;
         }
 
+        // Технический рендер окна в PNG (для проверки дизайна без захвата экрана):
+        // --shot menu|settings <путь>.
+        if (args.Length >= 3 && args[0] == "--shot")
+        {
+            Form form = args[1] == "menu"
+                ? new Overlay.MenuWindow(overlayActive: true, hasSelection: true)
+                : new Settings.SettingsForm(Config.AppConfig.Load());
+            form.StartPosition = FormStartPosition.Manual;
+            form.Location = new System.Drawing.Point(-3000, -3000);
+            form.Show();
+            Application.DoEvents();
+            using var bmp = new System.Drawing.Bitmap(form.Width, form.Height);
+            form.DrawToBitmap(bmp, new System.Drawing.Rectangle(0, 0, form.Width, form.Height));
+            bmp.Save(args[2]);
+            form.Close();
+            return;
+        }
+
         Application.Run(new TrayApplicationContext());
     }
 }

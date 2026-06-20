@@ -141,7 +141,7 @@ public sealed class ThemedButton : Control
             : Palette.Action();
         var labelRect = new Rectangle(textLeft, 0, Width - textLeft - textRightPad, Height);
         TextRenderer.DrawText(g, Text, font, labelRect, textColor,
-            TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
+            TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.NoClipping);
     }
 
     private (Color bg, Color bgBottom, Color border, Color text, Color glyph) Resolve()
