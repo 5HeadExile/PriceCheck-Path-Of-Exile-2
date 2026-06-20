@@ -21,3 +21,4 @@ config.json
 
 # OCR data downloaded at build/runtime
 tessdata/
+release/
