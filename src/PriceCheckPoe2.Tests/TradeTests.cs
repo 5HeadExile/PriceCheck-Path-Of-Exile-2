@@ -101,5 +101,47 @@ public class TradeTests
         Assert.Equal(5, l.Amount, 3);
         Assert.Equal("exalted", l.Currency);
         Assert.Equal("@Bob hi", l.Whisper);
+        Assert.Equal(SellerStatus.Offline, l.Status); // нет account.online
+    }
+
+    [Fact]
+    public void ParseFetch_ReadsIndexedStatusAndIgn()
+    {
+        const string json = """
+        {"result":[{"listing":{"price":{"amount":3,"currency":"divine"},
+        "indexed":"2026-06-20T10:00:00Z",
+        "account":{"name":"Sue","lastCharacterName":"SueSlayer","online":{"status":"afk"}},
+        "whisper":"@SueSlayer hi"}}]}
+        """;
+        var l = Assert.Single(TradeClient.ParseFetch(json));
+        Assert.Equal(SellerStatus.Afk, l.Status);
+        Assert.Equal("SueSlayer", l.Ign);
+        Assert.Equal(new DateTime(2026, 6, 20, 10, 0, 0, DateTimeKind.Utc), l.Indexed!.Value.ToUniversalTime());
+    }
+
+    [Fact]
+    public void Summarize_PicksDominantCurrencyAndMedian()
+    {
+        var listings = new[]
+        {
+            new TradeListing("a", 2, "exalted", null),
+            new TradeListing("b", 4, "exalted", null),
+            new TradeListing("c", 6, "exalted", null),
+            new TradeListing("d", 100, "chaos", null), // другая валюта — не доминирует
+        };
+
+        var s = TradeClient.Summarize(listings);
+        Assert.NotNull(s);
+        Assert.Equal("exalted", s!.Currency);
+        Assert.Equal(2, s.Min, 3);
+        Assert.Equal(4, s.Median, 3); // медиана [2,4,6] = 4
+        Assert.Equal(3, s.Count);
+    }
+
+    [Fact]
+    public void Summarize_ReturnsNull_WhenNoPricedListings()
+    {
+        var listings = new[] { new TradeListing("a", 0, "", null) };
+        Assert.Null(TradeClient.Summarize(listings));
     }
 }

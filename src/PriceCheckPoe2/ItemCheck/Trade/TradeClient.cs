@@ -97,11 +97,62 @@ public sealed class TradeClient
             var price = listing["price"];
             var amount = (double?)price?["amount"] ?? 0;
             var currency = (string?)price?["currency"] ?? string.Empty;
-            var account = (string?)listing["account"]?["name"] ?? string.Empty;
+            var accountObj = listing["account"];
+            var account = (string?)accountObj?["name"] ?? string.Empty;
             var whisper = (string?)listing["whisper"];
-            listings.Add(new TradeListing(account, amount, currency, whisper));
+            var indexed = ParseIndexed((string?)listing["indexed"]);
+            var status = ParseStatus(accountObj?["online"]);
+            var ign = (string?)accountObj?["lastCharacterName"];
+            listings.Add(new TradeListing(account, amount, currency, whisper, indexed, status, ign));
         }
 
         return listings;
+    }
+
+    private static DateTime? ParseIndexed(string? iso) =>
+        DateTime.TryParse(iso, System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal,
+            out var dt)
+            ? dt
+            : null;
+
+    // account.online отсутствует → offline; есть и status=="afk" → afk; иначе online.
+    private static SellerStatus ParseStatus(JToken? online)
+    {
+        if (online is not JObject)
+        {
+            return SellerStatus.Offline;
+        }
+
+        return (string?)online["status"] == "afk" ? SellerStatus.Afk : SellerStatus.Online;
+    }
+
+    /// <summary>
+    /// Сводка по цене: доминирующая валюта среди листингов + её минимум и медиана.
+    /// Листинги уже отсортированы по цене (sort.price=asc), поэтому медиана честная.
+    /// </summary>
+    public static TradePriceSummary? Summarize(IReadOnlyList<TradeListing> listings)
+    {
+        var priced = listings.Where(l => l.Amount > 0 && !string.IsNullOrEmpty(l.Currency)).ToList();
+        if (priced.Count == 0)
+        {
+            return null;
+        }
+
+        // Доминирующая валюта — самая частая (при равенстве берём более дешёвую группу).
+        var currency = priced
+            .GroupBy(l => l.Currency)
+            .OrderByDescending(g => g.Count())
+            .ThenBy(g => g.Min(l => l.Amount))
+            .First().Key;
+
+        var amounts = priced.Where(l => l.Currency == currency).Select(l => l.Amount).OrderBy(a => a).ToList();
+        return new TradePriceSummary(currency, amounts[0], Median(amounts), amounts.Count);
+    }
+
+    private static double Median(IReadOnlyList<double> sorted)
+    {
+        var n = sorted.Count;
+        return n % 2 == 1 ? sorted[n / 2] : (sorted[(n / 2) - 1] + sorted[n / 2]) / 2.0;
     }
 }

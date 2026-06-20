@@ -151,17 +151,39 @@ public sealed class ItemCheckWindow : Sw.Window
     {
         _listings.Children.Clear();
         _listings.Children.Add(SectionLabel($"Листинги ({listings.Count})"));
+
+        var summary = TradeClient.Summarize(listings);
+        if (summary is not null)
+        {
+            _listings.Children.Add(Line(
+                $"Цена: от {summary.Min:0.##} · медиана {summary.Median:0.##} {summary.Currency} (по {summary.Count})",
+                12, true, Rgb(235, 205, 120)));
+        }
+
         foreach (var l in listings)
         {
             var row = new Swc.StackPanel { Orientation = Swc.Orientation.Horizontal, Margin = new Sw.Thickness(0, 2, 0, 2) };
             row.Children.Add(new Swc.TextBlock
             {
                 Text = $"{l.Amount:0.##} {l.Currency}",
-                Width = 120,
+                Width = 110,
                 FontWeight = Sw.FontWeights.Bold,
                 Foreground = Rgb(230, 200, 110),
             });
-            row.Children.Add(new Swc.TextBlock { Text = l.Account, Foreground = Rgb(200, 200, 208) });
+            row.Children.Add(StatusDot(l.Status));
+            row.Children.Add(new Swc.TextBlock
+            {
+                Text = l.Ign is { Length: > 0 } ? l.Ign : l.Account,
+                Width = 150,
+                Foreground = Rgb(200, 200, 208),
+                ToolTip = l.Account,
+            });
+            row.Children.Add(new Swc.TextBlock
+            {
+                Text = RelativeTime(l.Indexed),
+                Foreground = Rgb(140, 140, 150),
+                VerticalAlignment = Sw.VerticalAlignment.Center,
+            });
             _listings.Children.Add(row);
         }
 
@@ -325,6 +347,59 @@ public sealed class ItemCheckWindow : Sw.Window
     private static string FormatBound(double value, bool dp) =>
         dp ? value.ToString("0.##", CultureInfo.InvariantCulture)
            : ((long)Math.Round(value)).ToString(CultureInfo.InvariantCulture);
+
+    // Цветной индикатор статуса продавца: зелёный — онлайн, жёлтый — afk, серый — офлайн.
+    private Swc.TextBlock StatusDot(Trade.SellerStatus status) => new()
+    {
+        Text = "●",
+        Width = 16,
+        TextAlignment = Sw.TextAlignment.Center,
+        VerticalAlignment = Sw.VerticalAlignment.Center,
+        ToolTip = status switch
+        {
+            Trade.SellerStatus.Online => "онлайн",
+            Trade.SellerStatus.Afk => "afk",
+            _ => "офлайн",
+        },
+        Foreground = status switch
+        {
+            Trade.SellerStatus.Online => Rgb(110, 200, 110),
+            Trade.SellerStatus.Afk => Rgb(220, 200, 110),
+            _ => Rgb(120, 120, 128),
+        },
+    };
+
+    // Относительное время листинга («5 мин назад», «3 ч назад», «2 дн назад»).
+    private static string RelativeTime(DateTime? indexed)
+    {
+        if (indexed is not { } dt)
+        {
+            return string.Empty;
+        }
+
+        var span = DateTime.UtcNow - dt.ToUniversalTime();
+        if (span < TimeSpan.Zero)
+        {
+            span = TimeSpan.Zero;
+        }
+
+        if (span.TotalMinutes < 1)
+        {
+            return "только что";
+        }
+
+        if (span.TotalHours < 1)
+        {
+            return $"{(int)span.TotalMinutes} мин назад";
+        }
+
+        if (span.TotalDays < 1)
+        {
+            return $"{(int)span.TotalHours} ч назад";
+        }
+
+        return $"{(int)span.TotalDays} дн назад";
+    }
 
     private static bool IsImportant(string text)
     {
