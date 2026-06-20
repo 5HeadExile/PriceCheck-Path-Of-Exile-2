@@ -49,6 +49,15 @@ public sealed class ParsedItem
     public string? Sockets { get; init; }
     public string? StackSize { get; init; }
 
+    /// <summary>Требование по уровню («Requires Level N» / «Level: N» в Requirements).</summary>
+    public int? RequireLevel { get; init; }
+
+    /// <summary>Уровень гема («Level: N» у Skill/Support Gems); иначе null.</summary>
+    public int? GemLevel { get; init; }
+
+    /// <summary>Число сокетов (по строке «Sockets:»), 0 если нет.</summary>
+    public int SocketCount { get; init; }
+
     public bool Corrupted { get; init; }
     public bool Unidentified { get; init; }
     public bool Mirrored { get; init; }

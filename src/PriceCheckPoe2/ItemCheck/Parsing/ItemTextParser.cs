@@ -18,6 +18,13 @@ public static class ItemTextParser
     private static readonly Regex RxSockets = new(@"^Sockets:\s*(.+)$", RegexOptions.Compiled);
     private static readonly Regex RxStackSize = new(@"^Stack Size:\s*(.+)$", RegexOptions.Compiled);
 
+    // «Level: 20» — у гемов это уровень гема; у снаряжения такой строки нет.
+    private static readonly Regex RxLevel = new(@"^Level:\s*(\d+)", RegexOptions.Compiled);
+
+    // «Requires Level 65» или «Level 65» в секции Requirements.
+    private static readonly Regex RxRequiresLevel = new(
+        @"(?:Requires\s+)?Level\s+(\d+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
     // Строка-свойство вида «Ключ:» (Requirements, Level, Str, Armour…) — не мод.
     private static readonly Regex RxProperty = new(@"^[A-Za-z][A-Za-z ]*:", RegexOptions.Compiled);
 
@@ -53,9 +60,10 @@ public static class ItemTextParser
         var rarity = MapRarity(rarityText);
         var isGear = rarity is ItemRarity.Normal or ItemRarity.Magic or ItemRarity.Rare or ItemRarity.Unique;
 
-        int? itemLevel = null, quality = null;
+        int? itemLevel = null, quality = null, requireLevel = null, gemLevel = null;
         string? sockets = null, stackSize = null;
         bool corrupted = false, unidentified = false, mirrored = false;
+        var isGem = rarity == ItemRarity.Gem;
         var implicits = new List<ItemMod>();
         var explicits = new List<ItemMod>();
         var runes = new List<ItemMod>();
@@ -80,6 +88,30 @@ public static class ItemTextParser
                 if (RxSockets.Match(line) is { Success: true } s)
                 {
                     sockets = s.Groups[1].Value.Trim();
+                    continue;
+                }
+
+                // «Level: N» — у гемов это уровень гема, у снаряжения (секция
+                // Requirements) — требование по уровню. «Item Level:» обработан выше.
+                if (RxLevel.Match(line) is { Success: true } lv)
+                {
+                    var n = int.Parse(lv.Groups[1].Value);
+                    if (isGem)
+                    {
+                        gemLevel ??= n;
+                    }
+                    else
+                    {
+                        requireLevel ??= n;
+                    }
+
+                    continue;
+                }
+
+                // Резервный формат «Requires Level N» (без двоеточия).
+                if (requireLevel is null && RxRequiresLevel.Match(line) is { Success: true } rl)
+                {
+                    requireLevel = int.Parse(rl.Groups[1].Value);
                     continue;
                 }
 
@@ -139,6 +171,9 @@ public static class ItemTextParser
             Quality = quality,
             Sockets = sockets,
             StackSize = stackSize,
+            RequireLevel = requireLevel,
+            GemLevel = gemLevel,
+            SocketCount = CountSockets(sockets),
             Corrupted = corrupted,
             Unidentified = unidentified,
             Mirrored = mirrored,
@@ -224,6 +259,18 @@ public static class ItemTextParser
             _ => ModKind.Explicit,
         };
         return (text, kind);
+    }
+
+    /// <summary>Считает сокеты по строке «Sockets:» (символы-руны разделены пробелами/«-»).</summary>
+    private static int CountSockets(string? sockets)
+    {
+        if (string.IsNullOrWhiteSpace(sockets))
+        {
+            return 0;
+        }
+
+        // Сокеты записаны как «S S S» или «S-S-S»; считаем непустые токены-символы.
+        return sockets.Split(new[] { ' ', '-' }, StringSplitOptions.RemoveEmptyEntries).Length;
     }
 
     /// <summary>Убирает диапазон ролла «(150-174)» и схлопывает пробелы.</summary>

@@ -188,6 +188,13 @@ public sealed class ItemCheckService
             type = item.Name ?? item.BaseType; // валюта/гемы/омены
         }
 
+        // Гемы: ищем по типу и уровню (как EE2 misc_filters.gem_level).
+        var isGem = item.Rarity == ItemRarity.Gem;
+        int? gemLevelMin = isGem && item.GemLevel is { } gl ? gl : null;
+
+        // Сокеты у снаряжения сужают выдачу до «не меньше текущего».
+        int? socketsMin = item.IsGear && item.SocketCount > 0 ? item.SocketCount : null;
+
         return new TradeQueryContext
         {
             Name = name,
@@ -195,6 +202,8 @@ public sealed class ItemCheckService
             CategoryId = category,
             Corrupted = item.Corrupted ? true : nonUnique ? false : (bool?)null,
             Mirrored = nonUnique ? false : null,
+            GemLevelMin = gemLevelMin,
+            SocketsMin = socketsMin,
             Stats = stats,
         };
     }

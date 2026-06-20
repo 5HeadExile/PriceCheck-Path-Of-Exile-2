@@ -65,6 +65,7 @@ public class ItemTextParserTests
         Assert.Equal("Skill Gems", item.ItemClass);
         Assert.Equal(ItemRarity.Gem, item.Rarity);
         Assert.Equal("Spark", item.Name);
+        Assert.Equal(1, item.GemLevel);
         Assert.Empty(item.Explicits);
         Assert.Empty(item.Implicits);
     }
@@ -79,6 +80,9 @@ public class ItemTextParserTests
         Assert.Equal("Expert Spired Greathelm", item.BaseType);
         Assert.Equal(20, item.Quality);
         Assert.Equal("S S", item.Sockets);
+        Assert.Equal(2, item.SocketCount);
+        Assert.Equal(67, item.RequireLevel);
+        Assert.Null(item.GemLevel);
         Assert.Equal(81, item.ItemLevel);
         Assert.Single(item.Runes);
         Assert.Equal("+12% to Fire Resistance", item.Runes[0].Text);
