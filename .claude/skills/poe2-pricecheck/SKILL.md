@@ -254,6 +254,20 @@ API — «Runes of Aldur» (дефолт в конфиге).
 
 ## Лог изменений (свежее сверху)
 
+- *2026-06-20* **РЕЛИЗ v0.2.0 на GitHub.** Собран single-file self-contained exe
+  (win-x64, 85 МБ): `dotnet publish -r win-x64 --self-contained -p:PublishSingleFile=true
+  -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true
+  -p:DebugType=none`. Ключевой флаг — `IncludeAllContentForSelfExtract` (иначе
+  нативный Tesseract `x64/*.dll`, `tessdata/eng.traineddata` и `Data/reward-aliases.json`
+  не распакуются → OCR упадёт). Smoke-тест запуска exe прошёл (трей жив, без
+  диалога ошибки = OCR-движок поднялся). Релиз: `gh release create v0.2.0` с
+  ассетом exe, заметки на русском (установка/хоткеи). URL:
+  github.com/5HeadExile/PriceCheck-Path-Of-Exile-2/releases/tag/v0.2.0. Версия в
+  csproj → 0.2.0. Сборка из ветки `claude/poe2-rewards-app-plan-v0tpdz` (в main НЕ
+  сливал — отдельное решение). `release/` и `dist/` в .gitignore. *Урок:* для
+  single-file с нативными зависимостями (Tesseract) обязателен
+  `IncludeAllContentForSelfExtract=true`, иначе контент/native не попадают в bundle.
+
 - *2026-06-20* **Редизайн UI «Воронёная сталь и сдержанное золото»** (по design
   handoff `design_handoff_poe2_overlay/`). Добавлен GDI+ дизайн-тулкит в
   `Theme/`: `Palette` (токены), `Draw` (RoundedRect/градиенты/свечение),
