@@ -40,6 +40,8 @@ public sealed class TrayApplicationContext : ApplicationContext
         _ = _marshal.Handle; // принудительно создаём хэндл в UI-потоке
 
         _menu = new MenuOverlay(_config);
+        // Тег ВКЛ/ВЫКЛ в меню отражает текущее состояние авто-оверлея.
+        _menu.IsOverlayActive = () => _monitor is { Paused: false };
         _menu.SettingsRequested += OpenSettings;
         _menu.AddPylonRequested += AddPylonRegion;
         _menu.ClearPylonsRequested += ClearPylons;

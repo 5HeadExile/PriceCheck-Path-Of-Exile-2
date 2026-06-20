@@ -1,39 +1,42 @@
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using PriceCheckPoe2.Config;
+using PriceCheckPoe2.Theme;
 
 namespace PriceCheckPoe2.Settings;
 
 /// <summary>
-/// Окно настроек (WinForms). Правит лигу, источник цен, интервал обновления,
-/// хоткеи и прозрачности, сохраняет в <see cref="AppConfig"/>.
-/// Примечание: план предполагал WPF+MahApps; для единого UI-стека и надёжной
-/// сборки сделано на WinForms — стилизацию можно вернуть позже.
+/// Окно настроек (дизайн-система «Воронёная сталь и сдержанное золото»).
+/// Секции Общие · Хоткеи · Внешний вид · Отладка; слайдеры со значением,
+/// keycap-поля хоткеев, приглушённая секция «Отладка». Сохраняет в
+/// <see cref="AppConfig"/>.
 /// </summary>
-public sealed class SettingsForm : Form
+public sealed class SettingsForm : RoundedForm
 {
+    private const int Pad = 16;
+    private const int LabelW = 150;
     private readonly AppConfig _config;
 
-    private readonly TextBox _league = new();
-    private readonly TextBox _apiUrl = new();
+    private readonly TextBox _league = Field();
+    private readonly TextBox _apiUrl = Field(muted: true);
     private readonly NumericUpDown _refresh = new() { Minimum = 1, Maximum = 240 };
-    private readonly TextBox _menuHotkey = new();
-    private readonly TextBox _recalibrateHotkey = new();
-    private readonly TrackBar _dim = new() { Minimum = 0, Maximum = 100 };
-    private readonly TrackBar _overlayOpacity = new() { Minimum = 0, Maximum = 100 };
     private readonly NumericUpDown _ocrThreshold = new() { Minimum = 0, Maximum = 255 };
-    private readonly CheckBox _saveDebug = new() { Text = "Сохранять кадры OCR" };
+    private readonly KeycapInput _menuHotkey = new();
+    private readonly KeycapInput _recalibrateHotkey = new();
+    private readonly SliderControl _dim = new();
+    private readonly SliderControl _overlayOpacity = new();
+    private readonly ThemedCheckBox _saveDebug = new();
 
     public SettingsForm(AppConfig config)
     {
         _config = config;
-
-        Text = "PriceCheck PoE2 — Настройки";
-        FormBorderStyle = FormBorderStyle.FixedDialog;
+        TopMost = true;
+        KeyPreview = true;
         StartPosition = FormStartPosition.CenterScreen;
-        MaximizeBox = false;
-        MinimizeBox = false;
-        ClientSize = new Size(440, 480);
+        Size = new Size(440, 540);
+        StyleNumeric(_refresh);
+        StyleNumeric(_ocrThreshold);
 
         BuildLayout();
         LoadFromConfig();
@@ -41,56 +44,172 @@ public sealed class SettingsForm : Form
 
     private void BuildLayout()
     {
-        var layout = new TableLayoutPanel
+        var w = ClientSize.Width - Pad * 2; // 408
+        int y = 56;
+
+        // ОБЩИЕ
+        Section("Общие", ref y, w);
+        Row("Лига", _league, ref y, w);
+        Row("Обновление цен", _refresh, ref y, w, controlWidth: 90);
+        y += 6;
+
+        // ХОТКЕИ
+        Section("Хоткеи", ref y, w);
+        Row("Хоткей меню", _menuHotkey, ref y, w, controlWidth: 60);
+        Row("Хоткей калибровки", _recalibrateHotkey, ref y, w, controlWidth: 60);
+        y += 6;
+
+        // ВНЕШНИЙ ВИД
+        Section("Внешний вид", ref y, w);
+        Row("Затемнение меню", _dim, ref y, w, controlWidth: w - LabelW);
+        Row("Прозрачность", _overlayOpacity, ref y, w, controlWidth: w - LabelW);
+        y += 6;
+
+        // ОТЛАДКА (приглушённая)
+        Controls.Add(new SectionHeader("Отладка", muted: true, badge: "ДОПОЛНИТЕЛЬНО")
         {
-            Dock = DockStyle.Fill,
-            ColumnCount = 2,
-            Padding = new Padding(12),
-            AutoSize = true,
-        };
-        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150));
-        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            Location = new Point(Pad, y),
+            Size = new Size(w, 18),
+        });
+        y += 22;
+        Row("URL цен", _apiUrl, ref y, w, muted: true);
+        Row("Порог OCR", _ocrThreshold, ref y, w, controlWidth: 90, muted: true);
+        Row("Отладка OCR", _saveDebug, ref y, w, muted: true);
 
-        AddRow(layout, "Лига", _league);
-        AddRow(layout, "URL цен (poe.ninja)", _apiUrl);
-        AddRow(layout, "Обновление цен, мин", _refresh);
-        AddRow(layout, "Хоткей меню", _menuHotkey);
-        AddRow(layout, "Хоткей калибровки", _recalibrateHotkey);
-        AddRow(layout, "Затемнение меню, %", _dim);
-        AddRow(layout, "Прозрачность оверлея, %", _overlayOpacity);
-        AddRow(layout, "Порог OCR (0..255)", _ocrThreshold);
-        AddRow(layout, "Отладка OCR", _saveDebug);
-
-        var save = new Button { Text = "Сохранить", DialogResult = DialogResult.OK, Width = 100 };
-        save.Click += (_, _) => SaveToConfig();
-        var cancel = new Button { Text = "Отмена", DialogResult = DialogResult.Cancel, Width = 100 };
-
-        var buttons = new FlowLayoutPanel
-        {
-            Dock = DockStyle.Bottom,
-            FlowDirection = FlowDirection.RightToLeft,
-            Height = 44,
-            Padding = new Padding(8),
-        };
-        buttons.Controls.Add(cancel);
-        buttons.Controls.Add(save);
-
-        Controls.Add(layout);
-        Controls.Add(buttons);
-        AcceptButton = save;
-        CancelButton = cancel;
+        BuildFooter();
     }
 
-    private static void AddRow(TableLayoutPanel layout, string label, Control control)
+    private void BuildFooter()
     {
-        control.Dock = DockStyle.Fill;
-        layout.Controls.Add(new Label
+        var footer = new Panel { Dock = DockStyle.Bottom, Height = 54, BackColor = Color.Transparent };
+        footer.Paint += (_, pe) =>
+        {
+            using var pen = new Pen(Palette.BorderFaint, 1f);
+            pe.Graphics.DrawLine(pen, Pad, 0, footer.Width - Pad, 0);
+        };
+        Controls.Add(footer); // добавляем первым — Dock задаёт реальную ширину
+
+        var save = new ThemedButton { Text = "Сохранить", Variant = ButtonVariant.GoldFill };
+        save.SetBounds(footer.Width - Pad - 120, 11, 120, 32);
+        save.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        save.Click += (_, _) => { SaveToConfig(); DialogResult = DialogResult.OK; Close(); };
+
+        var cancel = new ThemedButton { Text = "Отмена", Variant = ButtonVariant.Normal };
+        cancel.SetBounds(footer.Width - Pad - 120 - 100 - 8, 11, 100, 32);
+        cancel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        cancel.Click += (_, _) => { DialogResult = DialogResult.Cancel; Close(); };
+
+        footer.Controls.Add(save);
+        footer.Controls.Add(cancel);
+    }
+
+    private void Section(string caption, ref int y, int w)
+    {
+        Controls.Add(new SectionHeader(caption) { Location = new Point(Pad, y), Size = new Size(w, 18) });
+        y += 22;
+    }
+
+    private void Row(string label, Control control, ref int y, int w, int? controlWidth = null, bool muted = false)
+    {
+        var lbl = new Label
         {
             Text = label,
+            ForeColor = muted ? Palette.TextFaint : Palette.TextMuted,
+            Font = Palette.Label(),
+            AutoSize = false,
+            AutoEllipsis = true,
             TextAlign = ContentAlignment.MiddleLeft,
-            Dock = DockStyle.Fill,
-        });
-        layout.Controls.Add(control);
+            Location = new Point(Pad, y),
+            Size = new Size(LabelW - 8, 30),
+            BackColor = Color.Transparent,
+        };
+        Controls.Add(lbl);
+
+        var cw = controlWidth ?? (w - LabelW);
+        if (control is TextBox)
+        {
+            control.Size = new Size(cw, 26);
+        }
+        else if (control is not NumericUpDown)
+        {
+            control.Width = cw;
+        }
+
+        control.Location = new Point(Pad + LabelW, y + (30 - control.Height) / 2);
+        Controls.Add(control);
+        y += 34;
+    }
+
+    private static TextBox Field(bool muted = false) => new()
+    {
+        BorderStyle = BorderStyle.FixedSingle,
+        BackColor = muted ? Palette.FieldMutedBg : Palette.InputBg,
+        ForeColor = muted ? Palette.Hex("#7A766C") : Palette.Text,
+        Font = Palette.Label(),
+    };
+
+    private static void StyleNumeric(NumericUpDown n)
+    {
+        n.BorderStyle = BorderStyle.FixedSingle;
+        n.BackColor = Palette.InputBg;
+        n.ForeColor = Palette.Text;
+        n.Font = Palette.Label();
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        base.OnPaint(e);
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+
+        // Титулбар
+        var state = g.Save();
+        g.TranslateTransform(20, 24);
+        g.RotateTransform(45);
+        using (var brush = new LinearGradientBrush(new Rectangle(-5, -5, 10, 10),
+            Palette.AccentLighter, Palette.AccentDark, LinearGradientMode.ForwardDiagonal))
+        {
+            g.FillRectangle(brush, new Rectangle(-5, -5, 10, 10));
+        }
+
+        g.Restore(state);
+
+        using var title = Palette.Title();
+        TextRenderer.DrawText(g, "Настройки", title, new Point(36, 15), Palette.Text, TextFormatFlags.NoPrefix);
+
+        // Кнопка закрытия (рисуем глиф; клик ловим в OnMouseDown)
+        using var icon = Palette.Icon(10f);
+        TextRenderer.DrawText(g, "", icon, new Rectangle(ClientSize.Width - 38, 12, 24, 24),
+            Palette.TextMuted, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+
+        using var pen = new Pen(Palette.BorderFaint, 1f);
+        g.DrawLine(pen, 1, 46, ClientSize.Width - 2, 46);
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        if (e.KeyCode == Keys.Escape)
+        {
+            DialogResult = DialogResult.Cancel;
+            Close();
+        }
+
+        base.OnKeyDown(e);
+    }
+
+    protected override void OnMouseDown(MouseEventArgs e)
+    {
+        // Клик по «✕» в правом верхнем углу — закрыть как «Отмена».
+        var closeRect = new Rectangle(ClientSize.Width - 40, 10, 30, 28);
+        if (closeRect.Contains(e.Location))
+        {
+            DialogResult = DialogResult.Cancel;
+            Close();
+            return;
+        }
+
+        base.OnMouseDown(e);
     }
 
     private void LoadFromConfig()
@@ -98,8 +217,8 @@ public sealed class SettingsForm : Form
         _league.Text = _config.League;
         _apiUrl.Text = _config.PriceApiBaseUrl;
         _refresh.Value = Math.Clamp(_config.PriceRefreshMinutes, 1, 240);
-        _menuHotkey.Text = _config.MenuHotkey;
-        _recalibrateHotkey.Text = _config.RecalibrateHotkey;
+        _menuHotkey.SetKey(_config.MenuHotkey);
+        _recalibrateHotkey.SetKey(_config.RecalibrateHotkey);
         _dim.Value = (int)Math.Clamp(_config.MenuDimOpacity * 100, 0, 100);
         _overlayOpacity.Value = (int)Math.Clamp(_config.PriceOverlayOpacity * 100, 0, 100);
         _ocrThreshold.Value = Math.Clamp(_config.OcrThreshold, 0, 255);
@@ -111,8 +230,8 @@ public sealed class SettingsForm : Form
         _config.League = _league.Text.Trim();
         _config.PriceApiBaseUrl = _apiUrl.Text.Trim();
         _config.PriceRefreshMinutes = (int)_refresh.Value;
-        _config.MenuHotkey = _menuHotkey.Text.Trim();
-        _config.RecalibrateHotkey = _recalibrateHotkey.Text.Trim();
+        if (!string.IsNullOrEmpty(_menuHotkey.KeyCodeName)) _config.MenuHotkey = _menuHotkey.KeyCodeName;
+        if (!string.IsNullOrEmpty(_recalibrateHotkey.KeyCodeName)) _config.RecalibrateHotkey = _recalibrateHotkey.KeyCodeName;
         _config.MenuDimOpacity = _dim.Value / 100.0;
         _config.PriceOverlayOpacity = _overlayOpacity.Value / 100.0;
         _config.OcrThreshold = (int)_ocrThreshold.Value;
