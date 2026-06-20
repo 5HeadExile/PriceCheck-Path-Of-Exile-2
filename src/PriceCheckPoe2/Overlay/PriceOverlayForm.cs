@@ -113,7 +113,6 @@ public sealed class PriceOverlayForm : Form
             .FirstOrDefault();
 
         using var priceFont = new Font("Segoe UI", 10.5f, FontStyle.Bold);
-        using var totalFont = new Font("Segoe UI", 11.5f, FontStyle.Bold);
 
         foreach (var result in _results)
         {
@@ -122,8 +121,6 @@ public sealed class PriceOverlayForm : Form
                 using var pen = new Pen(Color.DeepSkyBlue, 2);
                 g.DrawRectangle(pen, ToLocal(result.Region));
             }
-
-            DrawTotalChip(g, result, totalFont);
 
             foreach (var reward in result.Rewards)
             {
@@ -176,34 +173,6 @@ public sealed class PriceOverlayForm : Form
 
         using var brush = new SolidBrush(color);
         g.DrawString(text, font, brush, left + 8, top + 3);
-    }
-
-    private void DrawTotalChip(Graphics g, PylonScanResult result, Font font)
-    {
-        double ex = 0, div = 0;
-        foreach (var r in result.Rewards)
-        {
-            ex += r.LineTotal;
-            div += (r.Price?.DivineValue ?? 0) * r.Stack;
-        }
-
-        var text = "Σ " + FormatValue(ex, div);
-        var size = g.MeasureString(text, font);
-        var w = (int)size.Width + 18;
-        var h = (int)size.Height + 8;
-
-        var origin = ToLocal(result.Region.Location);
-        var left = Math.Max(origin.X, EdgeMargin);
-        var top = Math.Max(origin.Y - h - 6, EdgeMargin);
-        var rect = new Rectangle(left, top, w, h);
-
-        using var path = Rounded(rect, 9);
-        using var bg = new SolidBrush(Color.FromArgb(255, 22, 22, 28));
-        g.FillPath(bg, path);
-        using var border = new Pen(Color.FromArgb(255, 72, 76, 86), 1.5f);
-        g.DrawPath(border, path);
-        using var brush = new SolidBrush(Color.FromArgb(214, 218, 224));
-        g.DrawString(text, font, brush, left + 9, top + 4);
     }
 
     /// <summary>Текст и цвет цены: «?» для нераспознанного, иначе сумма + тир-цвет.</summary>
