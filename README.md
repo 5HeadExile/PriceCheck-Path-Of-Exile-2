@@ -75,4 +75,6 @@ src/
 
 ## Лицензия
 
-См. ниже / TODO. Сохраняем атрибуцию исходного проекта PoeAncientsPriceHelper.
+MIT — см. [LICENSE](LICENSE). Атрибуцию исходного проекта
+[PoeAncientsPriceHelper](https://github.com/pedro-quiterio/PoeAncientsPriceHelper)
+сохраняем.
