@@ -12,8 +12,8 @@ public sealed class SliderControl : Control
 {
     private int _value;
     private bool _drag;
-    private const int ChipWidth = 46;
-    private const int HandleR = 7;
+    private static int ChipWidth => Ui.S(46);
+    private static int HandleR => Ui.S(7);
 
     public event EventHandler? ValueChanged;
 
@@ -39,11 +39,11 @@ public sealed class SliderControl : Control
         SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
                  ControlStyles.ResizeRedraw | ControlStyles.UserPaint | ControlStyles.SupportsTransparentBackColor, true);
         BackColor = Color.Transparent;
-        Height = 24;
+        Height = Ui.S(24);
         Cursor = Cursors.Hand;
     }
 
-    private Rectangle TrackArea => new(HandleR, 0, Width - ChipWidth - 8 - HandleR * 2, Height);
+    private Rectangle TrackArea => new(HandleR, 0, Width - ChipWidth - Ui.S(8) - HandleR * 2, Height);
 
     protected override void OnMouseDown(MouseEventArgs e) { _drag = true; SetFromX(e.X); base.OnMouseDown(e); }
     protected override void OnMouseUp(MouseEventArgs e) { _drag = false; base.OnMouseUp(e); }
@@ -64,20 +64,21 @@ public sealed class SliderControl : Control
 
         var track = TrackArea;
         var midY = Height / 2;
-        var trackRect = new Rectangle(track.X, midY - 2, track.Width, 4);
+        var th = Ui.S(4);
+        var trackRect = new Rectangle(track.X, midY - th / 2, track.Width, th);
 
         // Трек
-        Draw.Fill(g, trackRect, 2, Palette.BorderFaint);
+        Draw.Fill(g, trackRect, Ui.S(2), Palette.BorderFaint);
 
         // Заполнение
         var fillW = (int)(track.Width * (_value / 100.0));
         if (fillW > 0)
         {
-            var fillRect = new Rectangle(track.X, midY - 2, fillW, 4);
+            var fillRect = new Rectangle(track.X, midY - th / 2, fillW, th);
             using var brush = new LinearGradientBrush(
-                new Rectangle(track.X, midY - 2, Math.Max(1, track.Width), 4),
+                new Rectangle(track.X, midY - th / 2, Math.Max(1, track.Width), th),
                 Palette.AccentDark, Palette.AccentLight, LinearGradientMode.Horizontal);
-            using var path = Draw.RoundedRect(fillRect, 2);
+            using var path = Draw.RoundedRect(fillRect, Ui.S(2));
             g.FillPath(brush, path);
         }
 
@@ -95,9 +96,10 @@ public sealed class SliderControl : Control
         }
 
         // Чип значения
-        var chip = new Rectangle(Width - ChipWidth, midY - 11, ChipWidth - 1, 22);
-        Draw.Fill(g, chip, 4, Palette.InputBg);
-        Draw.Border(g, chip, 4, Palette.BorderQuiet);
+        var chipH = Ui.S(22);
+        var chip = new Rectangle(Width - ChipWidth, midY - chipH / 2, ChipWidth - 1, chipH);
+        Draw.Fill(g, chip, Ui.S(4), Palette.InputBg);
+        Draw.Border(g, chip, Ui.S(4), Palette.BorderQuiet);
         using var font = Palette.Mono();
         Draw.CenterText(g, $"{_value}%", font, Palette.Text, chip);
     }

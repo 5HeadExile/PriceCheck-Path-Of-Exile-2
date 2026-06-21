@@ -69,5 +69,5 @@ public static class Palette
     public static Font Icon(float sizePx = 13f) => Pixel("Segoe MDL2 Assets", sizePx);
 
     private static Font Pixel(string family, float sizePx) =>
-        new(family, sizePx, FontStyle.Regular, GraphicsUnit.Pixel);
+        new(family, Ui.Sf(sizePx), FontStyle.Regular, GraphicsUnit.Pixel);
 }

@@ -54,9 +54,10 @@ public static class Draw
     /// <summary>Внешнее свечение фокуса (золотая полупрозрачная рамка вокруг).</summary>
     public static void FocusGlow(Graphics g, Rectangle r, int radius)
     {
-        var outer = Rectangle.Inflate(r, 2, 2);
-        using var path = RoundedRect(outer, radius + 2);
-        using var pen = new Pen(Palette.AccentGlow, 2f);
+        var inset = Ui.S(2);
+        var outer = Rectangle.Inflate(r, inset, inset);
+        using var path = RoundedRect(outer, radius + inset);
+        using var pen = new Pen(Palette.AccentGlow, Ui.Sf(2));
         g.DrawPath(pen, path);
     }
 

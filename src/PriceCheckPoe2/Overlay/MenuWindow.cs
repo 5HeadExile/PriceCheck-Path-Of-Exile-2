@@ -12,7 +12,7 @@ namespace PriceCheckPoe2.Overlay;
 /// </summary>
 public sealed class MenuWindow : RoundedForm
 {
-    private const int Pad = 12;
+    private static int Pad => Ui.S(12);
     private readonly bool _overlayActive;
 
     public event Action? AddPylon;
@@ -27,27 +27,29 @@ public sealed class MenuWindow : RoundedForm
     {
         _overlayActive = overlayActive;
         TopMost = true;
-        Size = new Size(320, 372);
+        Size = new Size(Ui.S(320), Ui.S(372));
 
-        var w = ClientSize.Width - Pad * 2; // 296
-        int y = 54;
+        var pad = Pad;
+        var w = ClientSize.Width - pad * 2;
+        int rowH = Ui.S(34), botH = Ui.S(32), headH = Ui.S(18), gap = Ui.S(6);
+        int y = Ui.S(54);
 
-        Controls.Add(new SectionHeader("Область", SectionTone.Faint) { Location = new Point(Pad, y), Size = new Size(w, 18) });
-        y += 22;
+        Controls.Add(new SectionHeader("Область", SectionTone.Faint) { Location = new Point(pad, y), Size = new Size(w, headH) });
+        y += Ui.S(22);
 
         var add = Button("Выделить область", ButtonVariant.Primary, "", () => AddPylon?.Invoke());
-        add.SetBounds(Pad, y, w, 34);
+        add.SetBounds(pad, y, w, rowH);
         Controls.Add(add);
-        y += 40;
+        y += rowH + gap;
 
         var clear = Button("Сбросить выделенное", ButtonVariant.Normal, "", () => ClearPylons?.Invoke());
-        clear.SetBounds(Pad, y, w, 34);
+        clear.SetBounds(pad, y, w, rowH);
         clear.Enabled = hasSelection;
         Controls.Add(clear);
-        y += 40 + 10;
+        y += rowH + Ui.S(16);
 
-        Controls.Add(new SectionHeader("Сканирование", SectionTone.Faint) { Location = new Point(Pad, y), Size = new Size(w, 18) });
-        y += 22;
+        Controls.Add(new SectionHeader("Сканирование", SectionTone.Faint) { Location = new Point(pad, y), Size = new Size(w, headH) });
+        y += Ui.S(22);
 
         var toggle = Button(
             "Оверлей: пауза",
@@ -55,32 +57,32 @@ public sealed class MenuWindow : RoundedForm
             _overlayActive ? "" : "",
             () => TogglePriceOverlay?.Invoke());
         toggle.Tag2 = _overlayActive ? "ВКЛ" : "ВЫКЛ";
-        toggle.SetBounds(Pad, y, w, 34);
+        toggle.SetBounds(pad, y, w, rowH);
         Controls.Add(toggle);
-        y += 40;
+        y += rowH + gap;
 
         var rescan = Button("Пересканировать сейчас", ButtonVariant.Normal, "", () => Rescan?.Invoke());
-        rescan.SetBounds(Pad, y, w, 34);
+        rescan.SetBounds(pad, y, w, rowH);
         Controls.Add(rescan);
-        y += 34 + 12;
+        y += rowH + Ui.S(12);
 
         // Разделитель
-        var divider = new Panel { BackColor = Palette.BorderFaint, Size = new Size(w, 1), Location = new Point(Pad, y) };
+        var divider = new Panel { BackColor = Palette.BorderFaint, Size = new Size(w, 1), Location = new Point(pad, y) };
         Controls.Add(divider);
-        y += 13;
+        y += Ui.S(13);
 
-        var half = (w - 6) / 2;
+        var half = (w - gap) / 2;
         var settings = Button("Настройки", ButtonVariant.Normal, "", () => OpenSettings?.Invoke());
-        settings.SetBounds(Pad, y, half, 32);
+        settings.SetBounds(pad, y, half, botH);
         Controls.Add(settings);
 
         var close = Button("Закрыть", ButtonVariant.Normal, "", () => CloseMenu?.Invoke());
-        close.SetBounds(Pad + half + 6, y, w - half - 6, 32);
+        close.SetBounds(pad + half + gap, y, w - half - gap, botH);
         Controls.Add(close);
-        y += 38;
+        y += botH + gap;
 
         var exit = Button("Выход", ButtonVariant.Danger, "", () => Exit?.Invoke());
-        exit.SetBounds(Pad, y, w, 32);
+        exit.SetBounds(pad, y, w, botH);
         Controls.Add(exit);
     }
 
@@ -100,40 +102,44 @@ public sealed class MenuWindow : RoundedForm
         g.SmoothingMode = SmoothingMode.AntiAlias;
         g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
-        // Брендовый бар (44h)
-        DrawDiamond(g, new Point(18, 22));
+        // Брендовый бар
+        var barH = Ui.S(44);
+        DrawDiamond(g, new Point(Ui.S(18), barH / 2), Ui.S(10));
 
         using var brand = Palette.Brand();
-        var bw = Draw.TrackedText(g, "PRICECHECK", brand, Palette.Text, 34, 22, 1.5f);
+        var bw = Draw.TrackedText(g, "PRICECHECK", brand, Palette.Text, Ui.S(34), barH / 2, Ui.Sf(1.5));
 
         using var sub = Palette.MonoSmall();
-        TextRenderer.DrawText(g, "PoE2", sub, new Rectangle(34 + bw + 8, 0, 60, 44), Palette.Accent,
+        TextRenderer.DrawText(g, "PoE2", sub, new Rectangle(Ui.S(34) + bw + Ui.S(8), 0, Ui.S(60), barH), Palette.Accent,
             TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
 
         // Точка статуса справа
         var dotColor = _overlayActive ? Palette.Success : Palette.TextFaint;
+        var ds = Ui.S(7);
+        var dx = ClientSize.Width - Ui.S(23);
+        var dy = barH / 2 - ds / 2;
         if (_overlayActive)
         {
             using var glow = new SolidBrush(Color.FromArgb(60, Palette.Success));
-            g.FillEllipse(glow, ClientSize.Width - 26, 18, 12, 12);
+            g.FillEllipse(glow, dx - Ui.S(3), dy - Ui.S(3), ds + Ui.S(6), ds + Ui.S(6));
         }
 
         using (var dot = new SolidBrush(dotColor))
         {
-            g.FillEllipse(dot, ClientSize.Width - 23, 21, 7, 7);
+            g.FillEllipse(dot, dx, dy, ds, ds);
         }
 
         // Нижняя линия бара
         using var pen = new Pen(Palette.BorderFaint, 1f);
-        g.DrawLine(pen, 1, 44, ClientSize.Width - 2, 44);
+        g.DrawLine(pen, 1, barH, ClientSize.Width - 2, barH);
     }
 
-    private static void DrawDiamond(Graphics g, Point center)
+    private static void DrawDiamond(Graphics g, Point center, int size)
     {
         var state = g.Save();
         g.TranslateTransform(center.X, center.Y);
         g.RotateTransform(45);
-        var rect = new Rectangle(-5, -5, 10, 10);
+        var rect = new Rectangle(-size / 2, -size / 2, size, size);
         using var brush = new LinearGradientBrush(rect, Palette.AccentLighter, Palette.AccentDark, LinearGradientMode.ForwardDiagonal);
         g.FillRectangle(brush, rect);
         g.Restore(state);

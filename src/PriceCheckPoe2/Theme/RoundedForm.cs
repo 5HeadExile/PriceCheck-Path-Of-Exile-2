@@ -10,8 +10,8 @@ namespace PriceCheckPoe2.Theme;
 /// </summary>
 public class RoundedForm : Form
 {
-    private const int CornerRadius = 8;
-    private const int DragBarHeight = 46;
+    private static int CornerRadius => Ui.S(8);
+    private static int DragBarHeight => Ui.S(46);
 
     protected RoundedForm()
     {

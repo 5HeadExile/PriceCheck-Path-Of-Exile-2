@@ -21,7 +21,7 @@ public sealed class ThemedCheckBox : Control
         SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
                  ControlStyles.ResizeRedraw | ControlStyles.UserPaint | ControlStyles.SupportsTransparentBackColor, true);
         BackColor = Color.Transparent;
-        Height = 22;
+        Height = Ui.S(22);
         Cursor = Cursors.Hand;
     }
 
@@ -33,23 +33,25 @@ public sealed class ThemedCheckBox : Control
         g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
         g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
-        var box = new Rectangle(0, (Height - 16) / 2, 16, 16);
+        var bs = Ui.S(16);
+        var box = new Rectangle(0, (Height - bs) / 2, bs, bs);
         if (_checked)
         {
-            Draw.FillVertical(g, box, 4, Palette.AccentLight, Palette.Accent);
-            Draw.Border(g, box, 4, Palette.AccentBorder);
-            using var font = new Font("Segoe UI Semibold", 11f, FontStyle.Regular, GraphicsUnit.Pixel);
+            Draw.FillVertical(g, box, Ui.S(4), Palette.AccentLight, Palette.Accent);
+            Draw.Border(g, box, Ui.S(4), Palette.AccentBorder);
+            using var font = new Font("Segoe UI Semibold", Ui.Sf(11f), FontStyle.Regular, GraphicsUnit.Pixel);
             Draw.CenterText(g, "✓", font, Palette.OnAccent, box);
         }
         else
         {
-            Draw.Fill(g, box, 4, Palette.FieldMutedBg);
-            Draw.Border(g, box, 4, Palette.BorderStrong);
+            Draw.Fill(g, box, Ui.S(4), Palette.FieldMutedBg);
+            Draw.Border(g, box, Ui.S(4), Palette.BorderStrong);
         }
 
         var label = _checked ? "вкл" : "выкл";
         using var lf = Palette.Label();
-        var lr = new Rectangle(24, 0, Width - 24, Height);
+        var lx = Ui.S(24);
+        var lr = new Rectangle(lx, 0, Width - lx, Height);
         TextRenderer.DrawText(g, label, lf, lr, Palette.TextMuted,
             TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
     }

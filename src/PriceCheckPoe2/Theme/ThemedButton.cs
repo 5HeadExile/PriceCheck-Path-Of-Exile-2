@@ -28,7 +28,7 @@ public sealed class ThemedButton : Control
 {
     private bool _hover;
     private bool _pressed;
-    private readonly int _radius = 6;
+    private readonly int _radius = Ui.S(6);
 
     public ButtonVariant Variant { get; set; } = ButtonVariant.Normal;
 
@@ -113,26 +113,27 @@ public sealed class ThemedButton : Control
         }
 
         // Иконка-глиф слева
-        var textLeft = 12;
+        var textLeft = Ui.S(12);
         if (!string.IsNullOrEmpty(Glyph))
         {
             using var iconFont = Palette.Icon(13f);
-            var iconRect = new Rectangle(10, 0, 22, Height);
+            var iconRect = new Rectangle(Ui.S(10), 0, Ui.S(22), Height);
             TextRenderer.DrawText(g, Glyph, iconFont, iconRect, glyphColor,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
-            textLeft = 36;
+            textLeft = Ui.S(36);
         }
 
         // Правый тег-статус
-        var textRightPad = 12;
+        var textRightPad = Ui.S(12);
         if (!string.IsNullOrEmpty(Tag2))
         {
             using var tagFont = Palette.Section();
-            var tw = TextRenderer.MeasureText(g, Tag2, tagFont).Width + 14;
-            var tagRect = new Rectangle(Width - tw - 10, (Height - 18) / 2, tw, 18);
-            Draw.Border(g, tagRect, 4, Palette.AccentBorder);
+            var th = Ui.S(18);
+            var tw = TextRenderer.MeasureText(g, Tag2, tagFont).Width + Ui.S(14);
+            var tagRect = new Rectangle(Width - tw - Ui.S(10), (Height - th) / 2, tw, th);
+            Draw.Border(g, tagRect, Ui.S(4), Palette.AccentBorder);
             Draw.CenterText(g, Tag2, tagFont, Palette.Accent, tagRect);
-            textRightPad = tw + 16;
+            textRightPad = tw + Ui.S(16);
         }
 
         // Текст

@@ -14,6 +14,8 @@ internal static class Program
     private static void Main(string[] args)
     {
         ApplicationConfiguration.Initialize();
+        // Масштаб UI под DPI монитора (иначе на 125/150% окна мелкие).
+        Theme.Ui.Init();
 
         // Технический режим предпросмотра UI (для разработки): показывает окно
         // настроек поверх затемнения без трея/игры. Снимок → проверка дизайна.

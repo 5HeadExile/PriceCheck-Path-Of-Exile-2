@@ -32,7 +32,7 @@ public sealed class SectionHeader : Control
         SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
                  ControlStyles.ResizeRedraw | ControlStyles.UserPaint | ControlStyles.SupportsTransparentBackColor, true);
         BackColor = Color.Transparent;
-        Height = 18;
+        Height = Ui.S(18);
     }
 
     protected override void OnPaint(PaintEventArgs e)
@@ -44,18 +44,19 @@ public sealed class SectionHeader : Control
         var color = _tone == SectionTone.Gold ? Palette.Accent : Palette.TextFaint;
         var midY = Height / 2;
         using var font = Palette.Section();
-        var textW = Draw.TrackedText(g, _caption, font, color, 0, midY, 1.5f);
+        var textW = Draw.TrackedText(g, _caption, font, color, 0, midY, Ui.Sf(1.5));
 
-        var lineStart = textW + 12;
+        var lineStart = textW + Ui.S(12);
 
         if (_badge is not null)
         {
             using var bf = Palette.Badge();
-            var bw = TextRenderer.MeasureText(g, _badge, bf).Width + 10;
-            var br = new Rectangle(lineStart, midY - 8, bw, 15);
-            Draw.Border(g, br, 3, Palette.Hex("#2A2A31"));
+            var bh = Ui.S(15);
+            var bw = TextRenderer.MeasureText(g, _badge, bf).Width + Ui.S(10);
+            var br = new Rectangle(lineStart, midY - bh / 2, bw, bh);
+            Draw.Border(g, br, Ui.S(3), Palette.Hex("#2A2A31"));
             Draw.CenterText(g, _badge, bf, Palette.Hex("#5A564E"), br);
-            lineStart = br.Right + 10;
+            lineStart = br.Right + Ui.S(10);
         }
 
         if (lineStart < Width - 4)

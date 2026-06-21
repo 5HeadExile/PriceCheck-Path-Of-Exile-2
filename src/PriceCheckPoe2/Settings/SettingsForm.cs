@@ -14,8 +14,8 @@ namespace PriceCheckPoe2.Settings;
 /// </summary>
 public sealed class SettingsForm : RoundedForm
 {
-    private const int Pad = 16;
-    private const int LabelW = 150;
+    private static int Pad => Ui.S(16);
+    private static int LabelW => Ui.S(150);
     private readonly AppConfig _config;
 
     private readonly TextBox _league = Field();
@@ -34,7 +34,7 @@ public sealed class SettingsForm : RoundedForm
         TopMost = true;
         KeyPreview = true;
         StartPosition = FormStartPosition.CenterScreen;
-        Size = new Size(440, 540);
+        Size = new Size(Ui.S(440), Ui.S(540));
         StyleNumeric(_refresh);
         StyleNumeric(_ocrThreshold);
 
@@ -44,36 +44,36 @@ public sealed class SettingsForm : RoundedForm
 
     private void BuildLayout()
     {
-        var w = ClientSize.Width - Pad * 2; // 408
-        int y = 56;
+        var w = ClientSize.Width - Pad * 2;
+        int y = Ui.S(56);
 
         // ОБЩИЕ
         Section("Общие", ref y, w);
         Row("Лига", _league, ref y, w);
-        Row("Обновление цен", _refresh, ref y, w, controlWidth: 90);
-        y += 6;
+        Row("Обновление цен", _refresh, ref y, w, controlWidth: Ui.S(90));
+        y += Ui.S(6);
 
         // ХОТКЕИ
         Section("Хоткеи", ref y, w);
-        Row("Хоткей меню", _menuHotkey, ref y, w, controlWidth: 60);
-        Row("Хоткей калибровки", _recalibrateHotkey, ref y, w, controlWidth: 60);
-        y += 6;
+        Row("Хоткей меню", _menuHotkey, ref y, w, controlWidth: Ui.S(60));
+        Row("Хоткей калибровки", _recalibrateHotkey, ref y, w, controlWidth: Ui.S(60));
+        y += Ui.S(6);
 
         // ВНЕШНИЙ ВИД
         Section("Внешний вид", ref y, w);
         Row("Затемнение меню", _dim, ref y, w, controlWidth: w - LabelW);
         Row("Прозрачность", _overlayOpacity, ref y, w, controlWidth: w - LabelW);
-        y += 6;
+        y += Ui.S(6);
 
         // ОТЛАДКА (приглушённая)
         Controls.Add(new SectionHeader("Отладка", SectionTone.Faint, "ДОПОЛНИТЕЛЬНО")
         {
             Location = new Point(Pad, y),
-            Size = new Size(w, 18),
+            Size = new Size(w, Ui.S(18)),
         });
-        y += 22;
+        y += Ui.S(22);
         Row("URL цен", _apiUrl, ref y, w, muted: true);
-        Row("Порог OCR", _ocrThreshold, ref y, w, controlWidth: 90, muted: true);
+        Row("Порог OCR", _ocrThreshold, ref y, w, controlWidth: Ui.S(90), muted: true);
         Row("Отладка OCR", _saveDebug, ref y, w, muted: true);
 
         BuildFooter();
@@ -81,7 +81,7 @@ public sealed class SettingsForm : RoundedForm
 
     private void BuildFooter()
     {
-        var footer = new Panel { Dock = DockStyle.Bottom, Height = 54, BackColor = Color.Transparent };
+        var footer = new Panel { Dock = DockStyle.Bottom, Height = Ui.S(54), BackColor = Color.Transparent };
         footer.Paint += (_, pe) =>
         {
             using var pen = new Pen(Palette.BorderFaint, 1f);
@@ -89,13 +89,14 @@ public sealed class SettingsForm : RoundedForm
         };
         Controls.Add(footer); // добавляем первым — Dock задаёт реальную ширину
 
+        int bw = Ui.S(120), cbw = Ui.S(100), bh = Ui.S(32), by = Ui.S(11);
         var save = new ThemedButton { Text = "Сохранить", Variant = ButtonVariant.GoldFill };
-        save.SetBounds(footer.Width - Pad - 120, 11, 120, 32);
+        save.SetBounds(footer.Width - Pad - bw, by, bw, bh);
         save.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         save.Click += (_, _) => { SaveToConfig(); DialogResult = DialogResult.OK; Close(); };
 
         var cancel = new ThemedButton { Text = "Отмена", Variant = ButtonVariant.Normal };
-        cancel.SetBounds(footer.Width - Pad - 120 - 100 - 8, 11, 100, 32);
+        cancel.SetBounds(footer.Width - Pad - bw - cbw - Ui.S(8), by, cbw, bh);
         cancel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         cancel.Click += (_, _) => { DialogResult = DialogResult.Cancel; Close(); };
 
@@ -105,8 +106,8 @@ public sealed class SettingsForm : RoundedForm
 
     private void Section(string caption, ref int y, int w)
     {
-        Controls.Add(new SectionHeader(caption) { Location = new Point(Pad, y), Size = new Size(w, 18) });
-        y += 22;
+        Controls.Add(new SectionHeader(caption) { Location = new Point(Pad, y), Size = new Size(w, Ui.S(18)) });
+        y += Ui.S(22);
     }
 
     private void Row(string label, Control control, ref int y, int w, int? controlWidth = null, bool muted = false)
@@ -120,24 +121,25 @@ public sealed class SettingsForm : RoundedForm
             AutoEllipsis = true,
             TextAlign = ContentAlignment.MiddleLeft,
             Location = new Point(Pad, y),
-            Size = new Size(LabelW - 8, 30),
+            Size = new Size(LabelW - Ui.S(8), Ui.S(30)),
             BackColor = Color.Transparent,
         };
         Controls.Add(lbl);
 
+        var rowH = Ui.S(30);
         var cw = controlWidth ?? (w - LabelW);
         if (control is TextBox)
         {
-            control.Size = new Size(cw, 26);
+            control.Size = new Size(cw, Ui.S(26));
         }
         else if (control is not NumericUpDown)
         {
             control.Width = cw;
         }
 
-        control.Location = new Point(Pad + LabelW, y + (30 - control.Height) / 2);
+        control.Location = new Point(Pad + LabelW, y + (rowH - control.Height) / 2);
         Controls.Add(control);
-        y += 34;
+        y += Ui.S(34);
     }
 
     private static TextBox Field(bool muted = false) => new()
@@ -164,28 +166,31 @@ public sealed class SettingsForm : RoundedForm
         g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
         // Титулбар
+        var barH = Ui.S(46);
+        var dsz = Ui.S(10);
+        var drect = new Rectangle(-dsz / 2, -dsz / 2, dsz, dsz);
         var state = g.Save();
-        g.TranslateTransform(20, 24);
+        g.TranslateTransform(Ui.S(20), barH / 2);
         g.RotateTransform(45);
-        using (var brush = new LinearGradientBrush(new Rectangle(-5, -5, 10, 10),
+        using (var brush = new LinearGradientBrush(drect,
             Palette.AccentLighter, Palette.AccentDark, LinearGradientMode.ForwardDiagonal))
         {
-            g.FillRectangle(brush, new Rectangle(-5, -5, 10, 10));
+            g.FillRectangle(brush, drect);
         }
 
         g.Restore(state);
 
         using var title = Palette.Title();
-        TextRenderer.DrawText(g, "Настройки", title, new Rectangle(36, 0, 200, 46), Palette.Text,
+        TextRenderer.DrawText(g, "Настройки", title, new Rectangle(Ui.S(36), 0, Ui.S(200), barH), Palette.Text,
             TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
 
         // Кнопка закрытия (рисуем глиф; клик ловим в OnMouseDown)
         using var icon = Palette.Icon(12f);
-        TextRenderer.DrawText(g, "", icon, new Rectangle(ClientSize.Width - 40, 0, 28, 46),
+        TextRenderer.DrawText(g, "", icon, new Rectangle(ClientSize.Width - Ui.S(40), 0, Ui.S(28), barH),
             Palette.TextMuted, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
 
         using var pen = new Pen(Palette.BorderFaint, 1f);
-        g.DrawLine(pen, 1, 46, ClientSize.Width - 2, 46);
+        g.DrawLine(pen, 1, barH, ClientSize.Width - 2, barH);
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
@@ -202,7 +207,7 @@ public sealed class SettingsForm : RoundedForm
     protected override void OnMouseDown(MouseEventArgs e)
     {
         // Клик по «✕» в правом верхнем углу — закрыть как «Отмена».
-        var closeRect = new Rectangle(ClientSize.Width - 40, 10, 30, 28);
+        var closeRect = new Rectangle(ClientSize.Width - Ui.S(40), Ui.S(10), Ui.S(30), Ui.S(28));
         if (closeRect.Contains(e.Location))
         {
             DialogResult = DialogResult.Cancel;
