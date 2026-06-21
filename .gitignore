@@ -22,3 +22,5 @@ config.json
 # OCR data downloaded at build/runtime
 tessdata/
 release/
+.claude/
+design_handoff_poe2_overlay/
