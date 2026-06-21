@@ -15,7 +15,9 @@ description: >-
 
 ## Как продолжить на другой машине (VS Code)
 
-1. `git checkout claude/poe2-rewards-app-plan-v0tpdz && git pull`.
+1. `git checkout main && git pull` (вся работа влита в `main`; репозиторий
+   публичный, дефолтная ветка — `main`. Ветка `claude/…` удалена; код фичи
+   item-price-check сохранён в теге `item-pricecheck-wip`).
 2. Прочитать этот журнал (статус, решения, лог ошибок, TODO) и `docs/PLAN.md`.
 3. Где остановились: проект собран на Windows (.NET 8.0.422), **21/21 тест
    проходит**, exe опубликован в `dist\`, smoke-test запуска ОК. Дальше —
@@ -253,6 +255,14 @@ API — «Runes of Aldur» (дефолт в конфиге).
   `itemcheck_log.txt` (буфер пуст / не распознан / ошибка) для диагностики.
 
 ## Лог изменений (свежее сверху)
+
+- *2026-06-20* **Репозиторий опубликован.** Сделан public, добавлен `LICENSE`
+  (MIT, © 5HeadExile) + раздел лицензии в README. Ветка
+  `claude/poe2-rewards-app-plan-v0tpdz` влита fast-forward в `main` и удалена
+  (локально+remote); дефолтная ветка — `main`. Описание репо: «Pylon reward price
+  overlay for Path of Exile 2», темы: path-of-exile-2, poe2, overlay, csharp,
+  winforms. Тег `item-pricecheck-wip` (код фичи item-check) сохранён. Секрет-скан
+  перед публикацией — чисто.
 
 - *2026-06-20* **DPI-масштаб UI (меню + настройки крупнее).** На 1920×1080@125%
   окна были мелкими (рендерились в базовых 96-dpi px из-за `AutoScaleMode.None`).
