@@ -197,9 +197,11 @@ public sealed class RegionMonitor : IDisposable
             {
                 break;
             }
-            catch
+            catch (Exception ex)
             {
-                // Транзиентная ошибка кадра/захвата — продолжаем со следующего тика.
+                // Транзиентная ошибка кадра/захвата — продолжаем со следующего тика,
+                // но оставляем след для диагностики (виден в отладчике/DebugView).
+                System.Diagnostics.Debug.WriteLine($"[RegionMonitor] tick error: {ex}");
             }
 
             try

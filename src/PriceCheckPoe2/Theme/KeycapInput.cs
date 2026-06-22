@@ -11,7 +11,6 @@ namespace PriceCheckPoe2.Theme;
 public sealed class KeycapInput : Control
 {
     private bool _capturing;
-    private bool _hover;
 
     /// <summary>Имя клавиши SharpHook (<c>VcF2</c>). Пусто — не задано.</summary>
     public string KeyCodeName { get; private set; } = string.Empty;
@@ -32,8 +31,8 @@ public sealed class KeycapInput : Control
         Invalidate();
     }
 
-    protected override void OnMouseEnter(EventArgs e) { _hover = true; Invalidate(); base.OnMouseEnter(e); }
-    protected override void OnMouseLeave(EventArgs e) { _hover = false; Invalidate(); base.OnMouseLeave(e); }
+    protected override void OnMouseEnter(EventArgs e) { Invalidate(); base.OnMouseEnter(e); }
+    protected override void OnMouseLeave(EventArgs e) { Invalidate(); base.OnMouseLeave(e); }
 
     protected override void OnMouseDown(MouseEventArgs e)
     {

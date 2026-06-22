@@ -6,6 +6,10 @@ namespace PriceCheckPoe2.Pricing;
 /// </summary>
 public sealed class PriceCache
 {
+    // Если фетч вернул пусто (сеть недоступна/все категории упали) — не «замораживаем»
+    // пустой снапшот на весь TTL, а повторяем попытку через короткий интервал.
+    private static readonly TimeSpan EmptyRetry = TimeSpan.FromSeconds(30);
+
     private readonly IPriceSource _source;
     private readonly TimeSpan _ttl;
     private readonly SemaphoreSlim _gate = new(1, 1);
@@ -35,8 +39,19 @@ public sealed class PriceCache
         {
             if (IsStale)
             {
-                _prices = await _source.FetchAsync(league, cancellationToken).ConfigureAwait(false);
-                _lastRefreshUtc = DateTime.UtcNow;
+                var fetched = await _source.FetchAsync(league, cancellationToken).ConfigureAwait(false);
+                if (fetched.Count > 0)
+                {
+                    _prices = fetched;
+                    _lastRefreshUtc = DateTime.UtcNow;
+                }
+                else
+                {
+                    // Пусто: сохраняем прежние цены (если были) и пробуем снова через
+                    // EmptyRetry, а не через полный TTL — иначе оффлайн на старте
+                    // оставит цены пустыми на весь период обновления.
+                    _lastRefreshUtc = DateTime.UtcNow - _ttl + EmptyRetry;
+                }
             }
         }
         finally

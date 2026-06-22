@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 using Tesseract;
 // Tesseract тоже определяет тип ImageFormat — фиксируем простое имя на System.Drawing.
 using ImageFormat = System.Drawing.Imaging.ImageFormat;
@@ -86,15 +87,36 @@ public sealed class OcrEngine : IDisposable
             g.DrawImage(source, 0, 0, scaled.Width, scaled.Height);
         }
 
-        for (var y = 0; y < scaled.Height; y++)
+        // Бинаризация через LockBits: прямой доступ к буферу пикселей вместо
+        // GetPixel/SetPixel (те блокируют биты на каждый вызов → ~1 млн блокировок
+        // на кадр и десятки мс на скан). Формат 24bppRgb, порядок байт — BGR.
+        var rect = new Rectangle(0, 0, scaled.Width, scaled.Height);
+        var data = scaled.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+        try
         {
-            for (var x = 0; x < scaled.Width; x++)
+            var byteCount = Math.Abs(data.Stride) * scaled.Height;
+            var buffer = new byte[byteCount];
+            Marshal.Copy(data.Scan0, buffer, 0, byteCount);
+
+            for (var y = 0; y < scaled.Height; y++)
             {
-                var c = scaled.GetPixel(x, y);
-                var lum = (int)(0.299 * c.R + 0.587 * c.G + 0.114 * c.B);
-                var v = lum > _threshold ? 255 : 0;
-                scaled.SetPixel(x, y, Color.FromArgb(v, v, v));
+                var row = y * data.Stride;
+                for (var x = 0; x < scaled.Width; x++)
+                {
+                    var i = row + x * 3;
+                    var lum = (int)(0.114 * buffer[i] + 0.587 * buffer[i + 1] + 0.299 * buffer[i + 2]);
+                    var v = (byte)(lum > _threshold ? 255 : 0);
+                    buffer[i] = v;
+                    buffer[i + 1] = v;
+                    buffer[i + 2] = v;
+                }
             }
+
+            Marshal.Copy(buffer, 0, data.Scan0, byteCount);
+        }
+        finally
+        {
+            scaled.UnlockBits(data);
         }
 
         return scaled;

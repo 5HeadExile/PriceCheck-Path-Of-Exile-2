@@ -28,7 +28,15 @@ public sealed class PoeNinjaClient : IPriceSource, IDisposable
     {
         _baseUrl = config.PriceApiBaseUrl;
         _overviews = config.PriceOverviews;
+        var owned = http is null;
         _http = http ?? new HttpClient();
+        if (owned)
+        {
+            // Свой клиент — ограничиваем таймаут (дефолтные 100 с подвесили бы фоновый
+            // цикл/удерживали бы кэш-семафор). Внешний клиент настраивает вызывающий.
+            _http.Timeout = TimeSpan.FromSeconds(15);
+        }
+
         if (!_http.DefaultRequestHeaders.UserAgent.Any())
         {
             _http.DefaultRequestHeaders.UserAgent.ParseAdd("PriceCheckPoe2/0.1 (+https://github.com/5HeadExile)");
@@ -45,15 +53,18 @@ public sealed class PoeNinjaClient : IPriceSource, IDisposable
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var uri = BuildRequestUri(league, overview);
             try
             {
+                var uri = BuildRequestUri(league, overview);
                 var json = await _http.GetStringAsync(uri, cancellationToken).ConfigureAwait(false);
                 MergeOverview(json, prices);
             }
-            catch (HttpRequestException)
+            catch (Exception ex) when (
+                ex is HttpRequestException or TaskCanceledException or UriFormatException
+                && !cancellationToken.IsCancellationRequested)
             {
-                // Категория недоступна/пустая — остальные важнее, не валим всё.
+                // Категория недоступна/таймаут/кривой URL — остальные важнее, не валим
+                // весь фетч. Реальная отмена (наш токен) пробрасывается выше.
             }
         }
 

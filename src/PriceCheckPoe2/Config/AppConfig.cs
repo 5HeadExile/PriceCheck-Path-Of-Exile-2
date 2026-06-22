@@ -113,6 +113,20 @@ public sealed class AppConfig
     public void Save()
     {
         var json = JsonConvert.SerializeObject(this, Formatting.Indented);
-        File.WriteAllText(ConfigPath, json);
+        try
+        {
+            // Атомарно: пишем во временный файл и подменяем — обрыв записи не оставит
+            // битый config.json. Вызывается из UI-потока, поэтому IO-ошибку
+            // (файл занят и т.п.) глушим, чтобы не уронить приложение.
+            var tmp = ConfigPath + ".tmp";
+            File.WriteAllText(tmp, json);
+            File.Move(tmp, ConfigPath, overwrite: true);
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
     }
 }

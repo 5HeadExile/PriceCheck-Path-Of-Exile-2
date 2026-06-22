@@ -11,7 +11,9 @@ namespace PriceCheckPoe2.Ocr;
 public sealed class RewardParser
 {
     private readonly Dictionary<string, string> _aliasToCanonical;
-    private readonly List<string> _canonicalNames;
+    // Канонические имена вместе с предвычисленной нормализованной формой — чтобы
+    // не нормализовать их заново на каждой строке OCR в нечётком поиске.
+    private readonly List<(string Canonical, string Normalized)> _canonicalNames;
     private readonly int _maxDistance;
 
     public RewardParser(
@@ -20,11 +22,11 @@ public sealed class RewardParser
     {
         _maxDistance = maxDistance;
         _aliasToCanonical = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        _canonicalNames = new List<string>();
+        _canonicalNames = new List<(string, string)>();
 
         foreach (var (canonical, aliases) in canonicalToAliases)
         {
-            _canonicalNames.Add(canonical);
+            _canonicalNames.Add((canonical, Normalize(canonical)));
             _aliasToCanonical[Normalize(canonical)] = canonical;
             foreach (var alias in aliases)
             {
@@ -79,9 +81,9 @@ public sealed class RewardParser
         string? best = null;
         var bestDistance = int.MaxValue;
 
-        foreach (var canonical in _canonicalNames)
+        foreach (var (canonical, canonicalNorm) in _canonicalNames)
         {
-            var distance = Levenshtein(normalized, Normalize(canonical));
+            var distance = Levenshtein(normalized, canonicalNorm);
             if (distance < bestDistance)
             {
                 bestDistance = distance;
