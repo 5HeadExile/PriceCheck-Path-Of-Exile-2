@@ -172,10 +172,12 @@ public sealed class RegionMonitor : IDisposable
                         }
 
                         // Confirm-gate: область показывается, только если в ней реально
-                        // распознан список наград (≥ ConfirmRewards с ценой). Это отсекает
-                        // ложные срабатывания от яркости мира при беге.
+                        // распознан список наград (≥ ConfirmRewards строк с ценой ИЛИ явным
+                        // количеством «Nx»). Считаем по строкам-наградам, а не только по цене,
+                        // иначе панель из непрайсящихся предметов («Perfect Orb…») не покажется.
+                        // Яркость мира при беге не даёт строк вида «Nx Имя» → ложных нет.
                         var confirmed = results
-                            .Where(r => r.Rewards.Count(x => x.Price is not null) >= ConfirmRewards)
+                            .Where(r => r.Rewards.Count(x => x.Price is not null || x.HasCount) >= ConfirmRewards)
                             .ToList();
 
                         if (confirmed.Count > 0)

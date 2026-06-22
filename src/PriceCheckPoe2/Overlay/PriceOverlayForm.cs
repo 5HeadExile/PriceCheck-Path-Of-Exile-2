@@ -114,6 +114,10 @@ public sealed class PriceOverlayForm : Form
 
         using var priceFont = new Font("Segoe UI", 10.5f, FontStyle.Bold);
 
+        // Уже занятые плашками прямоугольники — чтобы не накладывались друг на друга
+        // (дубли OCR / близкие строки сдвигаем вниз вместо налипания).
+        var placed = new List<Rectangle>();
+
         foreach (var result in _results)
         {
             if (_debug)
@@ -134,12 +138,12 @@ public sealed class PriceOverlayForm : Form
                 var isBest = best is not null
                     && ReferenceEquals(reward, best);
 
-                DrawPriceChip(g, reward, priceFont, b, isBest);
+                DrawPriceChip(g, reward, priceFont, b, isBest, placed);
             }
         }
     }
 
-    private void DrawPriceChip(Graphics g, PricedReward reward, Font font, Rectangle row, bool best)
+    private void DrawPriceChip(Graphics g, PricedReward reward, Font font, Rectangle row, bool best, List<Rectangle> placed)
     {
         var (text, color) = PriceLabel(reward);
         if (best)
@@ -160,6 +164,16 @@ public sealed class PriceOverlayForm : Form
 
         var rect = new Rectangle(left, top, w, h);
 
+        // Анти-наложение: пока плашка пересекает уже размещённую — опускаем ниже.
+        var guard = 0;
+        while (placed.Any(p => p.IntersectsWith(rect)) && guard++ < 64)
+        {
+            var lowest = placed.Where(p => p.IntersectsWith(rect)).Max(p => p.Bottom);
+            rect.Y = lowest + 2;
+        }
+
+        placed.Add(rect);
+
         using var path = Rounded(rect, 8);
         // Непрозрачный нейтральный фон: без примеси magenta-ключа (раньше плашки
         // отдавали в фиолетовый) — ценностный цвет читается чётко.
@@ -172,7 +186,7 @@ public sealed class PriceOverlayForm : Form
         g.DrawPath(border, path);
 
         using var brush = new SolidBrush(color);
-        g.DrawString(text, font, brush, left + 8, top + 3);
+        g.DrawString(text, font, brush, rect.X + 8, rect.Y + 3);
     }
 
     /// <summary>Текст и цвет цены: «?» для нераспознанного, иначе сумма + тир-цвет.</summary>

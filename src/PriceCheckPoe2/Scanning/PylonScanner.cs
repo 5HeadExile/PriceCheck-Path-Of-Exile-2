@@ -8,12 +8,15 @@ using PriceCheckPoe2.Pricing;
 namespace PriceCheckPoe2.Scanning;
 
 /// <summary>Награда с ценой и её прямоугольником на экране (для отрисовки рядом).</summary>
+/// <param name="HasCount">Строка имела явное количество («1x»/«3x») — сильный
+/// признак строки-награды (даже если цены нет). Используется в confirm-gate.</param>
 public sealed record PricedReward(
     int Stack,
     string Name,
     RewardPrice? Price,
     double LineTotal,
-    Rectangle ScreenBounds);
+    Rectangle ScreenBounds,
+    bool HasCount = false);
 
 /// <summary>Результат оценки одной области-пилона: награды, сумма и сама область.</summary>
 public sealed record PylonScanResult(
@@ -91,6 +94,7 @@ public sealed class PylonScanner
         foreach (var line in lines)
         {
             var (stack, afterCount) = SplitCount(line.Text);
+            var hasCount = HasExplicitCount(line.Text);
             var name = StripTag(afterCount);            // снимаем тег "Skill:/Support:"
             var canonical = parser.Parse(name);
 
@@ -102,12 +106,12 @@ public sealed class PylonScanner
             {
                 priceTable.TryGetValue(canonical, out price);
                 lineTotal = (price?.ExaltedValue ?? 0) * stack;
-                total += lineTotal;
                 displayName = canonical;
             }
-            else if (KnownRewardTag.IsMatch(afterCount))
+            else if (KnownRewardTag.IsMatch(afterCount) || hasCount)
             {
-                // Скилл/саппорт распознан по тегу, но цены на poe.ninja для него нет.
+                // Строка-награда распознана (тег скилла/саппорта или явное «Nx»),
+                // но цены на poe.ninja нет → покажем её с «?», не выбрасываем.
                 displayName = name;
             }
             else
@@ -122,7 +126,27 @@ public sealed class PylonScanner
                 line.Bounds.Width,
                 line.Bounds.Height);
 
-            rewards.Add(new PricedReward(stack, displayName, price, lineTotal, screen));
+            // Дедуп: OCR иногда отдаёт две строки на одну награду (налипшие плашки).
+            // Если новая строка перекрывает уже добавленную по вертикали — оставляем
+            // более информативную (с ценой).
+            var dupIndex = rewards.FindIndex(r => VerticalOverlap(r.ScreenBounds, screen) > 0.6);
+            if (dupIndex >= 0)
+            {
+                if (price is not null && rewards[dupIndex].Price is null)
+                {
+                    total += lineTotal;
+                    rewards[dupIndex] = new PricedReward(stack, displayName, price, lineTotal, screen, hasCount);
+                }
+
+                continue;
+            }
+
+            if (price is not null)
+            {
+                total += lineTotal;
+            }
+
+            rewards.Add(new PricedReward(stack, displayName, price, lineTotal, screen, hasCount));
         }
 
         return new PylonScanResult(id, total, rewards, region);
@@ -148,6 +172,35 @@ public sealed class PylonScanner
         }
 
         return (1, text);
+    }
+
+    /// <summary>Есть ли в строке явное количество («1x Foo», «3 Foo», «Foo x12»).</summary>
+    internal static bool HasExplicitCount(string line)
+    {
+        var text = line.Trim();
+        var lead = LeadingCount.Match(text);
+        if (lead.Success && int.TryParse(lead.Groups[1].Value, out _) && lead.Groups[2].Value.Any(char.IsLetter))
+        {
+            return true;
+        }
+
+        var trail = TrailingCount.Match(text);
+        return trail.Success && int.TryParse(trail.Groups[2].Value, out _) && trail.Groups[1].Value.Any(char.IsLetter);
+    }
+
+    /// <summary>Доля вертикального перекрытия двух прямоугольников (0..1) — для дедупа строк.</summary>
+    internal static double VerticalOverlap(Rectangle a, Rectangle b)
+    {
+        var top = Math.Max(a.Top, b.Top);
+        var bottom = Math.Min(a.Bottom, b.Bottom);
+        var inter = bottom - top;
+        if (inter <= 0)
+        {
+            return 0;
+        }
+
+        var minHeight = Math.Min(a.Height, b.Height);
+        return minHeight <= 0 ? 0 : (double)inter / minHeight;
     }
 
     /// <summary>Снимает тег-префикс ("Skill: ", "Support: ") — берём часть после двоеточия.</summary>

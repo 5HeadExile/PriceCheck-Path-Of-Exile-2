@@ -1,3 +1,4 @@
+using System.Drawing;
 using PriceCheckPoe2.Scanning;
 using Xunit;
 
@@ -5,6 +6,32 @@ namespace PriceCheckPoe2.Tests;
 
 public class PylonScannerTests
 {
+    [Theory]
+    [InlineData("1x Perfect Orb of Transmutation", true)]
+    [InlineData("3x Exalted Orb", true)]
+    [InlineData("3 Divine Orb", true)]
+    [InlineData("Chaos Orb x12", true)]
+    [InlineData("Masterwork Rune", false)]
+    [InlineData("Perfect Orb of Augmentation", false)]
+    public void HasExplicitCount_DetectsLeadingOrTrailingCount(string line, bool expected) =>
+        Assert.Equal(expected, PylonScanner.HasExplicitCount(line));
+
+    [Fact]
+    public void VerticalOverlap_FullOverlap_IsOne()
+    {
+        var a = new Rectangle(0, 100, 200, 30);
+        var b = new Rectangle(50, 102, 180, 28); // почти та же строка
+        Assert.True(PylonScanner.VerticalOverlap(a, b) > 0.6);
+    }
+
+    [Fact]
+    public void VerticalOverlap_SeparateRows_IsZero()
+    {
+        var a = new Rectangle(0, 100, 200, 30);
+        var b = new Rectangle(0, 140, 200, 30); // следующая строка
+        Assert.Equal(0, PylonScanner.VerticalOverlap(a, b), 3);
+    }
+
     [Theory]
     [InlineData("5x Exalted Orb", 5, "Exalted Orb")]
     [InlineData("3x Greater Orb of Transmutation", 3, "Greater Orb of Transmutation")]
