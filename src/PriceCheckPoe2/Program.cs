@@ -38,6 +38,45 @@ internal static class Program
             return;
         }
 
+        // Технический рендер образцов ценников на тёмном фоне (проверка дизайна):
+        // --shot-chips <путь>.
+        if (args.Length >= 2 && args[0] == "--shot-chips")
+        {
+            using var bmp = new System.Drawing.Bitmap(360, 320);
+            using (var g = System.Drawing.Graphics.FromImage(bmp))
+            {
+                g.Clear(System.Drawing.Color.FromArgb(28, 24, 20)); // имитация тёмной игры
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+
+                var samples = new (Overlay.PriceChip.Model M, string Caption)[]
+                {
+                    (new(false, false, 0.05, "0.05 ex", null), "T1 тривиально"),
+                    (new(false, false, 0.55, "0.55 ex", null), "T2 дёшево"),
+                    (new(false, false, 2.18, "2.18 ex", null), "T3 заметно"),
+                    (new(false, false, 9.16, "9.16 ex", null), "T4 дорого"),
+                    (new(false, false, 17.46, "1.73 div", null), "T5 топ (div)"),
+                    (new(false, false, 3.85, "3.85 ex", "0.55/шт"), "стак"),
+                    (new(true, false, 0, "?", null), "нет цены"),
+                    (new(false, true, 22.3, "2.23 div", null), "лучшая"),
+                };
+
+                float y = 16;
+                using var cap = new System.Drawing.Font("Segoe UI", 10f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+                foreach (var (m, caption) in samples)
+                {
+                    var w = Overlay.PriceChip.MeasureWidth(g, m);
+                    Overlay.PriceChip.Draw(g, new System.Drawing.RectangleF(16, y, w, Overlay.PriceChip.Height), m);
+                    System.Windows.Forms.TextRenderer.DrawText(g, caption, cap,
+                        new System.Drawing.Point(190, (int)y + 4), System.Drawing.Color.FromArgb(150, 150, 150));
+                    y += 36;
+                }
+            }
+
+            bmp.Save(args[1]);
+            return;
+        }
+
         // Технический рендер окна в PNG (для проверки дизайна без захвата экрана):
         // --shot menu|settings <путь>.
         if (args.Length >= 3 && args[0] == "--shot")

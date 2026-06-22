@@ -1,26 +1,28 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using PriceCheckPoe2.Scanning;
 
 namespace PriceCheckPoe2.Overlay;
 
 /// <summary>
-/// Прозрачный click-through оверлей. Рисует цену напротив каждой награды на
-/// тёмной плашке (читаемо на любом фоне), цвет — по тиру ценности, лучшая
-/// награда подсвечена. Крупные суммы — в divine, мелкие — в exalted. При
-/// появлении плавно проявляется (fade-in).
+/// Прозрачный click-through оверлей цен. Рисует ценник-плашку («Тинт-стекло»)
+/// напротив каждой награды. Окно — **per-pixel alpha layered window**
+/// (`UpdateLayeredWindow`), чтобы полупрозрачная заливка плашки смешивалась с
+/// игрой, а не с фоном формы. Плавно проявляется (fade-in по альфе блендинга).
 /// </summary>
 public sealed class PriceOverlayForm : Form
 {
     private const int EdgeMargin = 8;
     private const int Gap = 10;
-    private const double DivineThreshold = 1.0; // от скольких div показываем в divine
-    private const double TargetOpacity = 1.0;
+    private const double DivineThreshold = 1.0;
 
     private IReadOnlyList<PylonScanResult> _results = Array.Empty<PylonScanResult>();
     private bool _debug;
-
+    private byte _alpha;
+    private Bitmap? _lastBmp;
     private readonly System.Windows.Forms.Timer _fadeTimer;
 
     public PriceOverlayForm()
@@ -28,13 +30,8 @@ public sealed class PriceOverlayForm : Form
         FormBorderStyle = FormBorderStyle.None;
         StartPosition = FormStartPosition.Manual;
         Bounds = SystemInformation.VirtualScreen;
-        // Чёрный ключ прозрачности: AA-края плашек/текста смешиваются с чёрным
-        // (тёмная кайма), а не с magenta (фиолетовая кайма — прежний баг).
-        BackColor = Color.Black;
-        TransparencyKey = Color.Black;
-        TopMost = true;
         ShowInTaskbar = false;
-        DoubleBuffered = true;
+        TopMost = true;
 
         _fadeTimer = new System.Windows.Forms.Timer { Interval = 16 };
         _fadeTimer.Tick += FadeTick;
@@ -42,7 +39,8 @@ public sealed class PriceOverlayForm : Form
         {
             if (Visible)
             {
-                Opacity = 0;
+                _alpha = 0;
+                Render();
                 _fadeTimer.Start();
             }
             else
@@ -52,7 +50,7 @@ public sealed class PriceOverlayForm : Form
         };
     }
 
-    /// <summary>Click-through: окно не перехватывает мышь.</summary>
+    /// <summary>Click-through + layered: окно не перехватывает мышь, рисуется через UpdateLayeredWindow.</summary>
     protected override CreateParams CreateParams
     {
         get
@@ -72,51 +70,68 @@ public sealed class PriceOverlayForm : Form
         set
         {
             _debug = value;
-            Invalidate();
+            if (Visible)
+            {
+                Render();
+            }
         }
     }
 
     public void Update(IReadOnlyList<PylonScanResult> results)
     {
         _results = results;
-        Invalidate();
+        if (Visible)
+        {
+            Render();
+        }
     }
 
     private void FadeTick(object? sender, EventArgs e)
     {
-        var next = Opacity + 0.12;
-        if (next >= TargetOpacity)
+        _alpha = (byte)Math.Min(255, _alpha + 40);
+        if (_lastBmp is not null)
         {
-            Opacity = TargetOpacity;
-            _fadeTimer.Stop();
+            ApplyLayered(_lastBmp, _alpha);
         }
-        else
+
+        if (_alpha >= 255)
         {
-            Opacity = next;
+            _fadeTimer.Stop();
         }
     }
 
-    protected override void OnPaint(PaintEventArgs e)
+    /// <summary>Рисует все плашки в ARGB-битмап и публикует через UpdateLayeredWindow.</summary>
+    private void Render()
     {
-        base.OnPaint(e);
-        var g = e.Graphics;
-        g.SmoothingMode = SmoothingMode.AntiAlias;
-        // Серое сглаживание (не ClearType): на прозрачном окне субпиксельный
-        // ClearType даёт цветные края.
-        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+        if (Width <= 0 || Height <= 0 || !IsHandleCreated)
+        {
+            return;
+        }
 
-        // Лучшая награда по ценности — для подсветки.
+        var bmp = new Bitmap(Width, Height, PixelFormat.Format32bppArgb);
+        using (var g = Graphics.FromImage(bmp))
+        {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            // Серое сглаживание (не ClearType): на ARGB-поверхности субпиксельный
+            // ClearType не даёт корректную альфу.
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+            DrawChips(g);
+        }
+
+        ApplyLayered(bmp, _alpha);
+        _lastBmp?.Dispose();
+        _lastBmp = bmp;
+    }
+
+    private void DrawChips(Graphics g)
+    {
         var best = _results
             .SelectMany(r => r.Rewards)
             .Where(x => x.Price is not null)
             .OrderByDescending(x => x.LineTotal)
             .FirstOrDefault();
 
-        using var priceFont = new Font("Segoe UI", 10.5f, FontStyle.Bold);
-
-        // Уже занятые плашками прямоугольники — чтобы не накладывались друг на друга
-        // (дубли OCR / близкие строки сдвигаем вниз вместо налипания).
-        var placed = new List<Rectangle>();
+        var placed = new List<RectangleF>();
 
         foreach (var result in _results)
         {
@@ -128,128 +143,124 @@ public sealed class PriceOverlayForm : Form
 
             foreach (var reward in result.Rewards)
             {
-                var b = ToLocal(reward.ScreenBounds);
+                var row = ToLocal(reward.ScreenBounds);
                 if (_debug)
                 {
                     using var lp = new Pen(Color.FromArgb(120, 0, 255, 0), 1);
-                    g.DrawRectangle(lp, b);
+                    g.DrawRectangle(lp, row);
                 }
 
-                var isBest = best is not null
-                    && ReferenceEquals(reward, best);
+                var model = ToModel(reward, ReferenceEquals(reward, best));
+                var w = PriceChip.MeasureWidth(g, model);
 
-                DrawPriceChip(g, reward, priceFont, b, isBest, placed);
+                // Ставим плашку сразу после названия, не давая вылезти за экран.
+                var desiredLeft = row.Right + Gap;
+                var maxLeft = Width - w - EdgeMargin;
+                var left = Math.Min(desiredLeft, maxLeft);
+                left = Math.Max(left, EdgeMargin);
+                var top = row.Y + (row.Height - PriceChip.Height) / 2f;
+
+                var rect = new RectangleF(left, top, w, PriceChip.Height);
+
+                // Анти-наложение: пересекающиеся плашки сдвигаем вниз.
+                var guard = 0;
+                while (placed.Any(p => p.IntersectsWith(rect)) && guard++ < 64)
+                {
+                    var lowest = placed.Where(p => p.IntersectsWith(rect)).Max(p => p.Bottom);
+                    rect.Y = lowest + 2;
+                }
+
+                placed.Add(rect);
+                PriceChip.Draw(g, rect, model);
             }
         }
     }
 
-    private void DrawPriceChip(Graphics g, PricedReward reward, Font font, Rectangle row, bool best, List<Rectangle> placed)
-    {
-        var (text, color) = PriceLabel(reward);
-        if (best)
-        {
-            text = "★ " + text;
-        }
-
-        var size = g.MeasureString(text, font);
-        var w = (int)size.Width + 16;
-        var h = (int)size.Height + 6;
-
-        // Ставим плашку сразу после названия, но не даём вылезти за экран.
-        var desiredLeft = row.Right + Gap;
-        var maxLeft = Width - w - EdgeMargin;
-        var left = Math.Min(desiredLeft, maxLeft);
-        left = Math.Max(left, EdgeMargin);
-        var top = row.Y + (row.Height - h) / 2;
-
-        var rect = new Rectangle(left, top, w, h);
-
-        // Анти-наложение: пока плашка пересекает уже размещённую — опускаем ниже.
-        var guard = 0;
-        while (placed.Any(p => p.IntersectsWith(rect)) && guard++ < 64)
-        {
-            var lowest = placed.Where(p => p.IntersectsWith(rect)).Max(p => p.Bottom);
-            rect.Y = lowest + 2;
-        }
-
-        placed.Add(rect);
-
-        using var path = Rounded(rect, 8);
-        // Непрозрачный нейтральный фон: без примеси magenta-ключа (раньше плашки
-        // отдавали в фиолетовый) — ценностный цвет читается чётко.
-        using var bg = new SolidBrush(Color.FromArgb(255, 24, 24, 28));
-        g.FillPath(bg, path);
-        // Лучшую награду выделяем только мягкой золотой рамкой (сдержанно).
-        using var border = new Pen(
-            best ? Color.FromArgb(255, 214, 182, 104) : Color.FromArgb(255, 58, 58, 66),
-            best ? 2f : 1f);
-        g.DrawPath(border, path);
-
-        using var brush = new SolidBrush(color);
-        g.DrawString(text, font, brush, rect.X + 8, rect.Y + 3);
-    }
-
-    /// <summary>Текст и цвет цены: «?» для нераспознанного, иначе сумма + тир-цвет.</summary>
-    private static (string Text, Color Color) PriceLabel(PricedReward reward)
+    private static PriceChip.Model ToModel(PricedReward reward, bool best)
     {
         if (reward.Price is null)
         {
-            return ("?", Color.FromArgb(181, 110, 96));
+            return new PriceChip.Model(Unknown: true, Best: false, Exalted: 0, MainText: "?", UnitText: null);
         }
 
         var exTotal = reward.LineTotal;
         var divTotal = (reward.Price.DivineValue ?? 0) * reward.Stack;
-        var text = FormatValue(exTotal, divTotal);
+        var useDiv = divTotal >= DivineThreshold;
+        var main = useDiv ? $"{divTotal:0.##} div" : $"{exTotal:0.##} ex";
 
-        // Для стака >1 — сумма, а в скобках цена за 1 штуку.
+        string? unit = null;
         if (reward.Stack > 1)
         {
-            var unit = FormatValue(reward.Price.ExaltedValue, reward.Price.DivineValue ?? 0);
-            text += $" ({unit}/шт)";
+            var u = useDiv ? (reward.Price.DivineValue ?? 0) : reward.Price.ExaltedValue;
+            unit = $"{u:0.##}/шт";
         }
 
-        return (text, TierColor(exTotal));
+        return new PriceChip.Model(Unknown: false, Best: best, Exalted: exTotal, MainText: main, UnitText: unit);
     }
-
-    private static string FormatValue(double exalted, double divine) =>
-        divine >= DivineThreshold
-            ? $"{divine:0.##} div"
-            : $"{exalted:0.##} ex";
-
-    // Сдержанная палитра по ценности (в exalted): приглушённые тона, читаемые
-    // на нейтральном тёмном фоне плашки.
-    private static Color TierColor(double exalted) => exalted switch
-    {
-        < 0.1 => Color.FromArgb(124, 130, 138),   // тривиальное — приглушённо-серое
-        < 1.0 => Color.FromArgb(198, 202, 208),   // дешёвое — мягкое белое
-        < 5.0 => Color.FromArgb(190, 162, 86),    // среднее — приглушённое золото
-        < 20.0 => Color.FromArgb(190, 130, 74),   // дорогое — приглушённая медь
-        _ => Color.FromArgb(190, 96, 110),         // топ — приглушённый терракот
-    };
-
-    private static GraphicsPath Rounded(Rectangle r, int radius)
-    {
-        var d = radius * 2;
-        var path = new GraphicsPath();
-        path.AddArc(r.X, r.Y, d, d, 180, 90);
-        path.AddArc(r.Right - d, r.Y, d, d, 270, 90);
-        path.AddArc(r.Right - d, r.Bottom - d, d, d, 0, 90);
-        path.AddArc(r.X, r.Bottom - d, d, d, 90, 90);
-        path.CloseFigure();
-        return path;
-    }
-
-    private Point ToLocal(Point screen) =>
-        new(screen.X - Bounds.X, screen.Y - Bounds.Y);
 
     private Rectangle ToLocal(Rectangle screen) =>
         new(screen.X - Bounds.X, screen.Y - Bounds.Y, screen.Width, screen.Height);
+
+    // --- per-pixel alpha layered window ---
+
+    private void ApplyLayered(Bitmap bmp, byte alpha)
+    {
+        var screenDc = GetDC(IntPtr.Zero);
+        var memDc = CreateCompatibleDC(screenDc);
+        var hBitmap = bmp.GetHbitmap(Color.FromArgb(0));
+        var old = SelectObject(memDc, hBitmap);
+        try
+        {
+            var size = new SIZE { cx = bmp.Width, cy = bmp.Height };
+            var src = new POINT { x = 0, y = 0 };
+            var dst = new POINT { x = Bounds.X, y = Bounds.Y };
+            var blend = new BLENDFUNCTION
+            {
+                BlendOp = AC_SRC_OVER,
+                BlendFlags = 0,
+                SourceConstantAlpha = alpha,
+                AlphaFormat = AC_SRC_ALPHA,
+            };
+            UpdateLayeredWindow(Handle, screenDc, ref dst, ref size, memDc, ref src, 0, ref blend, ULW_ALPHA);
+        }
+        finally
+        {
+            SelectObject(memDc, old);
+            DeleteObject(hBitmap);
+            DeleteDC(memDc);
+            ReleaseDC(IntPtr.Zero, screenDc);
+        }
+    }
+
+    private const int ULW_ALPHA = 0x02;
+    private const byte AC_SRC_OVER = 0x00;
+    private const byte AC_SRC_ALPHA = 0x01;
+
+    [StructLayout(LayoutKind.Sequential)] private struct POINT { public int x, y; }
+    [StructLayout(LayoutKind.Sequential)] private struct SIZE { public int cx, cy; }
+    [StructLayout(LayoutKind.Sequential)] private struct BLENDFUNCTION
+    {
+        public byte BlendOp, BlendFlags, SourceConstantAlpha, AlphaFormat;
+    }
+
+    [DllImport("user32.dll", ExactSpelling = true)] private static extern IntPtr GetDC(IntPtr hWnd);
+    [DllImport("user32.dll", ExactSpelling = true)] private static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
+    [DllImport("gdi32.dll", ExactSpelling = true)] private static extern IntPtr CreateCompatibleDC(IntPtr hDC);
+    [DllImport("gdi32.dll", ExactSpelling = true)] private static extern bool DeleteDC(IntPtr hDC);
+    [DllImport("gdi32.dll", ExactSpelling = true)] private static extern IntPtr SelectObject(IntPtr hDC, IntPtr hObject);
+    [DllImport("gdi32.dll", ExactSpelling = true)] private static extern bool DeleteObject(IntPtr hObject);
+
+    [DllImport("user32.dll", ExactSpelling = true)]
+    private static extern bool UpdateLayeredWindow(
+        IntPtr hwnd, IntPtr hdcDst, ref POINT pptDst, ref SIZE psize, IntPtr hdcSrc,
+        ref POINT pptSrc, int crKey, ref BLENDFUNCTION pblend, int dwFlags);
 
     protected override void Dispose(bool disposing)
     {
         if (disposing)
         {
             _fadeTimer.Dispose();
+            _lastBmp?.Dispose();
         }
 
         base.Dispose(disposing);
