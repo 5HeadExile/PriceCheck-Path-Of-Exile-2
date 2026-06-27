@@ -35,9 +35,12 @@ public sealed class OcrEngine : IDisposable
     /// Распознаёт текст в области и возвращает непустые строки с координатами
     /// (в пикселях исходной области).
     /// </summary>
-    public IReadOnlyList<OcrLine> ReadLines(Bitmap region)
+    public IReadOnlyList<OcrLine> ReadLines(Bitmap region) => ReadLines(region, _threshold);
+
+    /// <summary>Распознаёт строки, бинаризуя кадр заданным порогом (0 = авто Оцу).</summary>
+    public IReadOnlyList<OcrLine> ReadLines(Bitmap region, int threshold)
     {
-        using var prepared = Preprocess(region);
+        using var prepared = Preprocess(region, threshold);
 
         if (_saveDebug)
         {
@@ -77,8 +80,8 @@ public sealed class OcrEngine : IDisposable
         return lines;
     }
 
-    /// <summary>Апскейл, grayscale и бинаризация по порогу.</summary>
-    private Bitmap Preprocess(Bitmap source)
+    /// <summary>Апскейл, grayscale и бинаризация по порогу (0 = авто Оцу).</summary>
+    private Bitmap Preprocess(Bitmap source, int threshold)
     {
         var scaled = new Bitmap(source.Width * Scale, source.Height * Scale, PixelFormat.Format24bppRgb);
         using (var g = Graphics.FromImage(scaled))
@@ -98,14 +101,35 @@ public sealed class OcrEngine : IDisposable
             var buffer = new byte[byteCount];
             Marshal.Copy(data.Scan0, buffer, 0, byteCount);
 
+            // Первый проход: яркость каждого пикселя + гистограмма (для авто-порога).
+            var lum = new byte[scaled.Width * scaled.Height];
+            var hist = new int[256];
+            var li = 0;
             for (var y = 0; y < scaled.Height; y++)
             {
                 var row = y * data.Stride;
                 for (var x = 0; x < scaled.Width; x++)
                 {
                     var i = row + x * 3;
-                    var lum = (int)(0.114 * buffer[i] + 0.587 * buffer[i + 1] + 0.299 * buffer[i + 2]);
-                    var v = (byte)(lum > _threshold ? 255 : 0);
+                    var l = (int)(0.114 * buffer[i] + 0.587 * buffer[i + 1] + 0.299 * buffer[i + 2]);
+                    lum[li++] = (byte)l;
+                    hist[l]++;
+                }
+            }
+
+            // Порог: фиксированный (>0) или авто по Оцу (threshold<=0). Много-проходный
+            // OCR зовёт нас с разными порогами (см. PylonScanner) — это надёжнее одного.
+            var effThreshold = threshold > 0 ? threshold : OtsuThreshold(hist, lum.Length);
+
+            // Второй проход: бинаризация по выбранному порогу.
+            li = 0;
+            for (var y = 0; y < scaled.Height; y++)
+            {
+                var row = y * data.Stride;
+                for (var x = 0; x < scaled.Width; x++)
+                {
+                    var i = row + x * 3;
+                    var v = (byte)(lum[li++] > effThreshold ? 255 : 0);
                     buffer[i] = v;
                     buffer[i + 1] = v;
                     buffer[i + 2] = v;
@@ -120,6 +144,51 @@ public sealed class OcrEngine : IDisposable
         }
 
         return scaled;
+    }
+
+    /// <summary>
+    /// Авто-порог по методу Оцу: ищет уровень яркости, максимизирующий межклассовую
+    /// дисперсию (оптимальное разделение «фон/текст» по гистограмме кадра). Адаптируется
+    /// к яркости конкретной панели, поэтому надёжнее одного фиксированного порога.
+    /// </summary>
+    internal static int OtsuThreshold(int[] hist, int total)
+    {
+        long sumAll = 0;
+        for (var i = 0; i < 256; i++)
+        {
+            sumAll += (long)i * hist[i];
+        }
+
+        long sumB = 0;
+        int wB = 0;
+        double maxVar = -1;
+        var threshold = 127;
+        for (var i = 0; i < 256; i++)
+        {
+            wB += hist[i];
+            if (wB == 0)
+            {
+                continue;
+            }
+
+            var wF = total - wB;
+            if (wF == 0)
+            {
+                break;
+            }
+
+            sumB += (long)i * hist[i];
+            var mB = (double)sumB / wB;
+            var mF = (double)(sumAll - sumB) / wF;
+            var between = (double)wB * wF * (mB - mF) * (mB - mF);
+            if (between > maxVar)
+            {
+                maxVar = between;
+                threshold = i;
+            }
+        }
+
+        return threshold;
     }
 
     private static void TrySaveDebug(Bitmap prepared)

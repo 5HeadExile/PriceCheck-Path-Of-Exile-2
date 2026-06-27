@@ -19,11 +19,15 @@ public sealed record PricedReward(
     bool HasCount = false);
 
 /// <summary>Результат оценки одной области-пилона: награды, сумма и сама область.</summary>
+/// <param name="PricesLoaded">Прайс-таблица была непустой на момент скана. Если false
+/// (фетч poe.ninja не прошёл) — все награды без цены вынужденно, и монитор должен
+/// пересканировать, а не «замораживать» пустой результат.</param>
 public sealed record PylonScanResult(
     string PylonId,
     double TotalExalted,
     IReadOnlyList<PricedReward> Rewards,
-    Rectangle Region);
+    Rectangle Region,
+    bool PricesLoaded = true);
 
 /// <summary>
 /// Связывает весь пайплайн: захват области → OCR (со строками и координатами) →
@@ -79,6 +83,25 @@ public sealed class PylonScanner
         return results;
     }
 
+    /// <summary>
+    /// Офлайн-скан готового кадра пилона (PNG) с живыми ценами — для проверки
+    /// оценщика без захвата экрана. Возвращает результат и трассу решений по
+    /// каждой строке OCR (keep/drop/dedup/title), как в scan_log.txt.
+    /// </summary>
+    public async Task<(PylonScanResult Result, IReadOnlyList<string> Trace, int PriceCount)> ScanImageAsync(
+        string id, Bitmap bitmap, CancellationToken cancellationToken = default)
+    {
+        var priceTable = await _prices.GetAsync(_config.League, cancellationToken).ConfigureAwait(false);
+        var parser = priceTable.Count > 0
+            ? RewardParser.FromNames(priceTable.Keys)
+            : _fallbackParser ?? RewardParser.FromNames(Array.Empty<string>());
+
+        var region = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+        var trace = new List<string>();
+        var result = ScanBitmap(id, bitmap, region, parser, priceTable, trace);
+        return (result, trace, priceTable.Count);
+    }
+
     private PylonScanResult ScanRegion(
         string id,
         Rectangle region,
@@ -86,7 +109,58 @@ public sealed class PylonScanner
         IReadOnlyDictionary<string, RewardPrice> priceTable)
     {
         using var bitmap = ScreenCapturer.Capture(region);
-        var lines = _ocr.ReadLines(bitmap);
+        if (_config.SaveOcrDebugImages)
+        {
+            TrySaveRaw(id, bitmap);
+        }
+
+        return ScanBitmap(id, bitmap, region, parser, priceTable,
+            _config.SaveOcrDebugImages ? new List<string>() : null);
+    }
+
+    /// <summary>Сохраняет сырой кадр области (до предобработки) — фикстура для офлайн-стенда (--scan).</summary>
+    private static void TrySaveRaw(string id, Bitmap bitmap)
+    {
+        try
+        {
+            var path = Path.Combine(AppContext.BaseDirectory, $"region-raw-{id}-{DateTime.Now:HHmmss-fff}.png");
+            bitmap.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+        }
+        catch
+        {
+            // не критично
+        }
+    }
+
+    /// <summary>
+    /// Ядро оценки: OCR кадра → разбор количества/имени → цена из таблицы → дедуп.
+    /// Кадр приходит снаружи (захват экрана или PNG), <paramref name="region"/>
+    /// задаёт смещение строк в экранные координаты (для офлайна — (0,0,W,H)).
+    /// </summary>
+    private PylonScanResult ScanBitmap(
+        string id,
+        Bitmap bitmap,
+        Rectangle region,
+        RewardParser parser,
+        IReadOnlyDictionary<string, RewardPrice> priceTable,
+        List<string>? log)
+    {
+        // Много-проходный OCR: панели бывают разной яркости, поэтому бинаризуем
+        // несколькими порогами и объединяем строки — дедуп ниже оставит на каждую
+        // строку вариант с ценой. Тёмная панель читается низким порогом, яркая —
+        // высоким; так не теряем строки из-за единственного неподходящего порога.
+        var thresholds = _config.OcrThresholds is { Count: > 0 } set
+            ? set
+            : new List<int> { _config.OcrThreshold };
+        var lines = new List<OcrLine>();
+        foreach (var th in thresholds)
+        {
+            lines.AddRange(_ocr.ReadLines(bitmap, th));
+        }
+
+        // Сортируем по вертикали — чтобы дедуп по перекрытию шёл сверху вниз и
+        // строки одной награды (из разных проходов) гарантированно сопоставлялись.
+        lines.Sort((a, b) => a.Bounds.Y.CompareTo(b.Bounds.Y));
 
         var rewards = new List<PricedReward>();
         double total = 0;
@@ -102,20 +176,31 @@ public sealed class PylonScanner
             double lineTotal = 0;
             string displayName;
 
+            if (IsPanelTitle(name))
+            {
+                log?.Add($"  title-skip: '{line.Text}'");
+                continue;
+            }
+
             if (canonical is not null)
             {
                 priceTable.TryGetValue(canonical, out price);
                 lineTotal = (price?.ExaltedValue ?? 0) * stack;
                 displayName = canonical;
             }
-            else if (KnownRewardTag.IsMatch(afterCount) || hasCount)
+            else if (KnownRewardTag.IsMatch(afterCount) || LooksLikeName(name))
             {
-                // Строка-награда распознана (тег скилла/саппорта или явное «Nx»),
-                // но цены на poe.ninja нет → покажем её с «?», не выбрасываем.
+                // Строка-награда распознана (явный тег Skill/Support или текст похож
+                // на настоящее название), но цены на poe.ninja нет → покажем её с «?»,
+                // не выбрасываем. Раньше тут был обход по голому «Nx» (hasCount), но
+                // мусор от строки рун-иконок иногда тащит случайное число → давал
+                // ложную «?»-плашку. Теперь имя обязано пройти LooksLikeName; реальные
+                // награды с «Nx» (если без цены) и так проходят его по словам.
                 displayName = name;
             }
             else
             {
+                log?.Add($"  drop: '{line.Text}'");
                 continue;
             }
 
@@ -138,6 +223,7 @@ public sealed class PylonScanner
                     rewards[dupIndex] = new PricedReward(stack, displayName, price, lineTotal, screen, hasCount);
                 }
 
+                log?.Add($"  dedup-skip: '{line.Text}' (overlaps '{rewards[dupIndex].Name}')");
                 continue;
             }
 
@@ -146,10 +232,69 @@ public sealed class PylonScanner
                 total += lineTotal;
             }
 
+            log?.Add($"  keep: x{stack} '{displayName}' -> {(price is null ? "?" : price.ExaltedValue.ToString("0.##") + " ex")}");
             rewards.Add(new PricedReward(stack, displayName, price, lineTotal, screen, hasCount));
         }
 
-        return new PylonScanResult(id, total, rewards, region);
+        if (log is not null)
+        {
+            WriteScanLog(id, lines.Count, log);
+        }
+
+        return new PylonScanResult(id, total, rewards, region, priceTable.Count > 0);
+    }
+
+    /// <summary>Это строка-заголовок панели («Runeshape Combinations»), а не награда.</summary>
+    private static bool IsPanelTitle(string name)
+    {
+        var n = name.ToLowerInvariant();
+        return n.Contains("runeshape") || n.Contains("combination");
+    }
+
+    /// <summary>
+    /// Похоже на настоящее название награды — а не мусор OCR от строки рун-иконок,
+    /// которая идёт над названием (напр. «- oy V- DRI s - - e», «Crat . = * AN»,
+    /// «Wt SN ) B A r»). Требуем ≥2 «слов» из ≥3 букв подряд И высокую долю букв
+    /// среди непробельных символов: иконочный мусор полон одиночных букв, цифр и
+    /// спецсимволов и отсекается, а «Greater Jeweller's Orb» / «Uncut Spirit Gem»
+    /// проходят. Без этого каждая награда давала лишнюю «?»-плашку.
+    /// </summary>
+    internal static bool LooksLikeName(string name)
+    {
+        var trimmed = name.Trim();
+        if (trimmed.Length < 6)
+        {
+            return false;
+        }
+
+        var words = trimmed.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        var wordyWords = words.Count(w => w.Count(char.IsLetter) >= 3);
+        // ≥2 настоящих слова И они должны составлять большинство токенов: иконочный
+        // мусор вида «NI P o oo RIS JUS SO ps S NN o o I - 9» имеет пару 3-буквенных
+        // обрывков среди кучи односимвольного шума — отсекаем по доле слов.
+        if (wordyWords < 2 || wordyWords < words.Length * 0.5)
+        {
+            return false;
+        }
+
+        var nonSpace = trimmed.Count(c => !char.IsWhiteSpace(c));
+        var letters = trimmed.Count(c => char.IsLetter(c) || c == '\'');
+        return nonSpace > 0 && (double)letters / nonSpace >= 0.75;
+    }
+
+    private void WriteScanLog(string id, int lineCount, List<string> entries)
+    {
+        try
+        {
+            var path = Path.Combine(AppContext.BaseDirectory, "scan_log.txt");
+            var text = $"[{DateTime.Now:HH:mm:ss}] pylon '{id}': OCR lines={lineCount}{Environment.NewLine}"
+                + string.Join(Environment.NewLine, entries) + Environment.NewLine;
+            File.AppendAllText(path, text);
+        }
+        catch
+        {
+            // лог не критичен
+        }
     }
 
     /// <summary>Извлекает количество из строки OCR, возвращает (стак, остаток).</summary>

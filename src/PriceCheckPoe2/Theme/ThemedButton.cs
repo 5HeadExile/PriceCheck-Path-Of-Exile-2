@@ -136,13 +136,31 @@ public sealed class ThemedButton : Control
             textRightPad = tw + Ui.S(16);
         }
 
-        // Текст
+        // Текст. С иконкой-глифом — выравниваем по левому краю (после глифа); без
+        // иконки (напр. диалоговые «Отмена»/«Сохранить») — центрируем по горизонтали,
+        // иначе текст «прижат» влево и кнопка выглядит несбалансированно.
         using var font = Variant is ButtonVariant.Primary or ButtonVariant.GoldFill
             ? Palette.ActionSemibold()
             : Palette.Action();
-        var labelRect = new Rectangle(textLeft, 0, Width - textLeft - textRightPad, Height);
+
+        var hasGlyph = !string.IsNullOrEmpty(Glyph);
+        var hasTag = !string.IsNullOrEmpty(Tag2);
+        Rectangle labelRect;
+        TextFormatFlags align;
+        if (hasGlyph)
+        {
+            labelRect = new Rectangle(textLeft, 0, Width - textLeft - textRightPad, Height);
+            align = TextFormatFlags.Left;
+        }
+        else
+        {
+            // Центрируем по всей ширине; если есть правый тег — центрируем в области слева от него.
+            labelRect = new Rectangle(0, 0, Width - (hasTag ? textRightPad : 0), Height);
+            align = TextFormatFlags.HorizontalCenter;
+        }
+
         TextRenderer.DrawText(g, Text, font, labelRect, textColor,
-            TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.NoClipping);
+            align | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.NoClipping);
     }
 
     private (Color bg, Color bgBottom, Color border, Color text, Color glyph) Resolve()

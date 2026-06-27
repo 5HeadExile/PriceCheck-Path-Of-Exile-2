@@ -66,6 +66,13 @@ public sealed class AppConfig
     /// <summary>Хоткей debug-боксов.</summary>
     public string DebugHotkey { get; set; } = "VcF3";
 
+    /// <summary>
+    /// Хоткей «режима скриншота»: замораживает оверлей и временно разрешает захват
+    /// окна (снимает WDA_EXCLUDEFROMCAPTURE), чтобы плашки попали в скриншот. Повторное
+    /// нажатие возвращает обычный режим (оверлей снова скрыт от собственного захвата).
+    /// </summary>
+    public string ScreenshotHotkey { get; set; } = "VcF6";
+
     /// <summary>Прозрачность затемняющего слоя меню (0..1).</summary>
     public double MenuDimOpacity { get; set; } = 0.55;
 
@@ -79,8 +86,35 @@ public sealed class AppConfig
     /// </summary>
     public List<CalibrationProfile> PylonRegions { get; set; } = new();
 
-    /// <summary>Порог бинаризации для предобработки OCR (0..255).</summary>
+    /// <summary>Порог бинаризации для предобработки OCR (0..255). Легаси/одиночный режим.</summary>
     public int OcrThreshold { get; set; } = 110;
+
+    /// <summary>
+    /// Набор порогов бинаризации для много-проходного OCR. Полупрозрачная книга PoE2
+    /// поверх разного фона даёт панели РАЗНОЙ яркости: тёмные читаются низким порогом,
+    /// яркие — высоким. Сканируем каждым порогом и объединяем результат (дедуп
+    /// оставляет на каждую строку вариант с ценой). 0 в списке = авто-порог Оцу.
+    /// <para><see cref="ObjectCreationHandling.Replace"/> обязателен: иначе Newtonsoft
+    /// при десериализации ДОБАВЛЯЕТ значения из JSON к дефолтному списку, и список
+    /// растёт на каждый Load/Save (→ лишние проходы OCR и тормоза).</para>
+    /// </summary>
+    [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Replace)]
+    public List<int> OcrThresholds { get; set; } = new() { 60, 105, 150 };
+
+    /// <summary>
+    /// Пользовательский множитель размера UI поверх системного DPI (см. <see cref="Theme.Ui"/>).
+    /// 1.0 — без изменений. Полезно на мониторах с масштабом 100%, где плашки/меню
+    /// кажутся мелкими: например 1.25 вернёт размер как при системных 125%.
+    /// Итоговый масштаб = DPI × UiScale (с клампом).
+    /// </summary>
+    public double UiScale { get; set; } = 1.0;
+
+    /// <summary>
+    /// Ручная подстройка размера ценников-плашек поверх авто-масштаба. Плашки сами
+    /// масштабируются от высоты текста награды (любое разрешение — из коробки); этот
+    /// множитель нужен лишь если хочется крупнее/мельче. 1.0 = чистый авто-размер.
+    /// </summary>
+    public double PriceChipScale { get; set; } = 1.0;
 
     /// <summary>Сохранять предобработанные кадры OCR рядом с exe (для отладки).</summary>
     public bool SaveOcrDebugImages { get; set; }

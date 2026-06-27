@@ -80,6 +80,7 @@ public sealed class RewardParser
 
         string? best = null;
         var bestDistance = int.MaxValue;
+        var bestNormLen = 0;
 
         foreach (var (canonical, canonicalNorm) in _canonicalNames)
         {
@@ -88,10 +89,16 @@ public sealed class RewardParser
             {
                 bestDistance = distance;
                 best = canonical;
+                bestNormLen = canonicalNorm.Length;
             }
         }
 
-        return bestDistance <= _maxDistance ? best : null;
+        // Относительный порог: допускаем тем больше правок, чем длиннее имя (≈30%
+        // длины), но не больше абсолютного потолка. Абсолютный порог 4 на коротких
+        // именах («owlidol»=7) ловил фоновый шум OCR как реальный idol — фантомные
+        // цены. Относительный делает короткие имена строгими, длинные — терпимыми.
+        var allowed = Math.Clamp((int)Math.Round(bestNormLen * 0.30), 1, _maxDistance);
+        return bestDistance <= allowed ? best : null;
     }
 
     // Оставляем только буквы и цифры: убирает пробелы, апострофы и мусор OCR

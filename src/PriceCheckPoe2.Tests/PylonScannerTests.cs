@@ -64,4 +64,22 @@ public class PylonScannerTests
     [InlineData("Uncut Skill Gem (Level 19)", "Uncut Skill Gem (Level 19)")]
     public void StripTag_RemovesLeadingTag(string input, string expected) =>
         Assert.Equal(expected, PylonScanner.StripTag(input));
+
+    [Theory]
+    // Настоящие имена наград (показать с «?», если цены нет).
+    [InlineData("Greater Jeweller's Orb", true)]
+    [InlineData("Uncut Spirit Gem", true)]
+    [InlineData("Warding Rune of Hollowing", true)]
+    [InlineData("Orb of Transmutation", true)]
+    // Мусор OCR от строки рун-иконок над названием — НЕ должен давать «?»-плашку.
+    [InlineData("- oy V- DRI s - - e", false)]
+    [InlineData("Crat . = * AN", false)]
+    [InlineData("Wt SN ) B A r", false)]
+    [InlineData(". . B R M T e e", false)]
+    [InlineData("e e arim e o et . i Vo", false)]
+    // Пара 3-буквенных обрывков (RIS, JUS) среди кучи односимвольного шума — мусор.
+    [InlineData("NI P o oo RIS JUS SO ps S NN o o I - 9", false)]
+    [InlineData("Ve s A Y i o", false)]
+    public void LooksLikeName_AcceptsRealNamesRejectsIconGarbage(string text, bool expected) =>
+        Assert.Equal(expected, PylonScanner.LooksLikeName(text));
 }

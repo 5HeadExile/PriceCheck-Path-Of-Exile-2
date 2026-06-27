@@ -4,6 +4,7 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using PriceCheckPoe2.Scanning;
+using PriceCheckPoe2.Theme;
 
 namespace PriceCheckPoe2.Overlay;
 
@@ -16,8 +17,10 @@ namespace PriceCheckPoe2.Overlay;
 public sealed class PriceOverlayForm : Form
 {
     private const int EdgeMargin = 8;
-    private const int Gap = 10;
     private const double DivineThreshold = 1.0;
+
+    /// <summary>Необязательная ручная подстройка размера плашек поверх авто-масштаба (1.0 = авто).</summary>
+    public double ChipScale { get; set; } = 1.0;
 
     private IReadOnlyList<PylonScanResult> _results = Array.Empty<PylonScanResult>();
     private bool _debug;
@@ -61,6 +64,97 @@ public sealed class PriceOverlayForm : Form
             var cp = base.CreateParams;
             cp.ExStyle |= WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW;
             return cp;
+        }
+    }
+
+    private bool _capturable;
+
+    /// <summary>
+    /// Разрешить попадание оверлея в захват экрана (для скриншота плашек). В обычном
+    /// режиме оверлей исключён из захвата (<see cref="WDA_EXCLUDEFROMCAPTURE"/>), иначе
+    /// наш TopMost-оверлей попадает в CopyFromScreen детектора/OCR → плашки меняют
+    /// яркость правой части → детектор решает, что панель закрылась → петля мерцания.
+    /// «Режим скриншота» включает захват И замораживает детектор (см. RegionMonitor),
+    /// поэтому мерцания нет.
+    /// </summary>
+    public bool Capturable
+    {
+        get => _capturable;
+        set
+        {
+            _capturable = value;
+            ApplyCaptureAffinity();
+            if (Visible)
+            {
+                _alpha = 255; // в режиме скриншота показываем сразу, без fade
+                Render();
+            }
+        }
+    }
+
+    private static readonly Font BadgeFont = new("Segoe UI", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
+
+    /// <summary>Видимый индикатор «режим скриншота включён» — подтверждение нажатия F6.</summary>
+    private void DrawScreenshotBadge(Graphics g)
+    {
+        var primary = Screen.PrimaryScreen?.Bounds ?? new Rectangle(0, 0, Width, Height);
+        const string text = "●  Скриншот-режим — нажми F6, чтобы выйти";
+        var sz = g.MeasureString(text, BadgeFont);
+        float padX = 14, padY = 8, rad = 8;
+        var rect = new RectangleF(
+            primary.X - Bounds.X + 24,
+            primary.Y - Bounds.Y + 24,
+            sz.Width + padX * 2,
+            sz.Height + padY * 2);
+
+        using var path = new GraphicsPath();
+        var d = rad * 2;
+        path.AddArc(rect.X, rect.Y, d, d, 180, 90);
+        path.AddArc(rect.Right - d, rect.Y, d, d, 270, 90);
+        path.AddArc(rect.Right - d, rect.Bottom - d, d, d, 0, 90);
+        path.AddArc(rect.X, rect.Bottom - d, d, d, 90, 90);
+        path.CloseFigure();
+
+        using (var plate = new SolidBrush(Color.FromArgb(235, 18, 18, 22)))
+        {
+            g.FillPath(plate, path);
+        }
+
+        using (var border = new Pen(Color.FromArgb(220, 214, 182, 104), 1.5f))
+        {
+            g.DrawPath(border, path);
+        }
+
+        using (var dot = new SolidBrush(Color.FromArgb(230, 230, 90, 90)))
+        {
+            g.DrawString("●", BadgeFont, dot, rect.X + padX, rect.Y + padY);
+        }
+
+        var dotW = g.MeasureString("●", BadgeFont).Width;
+        using var fg = new SolidBrush(Color.FromArgb(235, 235, 228, 210));
+        g.DrawString(text[1..], BadgeFont, fg, rect.X + padX + dotW, rect.Y + padY);
+    }
+
+    protected override void OnHandleCreated(EventArgs e)
+    {
+        base.OnHandleCreated(e);
+        ApplyCaptureAffinity();
+    }
+
+    private void ApplyCaptureAffinity()
+    {
+        if (!IsHandleCreated)
+        {
+            return;
+        }
+
+        try
+        {
+            SetWindowDisplayAffinity(Handle, _capturable ? WDA_NONE : WDA_EXCLUDEFROMCAPTURE);
+        }
+        catch
+        {
+            // старая Windows без поддержки — не критично
         }
     }
 
@@ -116,6 +210,10 @@ public sealed class PriceOverlayForm : Form
             // ClearType не даёт корректную альфу.
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
             DrawChips(g);
+            if (_capturable)
+            {
+                DrawScreenshotBadge(g);
+            }
         }
 
         ApplyLayered(bmp, _alpha);
@@ -131,6 +229,24 @@ public sealed class PriceOverlayForm : Form
             .OrderByDescending(x => x.LineTotal)
             .FirstOrDefault();
 
+        // Авто-масштаб: размер плашки выводим из высоты строки текста, которую измерил
+        // OCR. Берём НИЗКИЙ перцентиль (40-й) высот — он стабильно попадает в «чистый»
+        // текст и игнорирует завышенные bbox-артефакты (OCR иногда прихватывает полосу
+        // иконок над именем или склеивает строки → высота 50-60px вместо ~25). Высокий
+        // перцентиль на таких панелях раздувал плашки вдвое. Так оверлей сам подгоняется
+        // под любое разрешение/UI-scale. ChipScale — необязательная подстройка (1.0).
+        var heights = _results.SelectMany(r => r.Rewards)
+            .Select(x => x.ScreenBounds.Height).Where(h => h > 0).OrderBy(h => h).ToList();
+        float em = heights.Count > 0
+            ? heights[Math.Min(heights.Count - 1, (int)(heights.Count * 0.40))]
+            : 20f;
+        em = (float)(Math.Clamp(em, 10, 48) * ChipScale);
+
+        var chipH = PriceChip.HeightFor(em);
+        var textGap = em * 0.45f;                  // зазор между текстом награды и плашкой
+        var stackGap = Math.Max(2f, em * 0.18f);   // мин. зазор между плашками (с запасом под гало «лучшей»)
+        var edge = Ui.S(EdgeMargin);
+
         var placed = new List<RectangleF>();
 
         foreach (var result in _results)
@@ -140,6 +256,18 @@ public sealed class PriceOverlayForm : Form
                 using var pen = new Pen(Color.DeepSkyBlue, 2);
                 g.DrawRectangle(pen, ToLocal(result.Region));
             }
+
+            if (result.Rewards.Count == 0)
+            {
+                continue;
+            }
+
+            // Общий левый край колонки = правее самой длинной строки + отступ.
+            // Ширину для клампа меряем БЕЗ выделения «лучшей» (ToModel(r,false)) —
+            // чтобы появление/смена лучшей не сдвигала весь столбец.
+            float columnLeft = result.Rewards.Max(r => ToLocal(r.ScreenBounds).Right) + textGap;
+            float maxColumnLeft = Width - edge - result.Rewards.Max(r => PriceChip.MeasureWidth(g, ToModel(r, false), em));
+            columnLeft = Math.Max(edge, Math.Min(columnLeft, maxColumnLeft));
 
             foreach (var reward in result.Rewards)
             {
@@ -151,27 +279,24 @@ public sealed class PriceOverlayForm : Form
                 }
 
                 var model = ToModel(reward, ReferenceEquals(reward, best));
-                var w = PriceChip.MeasureWidth(g, model);
+                var w = PriceChip.MeasureWidth(g, model, em);
+                var top = row.Y + (row.Height - chipH) / 2f;
 
-                // Ставим плашку сразу после названия, не давая вылезти за экран.
-                var desiredLeft = row.Right + Gap;
-                var maxLeft = Width - w - EdgeMargin;
-                var left = Math.Min(desiredLeft, maxLeft);
-                left = Math.Max(left, EdgeMargin);
-                var top = row.Y + (row.Height - PriceChip.Height) / 2f;
+                var rect = new RectangleF(columnLeft, top, w, chipH);
 
-                var rect = new RectangleF(left, top, w, PriceChip.Height);
-
-                // Анти-наложение: пересекающиеся плашки сдвигаем вниз.
+                // Анти-наложение: держим между плашками зазор stackGap (с запасом под
+                // гало «лучшей»), пересекающиеся сдвигаем вниз. Высота плашек одинакова
+                // для всех (в т.ч. «лучшей»), поэтому выделение не двигает соседей.
                 var guard = 0;
-                while (placed.Any(p => p.IntersectsWith(rect)) && guard++ < 64)
+                var test = RectangleF.Inflate(rect, 0, stackGap);
+                while (placed.Any(p => p.IntersectsWith(test)) && guard++ < 64)
                 {
-                    var lowest = placed.Where(p => p.IntersectsWith(rect)).Max(p => p.Bottom);
-                    rect.Y = lowest + 2;
+                    rect.Y = placed.Where(p => p.IntersectsWith(test)).Max(p => p.Bottom) + stackGap;
+                    test = RectangleF.Inflate(rect, 0, stackGap);
                 }
 
                 placed.Add(rect);
-                PriceChip.Draw(g, rect, model);
+                PriceChip.Draw(g, rect, model, em);
             }
         }
     }
@@ -231,6 +356,10 @@ public sealed class PriceOverlayForm : Form
             ReleaseDC(IntPtr.Zero, screenDc);
         }
     }
+
+    private const uint WDA_NONE = 0x0;
+    private const uint WDA_EXCLUDEFROMCAPTURE = 0x11;
+    [DllImport("user32.dll", ExactSpelling = true)] private static extern bool SetWindowDisplayAffinity(IntPtr hWnd, uint dwAffinity);
 
     private const int ULW_ALPHA = 0x02;
     private const byte AC_SRC_OVER = 0x00;

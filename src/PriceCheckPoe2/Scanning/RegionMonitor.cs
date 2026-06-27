@@ -20,11 +20,15 @@ public sealed class RegionMonitor : IDisposable
     private const int OpenBrightness = 100;
     private const int CloseBrightness = 80;
     private const int OpenStreak = 2;   // светлых кадров подряд, чтобы открыть
-    private const int CloseStreak = 3;  // тёмных кадров подряд, чтобы закрыть
+    private const int CloseStreak = 2;  // тёмных кадров подряд, чтобы закрыть (быстрее прячем)
     private const int OpenCycleMs = 150;
     private const int IdleCycleMs = 250;
-    // Насколько должна измениться сигнатура, чтобы пересканировать открытую панель.
-    private const long SignatureEpsilon = 1500;
+    // Насколько должна измениться сигнатура, чтобы пересканировать ОТКРЫТУЮ панель.
+    // Высокий порог намеренно: переключение пилонов и так идёт через тёмный→светлый
+    // (сбрасывает Scanned → форсит рескан на открытии), поэтому рескан «на лету» нужен
+    // редко. Низкий порог ловил мерцание игрового фона сквозь полупрозрачную книгу →
+    // постоянные много-проходные OCR-сканы блокировали цикл (тормоза + залипание цен).
+    private const long SignatureEpsilon = 8000;
     // Не чаще, чем раз в N мс запускаем OCR (бережёт CPU при беге по карте).
     private const int MinOcrIntervalMs = 350;
     // Confirm-gate: показываем область, только если OCR распознал столько известных
@@ -54,6 +58,13 @@ public sealed class RegionMonitor : IDisposable
 
     /// <summary>Пауза: оверлей скрыт и сканирование не идёт (по кнопке в меню).</summary>
     public bool Paused { get; set; }
+
+    /// <summary>
+    /// Заморозка: цикл ничего не делает (не семплит, не сканит, не прячет) — оверлей
+    /// остаётся как был показан. Для «режима скриншота»: при разрешённом захвате окна
+    /// детектор не должен видеть свои же плашки и мерцать.
+    /// </summary>
+    public bool Frozen { get; set; }
 
     public bool IsRunning => _loop is { IsCompleted: false };
 
@@ -99,6 +110,21 @@ public sealed class RegionMonitor : IDisposable
 
         while (!ct.IsCancellationRequested)
         {
+            // Заморозка: не трогаем экран и оверлей — он остаётся как был (режим скриншота).
+            if (Frozen)
+            {
+                try
+                {
+                    await Task.Delay(IdleCycleMs, ct).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+
+                continue;
+            }
+
             var anyOpen = false;
             try
             {
@@ -167,17 +193,29 @@ public sealed class RegionMonitor : IDisposable
                         foreach (var (id, _) in openRegions)
                         {
                             var st = State(id);
-                            st.Scanned = true;
-                            st.ScannedSignature = st.LastSignature;
+                            // Если цены не загрузились (фетч poe.ninja не прошёл) — НЕ помечаем
+                            // как отсканированную, чтобы следующий тик пересканировал и
+                            // повторил попытку (PriceCache сам троттлит фетч до раза в 30с).
+                            // Иначе пустой результат «замёрз» бы до смены содержимого панели.
+                            var pricesOk = results.FirstOrDefault(r => r.PylonId == id)?.PricesLoaded ?? false;
+                            st.Scanned = pricesOk;
+                            if (pricesOk)
+                            {
+                                st.ScannedSignature = st.LastSignature;
+                            }
                         }
 
-                        // Confirm-gate: область показывается, только если в ней реально
-                        // распознан список наград (≥ ConfirmRewards строк с ценой ИЛИ явным
-                        // количеством «Nx»). Считаем по строкам-наградам, а не только по цене,
-                        // иначе панель из непрайсящихся предметов («Perfect Orb…») не покажется.
-                        // Яркость мира при беге не даёт строк вида «Nx Имя» → ложных нет.
+                        // Confirm-gate: показываем область, если есть надёжный признак, что
+                        // это реальная панель наград:
+                        //   • ХОТЯ БЫ ОДНА награда с ценой (совпала с живым прайсом poe.ninja —
+                        //     после ужесточения матчинга это сильный сигнал, шум так не матчится), ИЛИ
+                        //   • ≥ ConfirmRewards правдоподобных наград (все строки в Rewards уже
+                        //     прошли priced/тег/LooksLikeName, мусор иконок/мира отсеян).
+                        // Прежний строгий «≥2 с ценой» прятал панель целиком, если одна строка
+                        // не прочиталась (баг A): напр. 2 валюты/руны, где OCR потерял одну.
                         var confirmed = results
-                            .Where(r => r.Rewards.Count(x => x.Price is not null || x.HasCount) >= ConfirmRewards)
+                            .Where(r => r.Rewards.Any(x => x.Price is not null)
+                                     || r.Rewards.Count >= ConfirmRewards)
                             .ToList();
 
                         if (confirmed.Count > 0)

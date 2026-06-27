@@ -16,6 +16,7 @@ public sealed class HotkeyManager : IDisposable
     public event Action? MenuToggleRequested;
     public event Action? RecalibrateRequested;
     public event Action? DebugToggleRequested;
+    public event Action? ScreenshotToggleRequested;
 
     public HotkeyManager(AppConfig config)
     {
@@ -42,6 +43,10 @@ public sealed class HotkeyManager : IDisposable
         else if (key == Parse(_config.DebugHotkey))
         {
             DebugToggleRequested?.Invoke();
+        }
+        else if (key == Parse(_config.ScreenshotHotkey))
+        {
+            ScreenshotToggleRequested?.Invoke();
         }
     }
 

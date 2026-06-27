@@ -53,11 +53,12 @@ public sealed class TrayApplicationContext : ApplicationContext
         _hotkeys.MenuToggleRequested += () => OnUi(() => _menu.Toggle());
         _hotkeys.RecalibrateRequested += () => OnUi(AddPylonRegion);
         _hotkeys.DebugToggleRequested += () => OnUi(ToggleDebug);
+        _hotkeys.ScreenshotToggleRequested += () => OnUi(ToggleScreenshotMode);
         _hotkeys.Start();
 
         _trayIcon = new NotifyIcon
         {
-            Icon = SystemIcons.Application,
+            Icon = LoadAppIcon(),
             Text = "PriceCheck PoE2",
             Visible = true,
             ContextMenuStrip = BuildTrayMenu(),
@@ -67,6 +68,26 @@ public sealed class TrayApplicationContext : ApplicationContext
         // Запускаем фоновый мониторинг сразу — он сам покажет цены, когда панель
         // окажется открытой (в т.ч. сразу после калибровки области).
         EnsurePipeline();
+    }
+
+    /// <summary>Иконка приложения для трея: грузим из .ico рядом с exe в малом размере
+    /// (чёткость в трее), с откатом на иконку exe и системную.</summary>
+    private static Icon LoadAppIcon()
+    {
+        try
+        {
+            var path = Path.Combine(AppContext.BaseDirectory, "Assets", "PriceCheck.ico");
+            if (File.Exists(path))
+            {
+                return new Icon(path, SystemInformation.SmallIconSize);
+            }
+
+            return Icon.ExtractAssociatedIcon(Application.ExecutablePath) ?? SystemIcons.Application;
+        }
+        catch
+        {
+            return SystemIcons.Application;
+        }
     }
 
     private ContextMenuStrip BuildTrayMenu()
@@ -190,6 +211,7 @@ public sealed class TrayApplicationContext : ApplicationContext
             _scanner = new PylonScanner(_ocr, _priceCache, _config, _parser);
 
             _priceOverlay ??= new PriceOverlayForm();
+            _priceOverlay.ChipScale = _config.PriceChipScale;
             _ = _priceOverlay.Handle; // создаём хэндл в UI-потоке
 
             _monitor = new RegionMonitor(
@@ -223,6 +245,46 @@ public sealed class TrayApplicationContext : ApplicationContext
         {
             _priceOverlay.DebugMode = !_priceOverlay.DebugMode;
         }
+    }
+
+    private bool _screenshotMode;
+
+    /// <summary>
+    /// Режим скриншота: размораживает захват оверлея (плашки попадут в скриншот) и
+    /// замораживает детектор (чтобы он не видел свои плашки и не мерцал). Повторное
+    /// нажатие возвращает обычную работу.
+    /// </summary>
+    private void ToggleScreenshotMode()
+    {
+        EnsurePipeline();
+
+        // Входим в режим только когда цены реально на экране — иначе заморозка
+        // детектора заблокировала бы оценку следующего пилона.
+        if (!_screenshotMode && _priceOverlay is not { Visible: true })
+        {
+            _trayIcon.BalloonTipTitle = "PriceCheck PoE2";
+            _trayIcon.BalloonTipText = "Открой пилон (чтобы появились цены), затем нажми F6.";
+            _trayIcon.ShowBalloonTip(2500);
+            return;
+        }
+
+        _screenshotMode = !_screenshotMode;
+
+        if (_monitor is not null)
+        {
+            _monitor.Frozen = _screenshotMode;
+        }
+
+        if (_priceOverlay is not null)
+        {
+            _priceOverlay.Capturable = _screenshotMode;
+        }
+
+        _trayIcon.BalloonTipTitle = "PriceCheck PoE2";
+        _trayIcon.BalloonTipText = _screenshotMode
+            ? "Режим скриншота ВКЛ: плашки видны для захвата, детектор заморожен. F6 — выключить."
+            : "Режим скриншота ВЫКЛ: обычная работа.";
+        _trayIcon.ShowBalloonTip(2500);
     }
 
     private void ExitApp()

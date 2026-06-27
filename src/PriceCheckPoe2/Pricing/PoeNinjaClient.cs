@@ -21,6 +21,7 @@ namespace PriceCheckPoe2.Pricing;
 public sealed class PoeNinjaClient : IPriceSource, IDisposable
 {
     private readonly HttpClient _http;
+    private readonly bool _ownsHttp;
     private readonly string _baseUrl;
     private readonly IReadOnlyList<string> _overviews;
 
@@ -28,9 +29,9 @@ public sealed class PoeNinjaClient : IPriceSource, IDisposable
     {
         _baseUrl = config.PriceApiBaseUrl;
         _overviews = config.PriceOverviews;
-        var owned = http is null;
+        _ownsHttp = http is null;
         _http = http ?? new HttpClient();
-        if (owned)
+        if (_ownsHttp)
         {
             // Свой клиент — ограничиваем таймаут (дефолтные 100 с подвесили бы фоновый
             // цикл/удерживали бы кэш-семафор). Внешний клиент настраивает вызывающий.
@@ -145,5 +146,12 @@ public sealed class PoeNinjaClient : IPriceSource, IDisposable
         return (double?)core["rates"]?["exalted"] ?? 1.0;
     }
 
-    public void Dispose() => _http.Dispose();
+    public void Dispose()
+    {
+        // Диспозим только свой клиент; переданный извне — ответственность вызывающего.
+        if (_ownsHttp)
+        {
+            _http.Dispose();
+        }
+    }
 }
